@@ -9,6 +9,7 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 - **Storage privado**: bucket `company-filters`, PNGs com máximo de 12 MB.
 - **Servidor para contas**: Supabase Edge Function `manage-client`.
 - **Frontend**: `index.html`, `styles.css`, `app.js` (HTML/CSS/JavaScript ES modules).
+- **Site de produção**: https://camera-marketing-studio.vercel.app (Vercel conectado à branch `main` do GitHub; deploy `READY` confirmado em 01/11/2026).
 - **Migração SQL**: `supabase/migrations/20261101_001_initial_schema.sql` (documentação da estrutura que já foi aplicada ao projeto real).
 - **Função do servidor**: `supabase/functions/manage-client/index.ts`.
 
@@ -27,9 +28,10 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 
 A instalação já tem banco/schema criados e uma Edge Function ativa, mas **não existe conta administrativa criada automaticamente**.
 
-1. Abra o site publicado em HTTPS, clique em **Criar conta inicial** e registre seu e-mail com senha forte.
-2. Confirme o e-mail enviado pelo Supabase (conforme configuração de autenticação).
-3. O dono do projeto, com acesso ao Supabase, deve promover **somente aquela conta verificada**. Esse passo pode ser executado no SQL Editor:
+1. No [Supabase → Authentication → URL Configuration](https://supabase.com/dashboard/project/imfgumnpbxhbrjlkiphf/auth/url-configuration), defina **Site URL** como `https://camera-marketing-studio.vercel.app` e salve. Isso evita redirecionar a confirmação de e-mail para `localhost`.
+2. Abra https://camera-marketing-studio.vercel.app, clique em **Criar conta inicial** e registre seu e-mail com senha forte.
+3. Confirme o e-mail enviado pelo Supabase (conforme configuração de autenticação).
+4. O dono do projeto, com acesso ao Supabase, deve promover **somente aquela conta verificada**. Esse passo pode ser executado no SQL Editor:
 
 ```sql
 update public.profiles
@@ -37,8 +39,8 @@ set role = 'admin', company_id = null
 where id = (select id from auth.users where email = 'EMAIL_CONFIRMADO_DO_ADMINISTRADOR');
 ```
 
-4. Faça logout/login novamente. O dashboard administrativo aparecerá.
-5. No painel, crie empresas com e-mail e senha individual. Empresas inativas não poderão carregar os filtros.
+5. Faça logout/login novamente. O dashboard administrativo aparecerá.
+6. No painel, crie empresas com e-mail e senha individual. Empresas inativas não poderão carregar os filtros.
 
 **Não compartilhe senhas, tokens ou chaves `service_role` por chat ou em repositórios.** O projeto contém apenas uma chave *publicável* de frontend, que pode ser vista em navegadores e depende de políticas RLS para a segurança real. Qualquer configuração `SUPABASE_SERVICE_ROLE_KEY` deve permanecer apenas nas variáveis protegidas do Supabase Edge Function.
 
@@ -68,9 +70,10 @@ Crie um projeto apontando para a raiz do repositório; **Framework: Other**, sem
 
 ## Pendências para produção
 
-- Vincular este código a um **novo repositório GitHub** (a cópia entregue é um repositório Git local completo com primeiro commit).
-- Publicar o frontend novo em um domínio HTTPS e validar a experiência no Safari iPhone e Chrome Android.
-- Cadastrar e autorizar a conta real de administrador.
+- **GitHub vinculado:** https://github.com/henriquedomarketing/camera-marketing-studio.
+- **Site HTTPS publicado:** https://camera-marketing-studio.vercel.app.
+- Configurar **Site URL** de autenticação no Supabase e cadastrar/autorizar a primeira conta administrativa.
+- Validar a experiência no Safari iPhone e Chrome Android.
 - Testar o cadastro/exclusão de uma empresa e o envio/download/captura de um PNG real, com as regras RLS habilitadas.
 - Validar backup, políticas de privacidade, alertas de cobrança, recuperação de senhas e rotinas de limpeza de PNGs órfãos.
 - Monitorar os limites do plano Supabase/Vercel, que podem mudar.
