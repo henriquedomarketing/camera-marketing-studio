@@ -23,7 +23,7 @@ const button=(label,action)=>`<button class="btn btn-primary" data-act="${action
 const action=(what,uid,label,css='')=>`<button class="small-action ${css}" data-act="${what}" data-id="${escapeHtml(uid)}">${label}</button>`;
 const header=(tag,title,subtitle,right='')=>`<div class="heading"><div><small>${tag}</small><h1>${title}</h1><p>${subtitle}</p></div>${right}</div>`;
 const stat=(label,value,sub)=>`<div class="stat"><label>${label}</label><b>${value}</b><small>${sub}</small></div>`;
-const field=(name,label,value='',type='text',required=true)=>`<div class="field"><label for="f_${name}">${label}</label><input id="f_${name}" name="${name}" type="${type}" value="${escapeHtml(value)}" ${required?'required':''}></div>`;
+const field=(name,label,value='',type='text',required=true)=>`<div class="field"><label for="f_${name}">${label}</label><input id="f_${name}" name="${name}" type="${type}" value="${escapeHtml(value)}" ${type==='password'?'minlength="8" maxlength="128" autocomplete="new-password"':''} ${required?'required':''}></div>`;
 const select=(name,label,opts)=>`<div class="field"><label for="f_${name}">${label}</label><select name="${name}" id="f_${name}" required>${opts}</select></div>`;
 const companyOptions=(selected='')=>app.companies.map(c=>option(c.id,c.name,c.id===selected)).join('');
 const endForm='<div class="form-actions"><button type="button" class="btn" data-act="close-modal">Cancelar</button><button class="btn btn-primary" type="submit">Salvar</button></div>';
@@ -46,7 +46,27 @@ async function loadData(){if(!app.user)return;const {data:profile,error}=await a
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
 async function authSubmit(form){const data=Object.fromEntries(new FormData(form));$('authError').textContent='';const submit=form.querySelector('button[type=submit]');submit.disabled=true;try{const {data:auth,error}=app.register?await api.auth.signUp({email:data.email,password:data.password}):await api.auth.signInWithPassword({email:data.email,password:data.password});if(error)throw error;if(!auth.session){toast('Cadastro recebido! Confira seu e-mail para confirmar a conta.');app.register=false;render();return;}app.user=auth.user;await loadData();}catch(error){const node=$('authError');if(node)node.textContent=errorMessage(error)}finally{if(submit.isConnected)submit.disabled=false;}}
-async function manager(body){const {data,error}=await api.functions.invoke('manage-client',{body});if(error)throw new Error(error?.context?.error||error.message||'Erro do servidor');if(data?.error)throw new Error(data.error);return data;}
+async function manager(body){
+  const {data,error}=await api.functions.invoke('manage-client',{body});
+  if(error){
+    // Supabase FunctionsHttpError carries a Response in context, not a parsed error.
+    // Read the server's JSON safely so a validation error is actionable.
+    let details='';
+    const response=error.context;
+    if(response && typeof response.clone==='function'){
+      try{
+        const payload=await response.clone().json();
+        if(typeof payload?.error==='string')details=payload.error;
+        else if(typeof payload?.message==='string')details=payload.message;
+      }catch{
+        try{details=(await response.clone().text()).slice(0,240)}catch{}
+      }
+    }
+    throw new Error(details||error.message||'Falha na comunicação com o servidor.');
+  }
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
 function openModal(title,body,formId){app.modal={title,content:body,formId};render();}
 function closeModal(){app.modal=null;render();}
 function companyModal(cid){const c=app.companies.find(x=>x.id===cid);const frm=`<form class="form" id="clientForm">${field('name','Nome da empresa',c?.name)}${field('email','E-mail do login',c?.contact_email,'email',!c)}${!c?field('password','Senha inicial (8 caracteres ou mais)','','password'):''}${field('phone','Telefone/WhatsApp',c?.phone||'','text',false)}${field('monthly_fee','Mensalidade em reais',c?.monthly_fee||0,'number')}${field('due_day','Dia do vencimento',c?.due_day||10,'number')}${field('next_due_date','Próximo vencimento',c?.next_due_date||'','date',false)}${c?select('active','Situação',option('true','Ativo',c.active)+option('false','Inativo',!c.active)):''}${endForm}</form>`;openModal(c?'Editar cliente':'Cadastrar cliente',frm,'clientForm');app.modal.recordId=c?.id||null;}
