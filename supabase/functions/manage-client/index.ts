@@ -1,53 +1,101 @@
-// Supabase Edge Function: server-side user management, JWT verified by the gateway.
-// Secret credentials must remain in Supabase server environment only.
-import { createClient } from 'npm:@supabase/supabase-js@2.57.0';
-const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,x-client-info,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json; charset=utf-8'};
-const respond=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
-const clean=(v:unknown,max=120)=>typeof v==='string'?v.trim().slice(0,max):'';
-Deno.serve(async req=>{
- if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
- if(req.method!=='POST')return respond({error:'Método não permitido'},405);
- const url=Deno.env.get('SUPABASE_URL'),service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
- if(!url||!service)return respond({error:'Serviço não configurado'},503);
- const sb=createClient(url,service,{auth:{autoRefreshToken:false,persistSession:false}});
- const header=req.headers.get('authorization')||'',token=header.startsWith('Bearer ')?header.slice(7):'';
- if(!token)return respond({error:'Autenticação necessária'},401);
- const {data:auth,error:authError}=await sb.auth.getUser(token);
- if(authError||!auth.user)return respond({error:'Sessão inválida'},401);
- const {data:profile}=await sb.from('profiles').select('role').eq('id',auth.user.id).maybeSingle();
- if(profile?.role!=='admin')return respond({error:'Somente administradores'},403);
- let b:Record<string,unknown>;
- try{b=await req.json()}catch{return respond({error:'JSON inválido'},400)}
- const action=clean(b.action,30),companyId=clean(b.company_id,50),name=clean(b.name),email=clean(b.email,160).toLowerCase(),password=typeof b.password==='string'?b.password:'';
- if(action==='create'){
-  if(name.length<2||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||password.length<8||password.length>128)return respond({error:'Empresa, e-mail ou senha inválida'},400);
-  const monthlyFee=Number(b.monthly_fee??0),dueDay=Number(b.due_day??10);
-  if(!Number.isFinite(monthlyFee)||monthlyFee<0||monthlyFee>100000||!Number.isInteger(dueDay)||dueDay<1||dueDay>31)return respond({error:'Valores inválidos'},400);
-  const {data:company,error:ce}=await sb.from('companies').insert({name,contact_email:email,phone:clean(b.phone,50),monthly_fee:monthlyFee,due_day:dueDay,next_due_date:b.next_due_date||null}).select('id').single();
-  if(ce||!company)return respond({error:ce?.message||'Falha ao criar empresa'},400);
-  const {data:user,error:ue}=await sb.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{display_name:name}});
-  if(ue||!user.user){await sb.from('companies').delete().eq('id',company.id);return respond({error:ue?.message||'Falha ao criar usuário'},400)}
-  const {error:le}=await sb.from('profiles').update({role:'client',company_id:company.id,display_name:name}).eq('id',user.user.id);
-  if(le){await sb.auth.admin.deleteUser(user.user.id);await sb.from('companies').delete().eq('id',company.id);return respond({error:'Falha ao vincular login'},500)}
-  return respond({ok:true,company_id:company.id,email});
- }
- if(action==='reset_password'){
-  if(!companyId||password.length<8||password.length>128)return respond({error:'Dados inválidos'},400);
-  const {data:p}=await sb.from('profiles').select('id').eq('company_id',companyId).eq('role','client').maybeSingle();
-  if(!p)return respond({error:'Cliente não encontrado'},404);
-  const {error}=await sb.auth.admin.updateUserById(p.id,{password});
-  return error?respond({error:'Não foi possível alterar a senha'},400):respond({ok:true});
- }
- if(action==='delete'){
-  if(!companyId)return respond({error:'Empresa obrigatória'},400);
-  const {data:found}=await sb.from('companies').select('id').eq('id',companyId).maybeSingle();if(!found)return respond({error:'Não encontrado'},404);
-  const {data:files}=await sb.from('filters').select('storage_path').eq('company_id',companyId);
-  const paths=(files||[]).map(x=>x.storage_path).filter(Boolean);
-  if(paths.length){const {error}=await sb.storage.from('company-filters').remove(paths);if(error)return respond({error:'Falha ao excluir arquivos'},500)}
-  const {data:users}=await sb.from('profiles').select('id').eq('company_id',companyId).eq('role','client');
-  for(const u of users||[]){const {error}=await sb.auth.admin.deleteUser(u.id);if(error)return respond({error:'Falha ao excluir login'},500)}
-  const {error}=await sb.from('companies').delete().eq('id',companyId);
-  return error?respond({error:'Falha ao excluir empresa'},500):respond({ok:true});
- }
- return respond({error:'Ação desconhecida'},400);
+import { createClient } from "npm:@supabase/supabase-js@2.57.0";
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, apikey, x-client-info, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Content-Type": "application/json; charset=utf-8",
+};
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: cors });
+const safeText = (value: unknown, max = 120) => typeof value === "string" ? value.trim().slice(0, max) : "";
+const validEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+  if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return json({ error: "Configuração protegida do servidor ausente." }, 503);
+  const adminApi = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+  const authorization = req.headers.get("authorization") || "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+  if (!token) return json({ error: "Faça login para continuar." }, 401);
+  const { data: authData, error: authError } = await adminApi.auth.getUser(token);
+  if (authError || !authData.user) return json({ error: "Sessão inválida." }, 401);
+  const { data: profile, error: profileError } = await adminApi.from("profiles").select("role").eq("id", authData.user.id).maybeSingle();
+  if (profileError || profile?.role !== "admin") return json({ error: "Acesso exclusivo do administrador." }, 403);
+
+  let body: Record<string, unknown>;
+  try { body = await req.json(); } catch { return json({ error: "Dados inválidos." }, 400); }
+  const action = safeText(body.action, 32);
+  const companyId = safeText(body.company_id, 50);
+  const password = typeof body.password === "string" ? body.password : "";
+  const name = safeText(body.name, 120);
+  const email = safeText(body.email, 160).toLowerCase();
+
+  if (action === "create") {
+    if (!name || name.length < 2 || !validEmail(email) || password.length < 8 || password.length > 128) {
+      return json({ error: "Preencha empresa, e-mail válido e senha de 8 a 128 caracteres." }, 400);
+    }
+    const monthlyFee = Number(body.monthly_fee ?? 0);
+    const dueDay = Number(body.due_day ?? 10);
+    if (!Number.isFinite(monthlyFee) || monthlyFee < 0 || monthlyFee > 100000 || !Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)
+      return json({ error: "Valor ou dia do vencimento inválido." }, 400);
+    const { data: createdCompany, error: companyError } = await adminApi.from("companies").insert({
+      name, contact_email: email, phone: safeText(body.phone, 50),
+      monthly_fee: monthlyFee, due_day: dueDay, next_due_date: body.next_due_date || null
+    }).select("id").single();
+    if (companyError || !createdCompany) return json({ error: companyError?.message || "Não foi possível criar a empresa." }, 400);
+    const { data: createdUser, error: userError } = await adminApi.auth.admin.createUser({
+      email, password, email_confirm: true,
+      user_metadata: { display_name: name }
+    });
+    if (userError || !createdUser.user) {
+      await adminApi.from("companies").delete().eq("id", createdCompany.id);
+      return json({ error: userError?.message || "Não foi possível criar o login." }, 400);
+    }
+    const { error: linkError } = await adminApi.from("profiles")
+      .update({ role: "client", company_id: createdCompany.id, display_name: name })
+      .eq("id", createdUser.user.id);
+    if (linkError) {
+      await adminApi.auth.admin.deleteUser(createdUser.user.id);
+      await adminApi.from("companies").delete().eq("id", createdCompany.id);
+      return json({ error: "Erro ao associar login à empresa." }, 500);
+    }
+    return json({ ok: true, company_id: createdCompany.id, email });
+  }
+
+  if (action === "reset_password") {
+    if (!companyId || password.length < 8 || password.length > 128)
+      return json({ error: "Informe a empresa e uma senha de 8 a 128 caracteres." }, 400);
+    const { data: profileRow } = await adminApi.from("profiles").select("id")
+      .eq("company_id", companyId).eq("role", "client").maybeSingle();
+    if (!profileRow) return json({ error: "Login do cliente não encontrado." }, 404);
+    const { error } = await adminApi.auth.admin.updateUserById(profileRow.id, { password });
+    if (error) return json({ error: "Não foi possível alterar a senha." }, 400);
+    return json({ ok: true });
+  }
+
+  if (action === "delete") {
+    if (!companyId) return json({ error: "Informe a empresa." }, 400);
+    const { data: exists } = await adminApi.from("companies").select("id").eq("id", companyId).maybeSingle();
+    if (!exists) return json({ error: "Empresa não encontrada." }, 404);
+    const { data: filterRows } = await adminApi.from("filters").select("storage_path").eq("company_id", companyId);
+    const paths = (filterRows || []).map((row) => row.storage_path).filter(Boolean);
+    if (paths.length) {
+      const { error: storageError } = await adminApi.storage.from("company-filters").remove(paths);
+      if (storageError) return json({ error: "Erro ao limpar PNGs. A empresa não foi excluída." }, 500);
+    }
+    const { data: loginRows } = await adminApi.from("profiles").select("id")
+      .eq("company_id", companyId).eq("role", "client");
+    for (const login of loginRows || []) {
+      const { error: deleteAuthError } = await adminApi.auth.admin.deleteUser(login.id);
+      if (deleteAuthError) return json({ error: "Falha ao excluir o login. Revise a empresa antes de tentar novamente." }, 500);
+    }
+    const { error: deleteError } = await adminApi.from("companies").delete().eq("id", companyId);
+    if (deleteError) return json({ error: "Falha ao excluir empresa. Verifique o painel." }, 500);
+    return json({ ok: true });
+  }
+
+  return json({ error: "Ação desconhecida." }, 400);
 });
