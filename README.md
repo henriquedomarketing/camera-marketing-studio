@@ -26,6 +26,16 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 7. Controle manual de cobranças. **Não** emite boletos nem consulta bancos.
 8. Configuração do nome da plataforma e WhatsApp de suporte.
 
+## Identidade visual personalizada por empresa
+
+O administrador cadastra, na mesma tela de **Novo cliente**, a logo original em **PNG de exatamente 500 × 500 pixels**, com até **2 MB**, e escolhe:
+- **Cor principal**, utilizada no cabeçalho e no plano de fundo do cliente;
+- **Cor dos botões**, utilizada nas categorias e no botão de fotografar.
+
+A logo é armazenada no bucket privado `company-filters`, no caminho `{company_id}/branding/{uuid}.png`. A coluna `companies.logo_path` aponta para esse arquivo. As regras RLS existentes permitem somente ao administrador carregar novas logos e ao cliente autenticado ler as imagens da própria empresa ativa. A identidade da empresa é exibida automaticamente depois do login, **sem alterar a imagem original**. Também é possível mudar logo e cores em **Clientes → Editar**.
+
+Por segurança, o cadastro da empresa ocorre antes do envio da logo: se o envio falhar, a conta poderá existir com personalização pendente. Nesse caso, abra **Editar** e envie novamente, sem duplicar o cadastro. A função `manage-client` também limpa o logo quando exclui a empresa. Empresas antigas sem logo continuam com a identidade padrão até o administrador configurar.
+
 ## Configuração e primeiro administrador (sem publicar segredos)
 
 A instalação já tem banco/schema criados e uma Edge Function ativa, mas **não existe conta administrativa criada automaticamente**.
