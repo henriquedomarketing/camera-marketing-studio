@@ -123,16 +123,16 @@ body.mobile-menu-lock{overflow:hidden}
 /* Identidade da plataforma: azul anil / azul-marinho escuro.
    Cores cadastradas por empresa continuam exclusivas da tela inicial do cliente. */
 :root{
-  --cms-navy:#101F52;
-  --cms-indigo:#172D6F;
-  --cms-indigo-hover:#213A83;
+  --cms-navy:#001893;
+  --cms-indigo:#001893;
+  --cms-indigo-hover:#001270;
   --cms-soft:#F0F3FA;
 }
 .brand-mark{
   background:var(--cms-indigo);
   color:#fff;
 }
-.sidebar{background:#0E1B3D;}
+.sidebar{background:#001893;}
 .sidebar .nav-btn.active,
 .sidebar .nav-btn:hover{
   background:var(--cms-indigo);
@@ -154,12 +154,26 @@ body.mobile-menu-lock{overflow:hidden}
 }
 .mobile-menu-toggle:hover{background:var(--cms-indigo-hover);}
 .filter-card .pick.active{border-color:var(--cms-indigo);}
-#toast{background:#182A59;}
+#toast{background:#001893;}
 @media(max-width:700px){
-  .admin-layout .sidebar{background:#0E1B3D;}
+  .admin-layout .sidebar{background:#001893;}
   .admin-layout .mobile-menu-toggle{
     background:var(--cms-indigo);
     color:#fff;border-color:var(--cms-indigo);
   }
   .admin-layout .mobile-menu-toggle:hover{background:var(--cms-indigo-hover);}
+}
+
+/* Azul oficial aprovado: #001893.
+   Aplicar somente à identidade Camera Marketing Studio, não às cores das empresas. */
+.btn-primary,.nav-btn.active,.sidebar .nav-btn.active,
+.brand-mark,.mobile-menu-toggle{
+  background-color:var(--cms-indigo);
+}
+.btn-primary{border-color:var(--cms-indigo);}
+.btn-primary:hover,.sidebar .nav-btn:hover{background-color:var(--cms-indigo-hover);}
+.filter-card .pick.active,.pick.active{border-color:var(--cms-indigo);}
+@media(max-width:700px){
+  .admin-layout .sidebar .nav-btn.active{background:var(--cms-indigo-hover);}
+  .admin-layout .mobile-menu-toggle{background:var(--cms-indigo);border-color:var(--cms-indigo);}
 }
