@@ -39,7 +39,7 @@ Se ocorrer erro no envio após criar uma categoria, o aplicativo tenta desfazer 
 ## Aparência e fluxo mobile (novembro de 2026)
 
 - **Apenas a tela inicial do cliente** usa a logo PNG original e as cores da empresa. A logo fica em moldura quadrada compacta, sem sobrepor os títulos; o PNG não é alterado. PNG com fundo branco não é necessariamente transparente, portanto prefira a logo com canal alfa para não exibir quadrado branco.
-- Ao entrar numa categoria, **a câmera tem fundo branco e a identidade padrão do Camera Marketing Studio** (azul anil / marinho escuro, base `#101F52` e destaque `#172D6F`), sem reproduzir as cores da loja.
+- Ao entrar numa categoria, **a câmera tem fundo branco e a identidade padrão do Camera Marketing Studio** (azul anil oficial `#001893`), sem reproduzir as cores da loja.
 - Ordem na câmera: **prévia da câmera → botão de captura e controles → filtros circulares horizontais**.
 - A tela de resultado também usa a identidade neutra da plataforma, com prévia final e ações de compartilhamento.
 - O painel administrativo usa azul-marinho escuro; o menu mobile abre por botão ☰, enquanto o desktop mantém a lateral fixa.
