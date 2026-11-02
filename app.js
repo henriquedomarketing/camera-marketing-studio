@@ -171,7 +171,7 @@ function cameraView(){
     <div class="client-photo-controls">
       <button type="button" data-act="${fromGallery?'use-camera':'flip-camera'}" class="client-control-secondary" aria-label="${fromGallery?'Voltar para câmera':'Alternar câmera'}" title="${fromGallery?'Voltar para câmera':'Alternar câmera'}"><span class="client-control-icon">${fromGallery?'◉':'⟳'}</span><small>${fromGallery?'Câmera':'Alternar'}</small></button>
       <button type="button" data-act="capture" class="client-shutter" aria-label="${fromGallery?'Aplicar filtro à foto':'Fotografar'}" title="${fromGallery?'Aplicar filtro à foto':'Fotografar'}"><span></span></button>
-      <button type="button" data-act="pick-gallery" class="client-control-secondary" aria-label="Escolher foto da galeria" title="Escolher foto da galeria"><span class="client-control-icon" aria-hidden="true">▧</span><small>Galeria</small></button>
+      <button type="button" data-act="pick-gallery" class="client-control-secondary" aria-label="Escolher foto da galeria" title="Escolher foto da galeria"><span class="client-control-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 17 5.8-5.8 4.1 4.1 2.4-2.4L21 18"/></svg></span><small>Galeria</small></button>
       <input id="galleryPhotoInput" class="client-gallery-file-input" type="file" accept="image/*,.heic,.heif" aria-label="Escolher foto da galeria" tabindex="-1">
     </div>
     <div class="client-filter-panel">
