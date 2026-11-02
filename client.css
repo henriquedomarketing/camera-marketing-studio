@@ -427,3 +427,192 @@
   background:#fff;border:1px solid #e4e8f1;border-radius:10px;
 }
 @media(max-width:350px){.brand-color-grid{grid-template-columns:1fr;}}
+
+
+/* Refinamento 2026-11-02
+   A identidade de cada empresa existe SOMENTE na seleção de categorias.
+   Câmera e resultado têm visual branco e azul-marinho anil do CMS. */
+
+/* Identidade original do cliente: moldura da logo sem permitir sobreposição. */
+.client-app.is-home .client-home-heading{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  gap:0;overflow:hidden;isolation:isolate;
+  padding:24px 18px 25px;
+  min-height:0;
+}
+.client-app.is-home .client-company-logo-wrap{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;
+  width:min(42vw,152px);height:min(42vw,152px);
+  min-width:0;min-height:0;max-width:152px;max-height:152px;
+  overflow:hidden;
+  padding:8px;margin:0 auto 17px;
+  background:#ffffff10;border:1px solid #ffffff2a;border-radius:17px;
+  box-sizing:border-box;
+}
+.client-app.is-home .client-company-logo-wrap .client-company-logo{
+  display:block!important;position:static!important;
+  width:100%!important;height:100%!important;
+  min-width:0;min-height:0;max-width:100%!important;max-height:100%!important;
+  object-fit:contain!important;object-position:center!important;
+  margin:0!important;padding:0!important;
+  flex-shrink:1;
+}
+.client-app.is-home .client-home-heading-copy{
+  display:flex;flex-direction:column;align-items:center;
+  gap:6px;position:relative;z-index:1;
+  width:100%;max-width:100%;min-width:0;
+  text-align:center;overflow-wrap:anywhere;
+}
+.client-app.is-home .client-home-heading-copy .client-eyebrow{
+  font-size:10px;letter-spacing:1.4px;line-height:1.45;
+  max-width:100%;text-align:center;
+}
+.client-app.is-home .client-home-heading-copy h1{
+  position:static;margin:3px 0 0;font-size:clamp(21px,5.6vw,27px);
+  line-height:1.2;letter-spacing:-.6px;
+}
+.client-app.is-home .client-home-heading-copy p{
+  position:static;margin:3px 0 0;max-width:310px;
+  font-size:12px;line-height:1.5;
+}
+
+/* Apenas na câmera e no resultado: identidade padrão da plataforma. */
+.client-app.is-camera,
+.client-app.is-preview{
+  --cms-navy:#101F52;
+  --cms-indigo:#172D6F;
+  color:#172441;
+  background:#fff!important;
+}
+.client-app.is-camera .client-content,
+.client-app.is-preview .client-content{
+  background:#fff;color:#172441;
+}
+.client-app.is-camera .client-header,
+.client-app.is-preview .client-header{
+  background:#fff!important;
+  color:var(--cms-navy)!important;
+  border-bottom:1px solid #e9edf5;
+}
+.client-app.is-camera .client-brand,
+.client-app.is-preview .client-brand,
+.client-app.is-camera .client-brand-copy strong,
+.client-app.is-preview .client-brand-copy strong{
+  color:var(--cms-navy)!important;
+}
+.client-app.is-camera .client-brand-copy small,
+.client-app.is-preview .client-brand-copy small{
+  color:#6c7794!important;
+}
+.client-app.is-camera .client-platform-mark,
+.client-app.is-preview .client-platform-mark{
+  background:var(--cms-navy);color:#fff;
+  border:1px solid var(--cms-navy);
+  box-shadow:none;
+}
+.client-app.is-camera .client-logout,
+.client-app.is-preview .client-logout{
+  color:var(--cms-navy)!important;
+  background:#f7f8fc;border:1px solid #dfe5f1;
+}
+.client-app.is-camera .client-footer,
+.client-app.is-preview .client-footer{
+  color:#929db1;background:#fff;
+}
+
+/* Câmera no alto, captura imediatamente abaixo, bolinhas depois. */
+.client-app.is-camera .client-camera-screen .client-viewfinder-wrap{
+  margin-bottom:10px;
+}
+.client-app.is-camera .client-photo-controls{
+  order:0;
+  width:100%;max-width:360px;
+  margin:0 auto 12px!important;
+  min-height:81px;padding:8px 20px;
+  border:1px solid #e6eaf3;border-radius:18px;
+  background:#f4f6fb;box-shadow:0 4px 15px #17274a0a;
+}
+.client-app.is-camera .client-control-secondary{
+  color:var(--cms-navy);background:#fff;
+  border:1px solid #dce3f0;
+  border-radius:13px;min-height:58px;
+}
+.client-app.is-camera .client-control-secondary small{
+  color:#526280;font-size:10px;
+}
+.client-app.is-camera .client-shutter{
+  border-color:var(--cms-navy);
+  box-shadow:0 0 0 2px #d8deeb;
+}
+.client-app.is-camera .client-shutter span{
+  background:#E42D43!important;
+}
+.client-app.is-camera .client-camera-topline .client-back{
+  background:#f5f7fc;border:1px solid #e4e9f3;color:var(--cms-navy);
+}
+.client-app.is-camera .client-category-title strong{
+  color:var(--cms-navy);
+}
+.client-app.is-camera .client-category-title .client-eyebrow{
+  color:#7785a1;
+}
+.client-app.is-camera .client-filter-panel{
+  margin:0 0 8px!important;
+  background:#f7f9fd;
+  border:1px solid #e1e7f2;border-radius:16px;
+}
+.client-app.is-camera .client-filter-panel-top,
+.client-app.is-camera .client-filter-panel-top small{
+  color:#435678;
+}
+.client-app.is-camera .client-filter-choice,
+.client-app.is-camera .client-filter-choice .client-filter-name{
+  color:#5a6784;
+}
+.client-app.is-camera .client-filter-choice.active .client-filter-name{
+  color:var(--cms-navy);
+}
+.client-app.is-camera .client-filter-choice.active .client-filter-circle,
+.client-app.is-camera .client-filter-choice[aria-pressed="true"] .client-filter-circle{
+  border-color:var(--cms-indigo);
+  box-shadow:0 0 0 3px #dfe6f4,0 5px 12px #14244821;
+}
+.client-app.is-camera .client-save-note,
+.client-app.is-camera .client-empty-strip{
+  color:#78869f;
+}
+
+/* Tela final com contraste correto no fundo branco. */
+.client-app.is-preview .client-result-heading h1{color:var(--cms-navy);}
+.client-app.is-preview .client-result-heading .client-eyebrow{color:#536a9a;}
+.client-app.is-preview .client-result-heading p{color:#697994;}
+.client-app.is-preview .client-result-preview{
+  background:#f4f6fb;border-color:#e5eaf3;
+  box-shadow:0 8px 21px #20345512;
+}
+.client-app.is-preview .client-result-preview figcaption{color:#667692;}
+.client-app.is-preview .client-result-share{
+  background:var(--cms-navy);color:#fff;
+}
+.client-app.is-preview .client-result-save{
+  background:#fff;border:1px solid #b8c5dd;color:var(--cms-navy);
+}
+.client-app.is-preview .client-result-secondary button{
+  background:#f6f8fc;border:1px solid #dee5f2;color:#334873;
+}
+.client-app.is-preview .client-result-note{color:#697994;}
+.client-app.is-preview .client-result-note b{color:#24365f;}
+@media(max-width:430px){
+  .client-app.is-home .client-home-heading{
+    padding:18px 16px 22px;
+  }
+  .client-app.is-home .client-company-logo-wrap{
+    width:min(40vw,140px);height:min(40vw,140px);
+    margin-bottom:13px;
+  }
+  .client-app.is-camera .client-photo-controls{
+    margin-bottom:10px!important;
+    min-height:75px;padding:7px 15px;
+  }
+}
