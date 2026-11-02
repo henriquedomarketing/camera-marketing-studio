@@ -133,3 +133,12 @@ test('Foto importada mostra Voltar à câmera sobre o enquadramento',()=>{
   const handler=source.slice(source.indexOf('async function click(event)'),source.indexOf('function setClientCameraMenu('));
   assert.match(handler,/if\(act==='use-camera'\)\{resetCameraSession\(\);return;\}/);
 });
+
+
+test('Créditos institucionais aparecem em login, cliente e administração, não na câmera',()=>{
+  assert.match(source,/Desenvolvido por <strong>@henriquedomarketing<\/strong>/);
+  assert.match(source,/Desde 2025 · Todos os direitos reservados\./);
+  assert.match(source,/studioCredits\('studio-credits-auth'\)/);
+  assert.match(source,/cameraMode\?'':studioCredits\('client-footer'\)/);
+  assert.match(source,/studioCredits\('studio-credits-admin'\)/);
+});
