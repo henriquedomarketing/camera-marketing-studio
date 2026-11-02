@@ -66,12 +66,58 @@ test('A página oferece foto da galeria e mantém troca de filtros',()=>{
   assert.match(source,/ctx\.drawImage\(overlay,0,0,1080,1920\)/);
 });
 
-test('A tela de resultado usa Voltar em vez de Sair',()=>{
+test('Tela de resultado oferece Voltar, sem botão de sair',()=>{
   const begin=source.indexOf('function layout(content)');
   const end=source.indexOf('function table(',begin);
   const layout=source.slice(begin,end);
   assert.match(layout,/type==='is-preview'\?[`]<header class="client-preview-header">/);
   assert.match(layout,/data-act="photo-back"/);
-  assert.match(source,/if\(act==='photo-back'\)\{backToCamera\(true\);return;\}/);
-  assert.match(source,/function backToCamera\(keepGallery=false\)/);
+  assert.match(layout,/class="client-preview-back"/);
+  assert.match(layout,/type==='is-preview'\?[`]<header class="client-preview-header">[\s\S]*?data-act="photo-back"/);
+  assert.match(source,/if\(act==='photo-back'\|\|act==='photo-retake'\|\|act==='photo-change-filter'\)\{backToCamera\(\);return;\}/);
+});
+
+test('Qualquer retorno da tela final deve limpar foto capturada e importada',()=>{
+  const resetSource=source.match(/function resetCameraSession\(categoryId=app.selectedCategory\)\{[\s\S]*?\n\}/);
+  assert.ok(resetSource,'Rotina central de reinicialização da câmera');
+  const originalGallery={url:'blob:galeria-antiga'};
+  const originalCapture={url:'blob:captura-antiga'};
+  const app={
+    selectedCategory:'categoria-atual',
+    selectedFilter:'filtro-antigo',
+    filters:[
+      {id:'filtro-padrao',category_id:'categoria-atual',active:true},
+      {id:'filtro-antigo',category_id:'categoria-atual',active:true}
+    ],
+    galleryPhoto:originalGallery,
+    captureData:originalCapture,
+    stream:'stream-antigo',
+    facing:'user',
+    page:'preview'
+  };
+  const calls=[];
+  const stopCamera=()=>{calls.push('stopCamera');app.stream=null;};
+  const clearCapturedPhoto=()=>{calls.push('clearCapturedPhoto');app.captureData=null;};
+  const clearGalleryPhoto=()=>{calls.push('clearGalleryPhoto');app.galleryPhoto=null;};
+  const render=()=>calls.push('render');
+  const window={scrollTo:(x,y)=>calls.push(`scrollTo(${x},${y})`)};
+  const reset=new Function('app','stopCamera','clearCapturedPhoto','clearGalleryPhoto','render','window',
+    'return ('+resetSource[0]+')')(app,stopCamera,clearCapturedPhoto,clearGalleryPhoto,render,window);
+  reset();
+  assert.equal(app.galleryPhoto,null,'Não deve reaproveitar foto da galeria');
+  assert.equal(app.captureData,null,'Não deve reaproveitar arquivo de captura');
+  assert.equal(app.stream,null,'Stream anterior deve ser encerrado');
+  assert.equal(app.page,'camera','Deve voltar à câmera');
+  assert.equal(app.facing,'environment','Deve usar câmera traseira novamente');
+  assert.equal(app.selectedCategory,'categoria-atual','Permanece na categoria');
+  assert.equal(app.selectedFilter,'filtro-padrao','Primeiro filtro da categoria');
+  assert.deepEqual(calls,['stopCamera','clearCapturedPhoto','clearGalleryPhoto','render','scrollTo(0,0)']);
+});
+
+test('Voltar, Nova foto e Trocar filtro sempre chamam mesma rotina limpa',()=>{
+  assert.match(source,/function backToCamera\(\)\{resetCameraSession\(\);\}/);
+  const handler=source.slice(source.indexOf('async function click(event)'),source.indexOf('function setClientCameraMenu('));
+  assert.match(handler,/act==='photo-back'\|\|act==='photo-retake'\|\|act==='photo-change-filter'/);
+  assert.match(handler,/\{backToCamera\(\);return;\}/);
+  assert.doesNotMatch(handler,/backToCamera\(true\)/);
 });
