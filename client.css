@@ -999,48 +999,48 @@ body.client-camera-menu-lock{overflow:hidden}
 
 
 
-/* Faixa superior simétrica: menu e filtros em cards iguais de 72 × 72.
+/* Faixa superior simétrica: menu e filtros em cards iguais de 58 × 58.
    A rolagem fica apenas nos filtros; a câmera 9:16 permanece grande. */
 .client-app.is-camera .client-camera-header{
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  gap:11px;
+  gap:9px;
   width:min(100%,530px);
-  height:94px;
-  min-height:94px;
+  height:76px;
+  min-height:76px;
   margin:0 auto;
-  padding:10px 11px;
+  padding:8px 11px;
   background:#fff;
   border-bottom:1px solid #ebeff7;
 }
 .client-app.is-camera .client-camera-header .client-camera-menu-toggle{
   position:static!important;
-  flex:0 0 72px;
-  width:72px;
-  min-width:72px;
-  height:72px;
-  min-height:72px;
+  flex:0 0 58px;
+  width:58px;
+  min-width:58px;
+  height:58px;
+  min-height:58px;
   margin:0;
   padding:0;
   display:grid;
   place-items:center;
   align-self:center;
   box-sizing:border-box;
-  border-radius:15px;
+  border-radius:12px;
   background:#001893;
   color:white;
   border:1px solid #001893;
   box-shadow:0 2px 9px #00189317;
-  font-size:25px;
+  font-size:22px;
   z-index:auto;
 }
 .client-app.is-camera .client-top-filters{
   display:flex;
   flex:1;
   min-width:0;
-  height:74px;
-  gap:11px;
+  height:60px;
+  gap:9px;
   align-items:center;
   overflow-x:auto;
   overflow-y:hidden;
@@ -1055,20 +1055,20 @@ body.client-camera-menu-lock{overflow:hidden}
 .client-app.is-camera .client-top-filters .client-filter-choice{
   appearance:none;
   display:flex;
-  flex:0 0 72px;
-  width:72px;
-  min-width:72px;
-  height:72px;
-  min-height:72px;
-  padding:5px 3px 4px;
+  flex:0 0 58px;
+  width:58px;
+  min-width:58px;
+  height:58px;
+  min-height:58px;
+  padding:3px 2px 3px;
   margin:0;
   box-sizing:border-box;
   align-self:center;
   align-items:center;
   justify-content:center;
   flex-direction:column;
-  gap:3px;
-  border-radius:15px;
+  gap:2px;
+  border-radius:12px;
   border:1px solid #dce3f1;
   background:#f8faff;
   color:#52627d;
@@ -1079,14 +1079,14 @@ body.client-camera-menu-lock{overflow:hidden}
 .client-app.is-camera .client-top-filters .client-filter-circle{
   display:grid;
   place-items:center;
-  flex:0 0 43px;
-  width:43px;
-  height:43px;
-  min-height:43px;
-  max-height:43px;
+  flex:0 0 35px;
+  width:35px;
+  height:35px;
+  min-height:35px;
+  max-height:35px;
   margin:0;
   border:1px solid #dee5f0;
-  border-radius:9px;
+  border-radius:7px;
   overflow:hidden;
   background:repeating-conic-gradient(#e8edf9 0 25%,#fff 0 50%) 50%/12px 12px;
   box-shadow:none;
@@ -1102,8 +1102,8 @@ body.client-camera-menu-lock{overflow:hidden}
 .client-app.is-camera .client-top-filters .client-filter-choice .client-filter-name{
   display:block;
   flex:0 0 auto;
-  width:63px;
-  max-width:63px;
+  width:52px;
+  max-width:52px;
   margin:0;
   font-size:9px;
   font-weight:750;
@@ -1118,13 +1118,13 @@ body.client-camera-menu-lock{overflow:hidden}
 .client-app.is-camera .client-top-filters .client-filter-choice[aria-pressed="true"]{
   background:#f0f3ff;
   border:2px solid #001893;
-  padding:4px 2px 3px;
+  padding:2px 1px 2px;
   box-shadow:0 0 0 1px #00189317;
 }
 .client-app.is-camera .client-top-filters .client-filter-choice.active .client-filter-circle,
 .client-app.is-camera .client-top-filters .client-filter-choice[aria-pressed="true"] .client-filter-circle{
   border:1px solid #d8e0f0;
-  border-radius:9px;
+  border-radius:7px;
   box-shadow:none;
   transform:none;
 }
@@ -1157,4 +1157,56 @@ body.client-camera-menu-lock{overflow:hidden}
 }
 @media(prefers-reduced-motion:reduce){
   .client-app.is-camera .client-top-filters .client-filter-circle{transition:none}
+}
+
+/* Drawer personalizado em azul oficial com ordem: início, categorias, sair. */
+.client-app.is-camera .client-camera-drawer{
+  background:#001893;
+  color:#fff;
+  border-right:1px solid #ffffff26;
+}
+.client-app.is-camera .client-camera-drawer-heading{padding:1px 0 15px}
+.client-app.is-camera .client-camera-drawer-heading strong{
+  color:#fff;font-size:16px;font-weight:850;
+}
+.client-app.is-camera .client-camera-drawer-close{
+  background:#ffffff1c;color:#fff;border:1px solid #ffffff43;
+}
+.client-app.is-camera .client-camera-drawer-home{
+  flex:0 0 auto;
+  display:flex;align-items:center;gap:12px;
+  width:100%;min-height:52px;
+  padding:10px 13px;margin:8px 0 0;text-align:left;
+  border:1px solid #ffffff50;border-radius:12px;
+  background:#ffffff1a;color:#fff;
+}
+.client-app.is-camera .client-camera-drawer-home>span:first-child{
+  display:grid;place-items:center;font-size:22px;width:25px;flex:0 0 25px;
+}
+.client-app.is-camera .client-camera-drawer-home strong{
+  flex:1;font-size:13px;font-weight:800;
+}
+.client-app.is-camera .client-camera-drawer-home .client-drawer-chevron{font-size:23px}
+.client-app.is-camera .client-camera-drawer-label{
+  color:#bcc9ff;font-size:10px;letter-spacing:1.6px;margin:24px 0 10px;
+}
+.client-app.is-camera .client-camera-drawer-category{
+  border:1px solid #ffffff45;background:#ffffff14;
+  color:#fff;font-size:13px;border-radius:12px;
+}
+.client-app.is-camera .client-camera-drawer-category.selected{
+  background:#fff;color:#001893;border-color:#fff;
+  box-shadow:0 3px 13px #00115a25;
+}
+.client-app.is-camera .client-camera-drawer-bottom{border-top:1px solid #ffffff3b}
+.client-app.is-camera .client-camera-drawer-bottom button{
+  border:1px solid #ffffff4b;background:#ffffff14;color:#fff;
+}
+.client-app.is-camera .client-camera-drawer-home:hover,
+.client-app.is-camera .client-camera-drawer-category:not(.selected):hover,
+.client-app.is-camera .client-camera-drawer-bottom button:hover{background:#ffffff27}
+.client-app.is-camera .client-camera-drawer-home:focus-visible,
+.client-app.is-camera .client-camera-drawer-close:focus-visible,
+.client-app.is-camera .client-camera-drawer-category:focus-visible{
+  outline:3px solid #dfe5ff;outline-offset:2px;
 }
