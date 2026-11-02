@@ -80,6 +80,12 @@ function layout(content){const admin=app.profile?.role==='admin';
     return `<div class="client-app ${type}" ${home?`style="${brandStyle(app.company)}"`:''}>
       ${cameraMode?`<header class="client-camera-header">
         <button type="button" class="client-camera-menu-toggle" data-act="open-client-menu" aria-label="Abrir menu de categorias" aria-controls="clientCameraDrawer" aria-expanded="false"><span aria-hidden="true">☰</span></button>
+        <div class="client-top-filters" role="group" aria-label="Filtros disponíveis para esta categoria">
+          ${app.filters.filter(f=>f.category_id===app.selectedCategory&&f.active).map(f=>`<button type="button" class="client-filter-choice ${app.selectedFilter===f.id?'active':''}" data-act="choose-filter" data-id="${escapeHtml(f.id)}" aria-label="Selecionar filtro ${escapeHtml(f.name)}" aria-pressed="${app.selectedFilter===f.id}">
+            <span class="client-filter-circle"><img data-img="${escapeHtml(f.id)}" alt="" loading="lazy"></span>
+            <span class="client-filter-name">${escapeHtml(f.name)}</span>
+          </button>`).join('')||'<span class="client-top-filters-empty">Nenhum filtro disponível</span>'}
+        </div>
       </header>`:`<header class="client-header">
         ${clientBrand}
         <button type="button" class="client-logout" data-act="logout" aria-label="Sair da conta">Sair</button>
@@ -170,7 +176,6 @@ function clientCategories(){
   </section>`;
 }
 function cameraView(){
-  const filters=app.filters.filter(f=>f.category_id===app.selectedCategory&&f.active);
   const fromGallery=Boolean(app.galleryPhoto);
   return `<section class="client-camera-screen">
     <div class="client-viewfinder-wrap">
@@ -193,15 +198,6 @@ function cameraView(){
       <span class="client-gallery-finish-copy"><strong>Salvar ou compartilhar</strong><small>Concluir foto com o filtro selecionado</small></span>
       <span class="client-gallery-finish-arrow" aria-hidden="true">›</span>
     </button>`:''}
-    <div class="client-filter-panel">
-      <div class="client-filter-panel-top"><span>SELECIONE UM FILTRO</span><small>${filters.length} disponíveis</small></div>
-      <div class="client-filter-strip" role="group" aria-label="Filtros disponíveis">
-        ${filters.map(f=>`<button type="button" class="client-filter-choice ${app.selectedFilter===f.id?'active':''}" data-act="choose-filter" data-id="${escapeHtml(f.id)}" aria-label="Selecionar filtro ${escapeHtml(f.name)}" aria-pressed="${app.selectedFilter===f.id}">
-          <span class="client-filter-circle"><img data-img="${escapeHtml(f.id)}" alt="" loading="lazy"></span>
-          <span class="client-filter-name">${escapeHtml(f.name)}</span>
-        </button>`).join('')||'<span class="client-empty-strip">Nenhum filtro nesta categoria.</span>'}
-      </div>
-    </div>
     <p class="client-save-note">${fromGallery?'Escolha outro filtro se quiser. Depois toque em Salvar ou compartilhar.':'Fotografe ou escolha uma foto da galeria. Resultado em 1080 × 1920.'}</p>
   </section>`;
 }
