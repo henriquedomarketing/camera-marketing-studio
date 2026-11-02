@@ -672,3 +672,54 @@
   .client-app.is-camera .client-control-secondary{width:65px}
   .client-app.is-camera .client-photo-controls{gap:8px}
 }
+
+
+/* Foto importada: ação explícita para abrir a mesma tela de resultado da câmera. */
+.client-app.is-camera .client-gallery-finish{
+  appearance:none;
+  width:100%;max-width:360px;min-height:66px;
+  display:flex;align-items:center;gap:12px;
+  text-align:left;
+  padding:12px 14px;
+  margin:0 auto 13px;
+  border:1px solid #001893;
+  border-radius:15px;
+  background:#001893;color:#fff;
+  box-shadow:0 5px 16px #00189326;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.client-app.is-camera .client-gallery-finish-icon{
+  flex:0 0 37px;width:37px;height:37px;
+  display:grid;place-items:center;
+  border-radius:11px;
+  background:#ffffff26;
+  color:#fff;font-size:22px;font-weight:850;
+}
+.client-app.is-camera .client-gallery-finish-copy{
+  flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;
+}
+.client-app.is-camera .client-gallery-finish-copy strong{
+  color:#fff;font-size:14px;line-height:1.2;font-weight:850;
+}
+.client-app.is-camera .client-gallery-finish-copy small{
+  font-size:10px;line-height:1.35;font-weight:600;color:#d8e2ff;
+}
+.client-app.is-camera .client-gallery-finish-arrow{
+  font-size:28px;font-weight:400;line-height:1;
+}
+.client-app.is-camera .client-gallery-finish:active{
+  transform:scale(.992);background:#001270;
+}
+.client-app.is-camera .client-gallery-finish:focus-visible{
+  outline:3px solid #001893;outline-offset:4px;
+}
+.client-app.is-camera .client-gallery-finish:disabled{
+  opacity:.78;cursor:wait;
+}
+@media(max-width:430px){
+  .client-app.is-camera .client-gallery-finish{
+    min-height:58px;padding:9px 12px;gap:10px;margin-bottom:11px;
+  }
+  .client-app.is-camera .client-gallery-finish-copy strong{font-size:13px;}
+}
