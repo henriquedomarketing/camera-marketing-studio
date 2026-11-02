@@ -998,94 +998,163 @@ body.client-camera-menu-lock{overflow:hidden}
 }
 
 
-/* Barra de filtros no topo: bolinhas ao lado do menu ☰, acima da câmera.
-   O painel inferior de seleção foi removido para deixar a câmera livre. */
+
+/* Faixa superior simétrica: menu e filtros em cards iguais de 72 × 72.
+   A rolagem fica apenas nos filtros; a câmera 9:16 permanece grande. */
 .client-app.is-camera .client-camera-header{
-  display:flex;align-items:center;justify-content:flex-start;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
   gap:11px;
   width:min(100%,530px);
-  height:86px;min-height:86px;
+  height:94px;
+  min-height:94px;
   margin:0 auto;
-  padding:6px 10px;
+  padding:10px 11px;
   background:#fff;
-  border-bottom:1px solid #eef1f7;
+  border-bottom:1px solid #ebeff7;
 }
 .client-app.is-camera .client-camera-header .client-camera-menu-toggle{
-  flex:0 0 46px;
-  width:46px;height:46px;
+  position:static!important;
+  flex:0 0 72px;
+  width:72px;
+  min-width:72px;
+  height:72px;
+  min-height:72px;
+  margin:0;
+  padding:0;
+  display:grid;
+  place-items:center;
   align-self:center;
-  border-radius:13px;
+  box-sizing:border-box;
+  border-radius:15px;
+  background:#001893;
+  color:white;
+  border:1px solid #001893;
+  box-shadow:0 2px 9px #00189317;
+  font-size:25px;
+  z-index:auto;
 }
 .client-app.is-camera .client-top-filters{
-  display:flex;align-items:center;
-  flex:1;min-width:0;
-  gap:10px;
-  overflow-x:auto;overflow-y:hidden;
+  display:flex;
+  flex:1;
+  min-width:0;
+  height:74px;
+  gap:11px;
+  align-items:center;
+  overflow-x:auto;
+  overflow-y:hidden;
   overscroll-behavior-x:contain;
   scroll-snap-type:x proximity;
   scrollbar-width:none;
   -webkit-overflow-scrolling:touch;
-  padding:6px 5px 7px;
-  height:100%;
+  padding:1px 1px;
+  margin:0;
 }
-.client-app.is-camera .client-top-filters::-webkit-scrollbar{display:none;}
+.client-app.is-camera .client-top-filters::-webkit-scrollbar{display:none}
 .client-app.is-camera .client-top-filters .client-filter-choice{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  flex:0 0 58px;width:58px;
-  min-width:58px;
-  padding:0;margin:0;gap:3px;
-  background:transparent;border:0;
-  color:#485674;
+  appearance:none;
+  display:flex;
+  flex:0 0 72px;
+  width:72px;
+  min-width:72px;
+  height:72px;
+  min-height:72px;
+  padding:5px 3px 4px;
+  margin:0;
+  box-sizing:border-box;
+  align-self:center;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:3px;
+  border-radius:15px;
+  border:1px solid #dce3f1;
+  background:#f8faff;
+  color:#52627d;
+  box-shadow:none;
   scroll-snap-align:start;
+  -webkit-tap-highlight-color:transparent;
 }
 .client-app.is-camera .client-top-filters .client-filter-circle{
-  width:51px;height:51px;flex:0 0 51px;
-  border:2px solid #d6dff0;
-  border-radius:50%;
-  box-shadow:0 2px 6px #10235517;
+  display:grid;
+  place-items:center;
+  flex:0 0 43px;
+  width:43px;
+  height:43px;
+  min-height:43px;
+  max-height:43px;
+  margin:0;
+  border:1px solid #dee5f0;
+  border-radius:9px;
   overflow:hidden;
+  background:repeating-conic-gradient(#e8edf9 0 25%,#fff 0 50%) 50%/12px 12px;
+  box-shadow:none;
+  transform:none;
 }
 .client-app.is-camera .client-top-filters .client-filter-circle img{
-  width:100%;height:100%;
+  display:block;
+  width:100%;
+  height:100%;
   object-fit:contain;
+  object-position:center;
 }
 .client-app.is-camera .client-top-filters .client-filter-choice .client-filter-name{
-  width:58px;max-width:58px;
+  display:block;
+  flex:0 0 auto;
+  width:63px;
+  max-width:63px;
+  margin:0;
+  font-size:9px;
+  font-weight:750;
+  line-height:1.25;
+  color:#51617d;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
   text-align:center;
-  color:#50607d;
-  font-size:9px;font-weight:700;
-  line-height:1.1;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;
 }
+.client-app.is-camera .client-top-filters .client-filter-choice.active,
+.client-app.is-camera .client-top-filters .client-filter-choice[aria-pressed="true"]{
+  background:#f0f3ff;
+  border:2px solid #001893;
+  padding:4px 2px 3px;
+  box-shadow:0 0 0 1px #00189317;
+}
+.client-app.is-camera .client-top-filters .client-filter-choice.active .client-filter-circle,
 .client-app.is-camera .client-top-filters .client-filter-choice[aria-pressed="true"] .client-filter-circle{
-  border-color:#001893;
-  box-shadow:0 0 0 2px #b6c4ff,0 2px 8px #0018932a;
+  border:1px solid #d8e0f0;
+  border-radius:9px;
+  box-shadow:none;
+  transform:none;
 }
+.client-app.is-camera .client-top-filters .client-filter-choice.active .client-filter-name,
 .client-app.is-camera .client-top-filters .client-filter-choice[aria-pressed="true"] .client-filter-name{
-  color:#001893;font-weight:900;
+  color:#001893;
+  font-weight:850;
+}
+.client-app.is-camera .client-top-filters .client-filter-choice:focus-visible{
+  outline:3px solid #8297f2;
+  outline-offset:2px;
 }
 .client-app.is-camera .client-top-filters-empty{
-  font-size:12px;color:#697792;
+  padding:6px 0;
+  color:#7685a0;
+  font-size:11px;
   white-space:nowrap;
 }
 .client-app.is-camera .client-content{
   padding-top:5px!important;
 }
-@media(max-width:390px){
+@media(max-width:360px){
+  /* Mantém menu e cards sempre iguais, mesmo em aparelhos estreitos. */
   .client-app.is-camera .client-camera-header{
-    gap:7px;height:81px;min-height:81px;padding:4px 8px;
+    gap:8px;
+    padding-left:8px;
+    padding-right:8px;
   }
-  .client-app.is-camera .client-camera-header .client-camera-menu-toggle{
-    flex-basis:43px;width:43px;height:43px;
-  }
-  .client-app.is-camera .client-top-filters{gap:7px}
-  .client-app.is-camera .client-top-filters .client-filter-choice{
-    flex-basis:54px;width:54px;min-width:54px;
-  }
-  .client-app.is-camera .client-top-filters .client-filter-circle{
-    width:47px;height:47px;flex-basis:47px;
-  }
-  .client-app.is-camera .client-top-filters .client-filter-choice .client-filter-name{
-    width:54px;max-width:54px;
-  }
+  .client-app.is-camera .client-top-filters{gap:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .client-app.is-camera .client-top-filters .client-filter-circle{transition:none}
 }
