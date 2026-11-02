@@ -480,8 +480,8 @@
 /* Apenas na câmera e no resultado: identidade padrão da plataforma. */
 .client-app.is-camera,
 .client-app.is-preview{
-  --cms-navy:#101F52;
-  --cms-indigo:#172D6F;
+  --cms-navy:#001893;
+  --cms-indigo:#001893;
   color:#172441;
   background:#fff!important;
 }
@@ -615,4 +615,16 @@
     margin-bottom:10px!important;
     min-height:75px;padding:7px 15px;
   }
+}
+
+/* Cor oficial da plataforma: anil #001893; mantém intacto o tema das empresas. */
+.client-app.is-camera .client-platform-mark,
+.client-app.is-preview .client-platform-mark{
+  background:#001893;
+  border-color:#001893;
+}
+.client-app.is-camera .client-back:focus-visible,
+.client-app.is-preview .client-result-btn:focus-visible,
+.client-app.is-camera .client-filter-choice:focus-visible{
+  outline-color:#001893;
 }
