@@ -10,7 +10,7 @@ const brl = n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const dateBR = d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
 const today=()=>new Date().toISOString().slice(0,10);
 const id=()=>crypto.randomUUID();
-const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false,captureData:null,galleryPhoto:null,cameraRequestId:0 };
+const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false,captureData:null,galleryPhoto:null,cameraRequestId:0,adminTest:{active:false,companyId:null,categoryId:null} };
 let toastTimer;
 const toast=(message)=>{const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),5000)};
 const errorMessage=error=>error?.message||'Não foi possível concluir esta operação.';
@@ -56,6 +56,13 @@ function resetCameraSession(categoryId=app.selectedCategory){
   window.scrollTo(0,0);
 }
 function backToCamera(){resetCameraSession();}
+function exitAdminTest(){
+  stopCamera();clearCapturedPhoto();clearGalleryPhoto();
+  app.adminTest.active=false;
+  app.page='test-filters';
+  app.selectedCategory=null;app.selectedFilter=null;
+  render();window.scrollTo(0,0);
+}
 function navigate(page){document.body.classList.remove('mobile-menu-lock');if(app.page==='camera'&&page!=='camera')stopCamera();if(page!=='preview')clearCapturedPhoto();if(page!=='camera')clearGalleryPhoto();app.page=page;app.selectedFilter=null;render();window.scrollTo(0,0);}
 function studioCredits(extraClass=''){
   return `<footer class="studio-credits ${extraClass}" aria-label="Créditos do aplicativo">
@@ -114,7 +121,7 @@ function layout(content){const admin=app.profile?.role==='admin';
       ${cameraDrawer}
     </div>`;
   }
-  const menu=[['dashboard','◫ Visão geral'],['clients','♙ Clientes'],['filters','▧ Filtros PNG'],['finance','▤ Financeiro'],['settings','⚙ Configurações']];
+  const menu=[['dashboard','◫ Visão geral'],['clients','♙ Clientes'],['filters','▧ Filtros PNG'],['test-filters','◉ Testar filtros'],['finance','▤ Financeiro'],['settings','⚙ Configurações']];
   return `<div class="layout admin-layout" id="adminLayout">
     <button type="button" class="mobile-menu-backdrop" data-act="close-mobile-menu" tabindex="-1" aria-label="Fechar menu"></button>
     <aside class="sidebar" id="adminSidebar" aria-label="Menu administrativo">
