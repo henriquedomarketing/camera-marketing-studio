@@ -279,11 +279,37 @@ function previewView(){
   </section>`;
 }
 
-function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">CM</span><span>Camera Marketing Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p><button class="btn" data-act="logout">Sair</button></div></div>`}
+function supportContactMarkup(){
+  const phone=String(app.settings?.branding?.supportWhatsapp||'').trim();
+  const digits=phone.replace(/\D/g,'');
+  const waDigits=digits.length===10||digits.length===11?'55'+digits:digits;
+  const valid=(waDigits.length===12||waDigits.length===13)&&waDigits.startsWith('55');
+  const contact=phone?'<p class="support-phone"><span>WhatsApp do suporte</span><strong>'+escapeHtml(phone)+'</strong></p>':
+    '<p class="muted support-not-configured">O número de suporte ainda não foi informado. Ele aparecerá aqui assim que o administrador o cadastrar.</p>';
+  return contact+(valid?'<a class="btn btn-primary support-whatsapp-button" href="https://wa.me/'+waDigits+'?text='+encodeURIComponent('Olá! Gostaria de verificar a situação do acesso da minha empresa ao Camera Marketing Studio.')+'" target="_blank" rel="noopener noreferrer">Falar com suporte pelo WhatsApp</a>':'');
+}
+function pausedClientView(){
+  return '<div class="access-paused-layout">'+
+    '<section class="card access-paused-card" role="status" aria-live="polite">'+
+      '<div class="access-paused-brand"><span class="brand-mark">CM</span><strong>camera marketing <small>STUDIO</small></strong></div>'+
+      '<div class="access-paused-icon" aria-hidden="true">🔒</div>'+
+      '<h1>Acesso temporariamente pausado</h1>'+
+      '<p class="access-paused-description">O acesso aos filtros desta empresa está temporariamente indisponível. Para verificar sua situação e solicitar a regularização, entre em contato com nosso suporte.</p>'+
+      supportContactMarkup()+
+      '<div class="access-paused-actions">'+
+        '<button type="button" class="btn" data-act="check-client-access">Verificar novamente</button>'+
+        '<button type="button" class="btn access-paused-logout" data-act="logout">Sair da conta</button>'+
+      '</div></section>'+studioCredits('studio-credits-auth')+'</div>';
+}
+function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">CM</span><span>Camera Marketing Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p>${supportContactMarkup()}<button class="btn" data-act="logout">Sair</button></div></div>`}
 function render(){
   document.body.classList.remove('mobile-menu-lock','client-camera-menu-lock');
   if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}
   if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}
+  if(app.profile.role!=='admin'&&(app.company?.access_paused||app.company?.active===false)){
+    stopCamera();clearCapturedPhoto();clearGalleryPhoto();
+    $('root').innerHTML=pausedClientView();return;
+  }
   const admin=app.profile.role==='admin';
   const testing=admin&&app.adminTest.active&&['camera','preview'].includes(app.page);
   const content=admin&&!testing
@@ -297,7 +323,49 @@ function render(){
     if(app.selectedFilter)selectFilter(app.selectedFilter);
   }
 }
-async function loadData(){if(!app.user)return;const {data:profile,error}=await api.from('profiles').select('*').eq('id',app.user.id).single();if(error)throw error;app.profile=profile;const admin=profile.role==='admin';if(admin){const [a,b,c,d,s]=await Promise.all([api.from('companies').select('*').order('created_at',{ascending:false}),api.from('categories').select('*').order('sort_order'),api.from('filters').select('*').order('sort_order'),api.from('invoices').select('*').order('due_date',{ascending:true}),api.from('app_settings').select('*')]);for(const x of [a,b,c,d,s])if(x.error)throw x.error;app.companies=a.data;app.categories=b.data;app.filters=c.data;app.invoices=d.data;app.settings=Object.fromEntries(s.data.map(x=>[x.key,x.value]));app.page=['categories','camera'].includes(app.page)?'dashboard':app.page;}else{app.company=null;if(profile.company_id){const [co,cat,fil]=await Promise.all([api.from('companies').select('*').eq('id',profile.company_id).maybeSingle(),api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order'),api.from('filters').select('*').eq('company_id',profile.company_id).eq('active',true).order('sort_order')]);for(const x of [co,cat,fil])if(x.error)throw x.error;app.company=co.data;app.categories=cat.data;app.filters=fil.data;}app.page='categories';}render();}
+async function loadData(){
+  if(!app.user)return;
+  const {data:profile,error}=await api.from('profiles').select('*').eq('id',app.user.id).single();
+  if(error)throw error;
+  app.profile=profile;
+  const admin=profile.role==='admin';
+  if(admin){
+    const [a,b,c,d,settings]=await Promise.all([
+      api.from('companies').select('*').order('created_at',{ascending:false}),
+      api.from('categories').select('*').order('sort_order'),
+      api.from('filters').select('*').order('sort_order'),
+      api.from('invoices').select('*').order('due_date',{ascending:true}),
+      api.from('app_settings').select('*')
+    ]);
+    for(const result of [a,b,c,d,settings])if(result.error)throw result.error;
+    app.companies=a.data;app.categories=b.data;app.filters=c.data;app.invoices=d.data;
+    app.settings=Object.fromEntries(settings.data.map(item=>[item.key,item.value]));
+    app.page=['categories','camera'].includes(app.page)?'dashboard':app.page;
+  }else{
+    app.company=null;
+    app.categories=[];app.filters=[];
+    const support=api.from('app_settings').select('value').eq('key','branding').maybeSingle();
+    const company=profile.company_id
+      ?api.from('companies').select('*').eq('id',profile.company_id).maybeSingle()
+      :Promise.resolve({data:null,error:null});
+    const [settings,co]=await Promise.all([support,company]);
+    if(settings.error)throw settings.error;
+    if(co.error)throw co.error;
+    app.settings={branding:settings.data?.value||{}};
+    app.company=co.data;
+    if(co.data?.active&&!co.data?.access_paused){
+      const [cats,filters]=await Promise.all([
+        api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order'),
+        api.from('filters').select('*').eq('company_id',profile.company_id).eq('active',true).order('sort_order')
+      ]);
+      if(cats.error)throw cats.error;
+      if(filters.error)throw filters.error;
+      app.categories=cats.data;app.filters=filters.data;
+    }
+    app.page='categories';
+  }
+  render();
+}
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
 async function authSubmit(form){const data=Object.fromEntries(new FormData(form));$('authError').textContent='';const submit=form.querySelector('button[type=submit]');submit.disabled=true;try{const {data:auth,error}=app.register?await api.auth.signUp({email:data.email,password:data.password}):await api.auth.signInWithPassword({email:data.email,password:data.password});if(error)throw error;if(!auth.session){toast('Cadastro recebido! Confira seu e-mail para confirmar a conta.');app.register=false;render();return;}app.user=auth.user;await loadData();}catch(error){const node=$('authError');if(node)node.textContent=errorMessage(error)}finally{if(submit.isConnected)submit.disabled=false;}}
@@ -691,7 +759,13 @@ function saveCapturedPhoto(){
   else downloadCapturedPhoto();
 }
 
-async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='start-admin-test'){
+async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='check-client-access'){
+  if(app.profile?.role==='admin')return;
+  await loadData();
+  if(app.company?.access_paused||app.company?.active===false)toast('O acesso ainda está pausado. Entre em contato com o suporte.');
+  else if(app.company)toast('Acesso liberado! Você já pode utilizar os filtros.');
+  return;
+}if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='start-admin-test'){
   if(app.profile?.role!=='admin')return;
   const co=app.companies.find(c=>c.id===app.adminTest.companyId);
   const ca=app.categories.find(c=>c.id===app.adminTest.categoryId&&c.company_id===co?.id);
