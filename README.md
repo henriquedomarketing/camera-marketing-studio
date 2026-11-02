@@ -40,7 +40,10 @@ Se ocorrer erro no envio após criar uma categoria, o aplicativo tenta desfazer 
 
 - **Apenas a tela inicial do cliente** usa a logo PNG original e as cores da empresa. A logo fica em moldura quadrada compacta, sem sobrepor os títulos; o PNG não é alterado. PNG com fundo branco não é necessariamente transparente, portanto prefira a logo com canal alfa para não exibir quadrado branco.
 - Ao entrar numa categoria, **a câmera tem fundo branco e a identidade padrão do Camera Marketing Studio** (azul anil oficial `#001893`), sem reproduzir as cores da loja.
-- Ordem na câmera: **prévia da câmera → botão de captura e controles → filtros circulares horizontais**.
+- Ordem na câmera: **prévia da câmera → controles (Alternar / botão vermelho / Galeria) → filtros circulares horizontais**.
+- **Importar da galeria**: ao tocar em **Galeria**, o funcionário escolhe uma foto do próprio aparelho (até 25 MB; formatos de imagem que o navegador consiga abrir). Ela aparece dentro do enquadramento 9:16 com o **filtro selecionado**; basta tocar em outra bolinha para trocar o filtro sem importar a imagem outra vez. Para finalizar, toca no botão vermelho e abre a mesma tela de prévia/compartilhamento.
+- **Sem esticar**: foto horizontal, quadrada ou vertical usa recorte central proporcional (`object-fit: cover`), com resultado fixo em **1080 × 1920 px**. Foto horizontal perde as laterais. Algumas fotos HEIC podem depender do suporte do navegador; para incompatíveis, tente JPEG ou PNG.
+- **Privacidade da galeria**: a foto escolhida é tratada temporariamente no navegador do aparelho e não é enviada ao Supabase. Em **Trocar filtro** na tela final, a imagem da galeria pode ser reaproveitada; em **Nova foto**, volta à câmera.
 - A tela de resultado também usa a identidade neutra da plataforma, com prévia final e ações de compartilhamento.
 - O painel administrativo usa azul-marinho escuro; o menu mobile abre por botão ☰, enquanto o desktop mantém a lateral fixa.
 
