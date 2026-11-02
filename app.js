@@ -52,12 +52,40 @@ function layout(content){const admin=app.profile?.role==='admin';
       <footer class="client-footer">CAMERA MARKETING • FILTROS PERSONALIZADOS</footer>
     </div>`;
   }
-  const menu=admin?[['dashboard','◫ Visão geral'],['clients','♙ Clientes'],['categories','▦ Categorias'],['filters','▧ Filtros PNG'],['finance','▤ Financeiro'],['settings','⚙ Configurações']]:[['categories','▦ Categorias'],['camera','◎ Câmera']];return `<div class="layout"><aside class="sidebar"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><nav>${menu.map(([value,title])=>`<button class="nav-btn ${app.page===value?'active':''}" data-nav="${value}">${title}</button>`).join('')}</nav><div class="sidebar-bottom"><b>${admin?'Administrador':'Área do cliente'}</b><p>${escapeHtml(app.user?.email)}</p><button class="btn btn-full" data-act="logout">Sair da conta</button></div></aside><div class="workspace"><header class="topbar"><div>Workspace / <strong>${admin?'Painel administrativo':escapeHtml(app.company?.name)}</strong></div><div class="topbar-right"><span class="chip">Conta autenticada</span><button class="btn" data-act="logout">Sair</button></div></header><main class="content">${content}</main></div></div>${app.modal?`<div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>${escapeHtml(app.modal.title)}</h2><button class="btn" data-act="close-modal">✕</button></div>${app.modal.content}</div></div>`:''}`}
+  const menu=admin?[['dashboard','◫ Visão geral'],['clients','♙ Clientes'],['filters','▧ Filtros PNG'],['finance','▤ Financeiro'],['settings','⚙ Configurações']]:[['categories','▦ Categorias'],['camera','◎ Câmera']];return `<div class="layout"><aside class="sidebar"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><nav>${menu.map(([value,title])=>`<button class="nav-btn ${app.page===value?'active':''}" data-nav="${value}">${title}</button>`).join('')}</nav><div class="sidebar-bottom"><b>${admin?'Administrador':'Área do cliente'}</b><p>${escapeHtml(app.user?.email)}</p><button class="btn btn-full" data-act="logout">Sair da conta</button></div></aside><div class="workspace"><header class="topbar"><div>Workspace / <strong>${admin?'Painel administrativo':escapeHtml(app.company?.name)}</strong></div><div class="topbar-right"><span class="chip">Conta autenticada</span><button class="btn" data-act="logout">Sair</button></div></header><main class="content">${content}</main></div></div>${app.modal?`<div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>${escapeHtml(app.modal.title)}</h2><button class="btn" data-act="close-modal">✕</button></div>${app.modal.content}</div></div>`:''}`}
 function table(headings,rows){return `<div class="table-wrap"><table class="table"><thead><tr>${headings.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td class="empty" colspan="${headings.length}">Nenhum registro encontrado</td></tr>`}</tbody></table></div>`}
 function dashboard(){const overdue=app.invoices.filter(i=>dueStatus(i)==='overdue'),unpaid=app.invoices.filter(i=>i.status==='pending');return header('DASHBOARD','Visão geral','Os indicadores abaixo são calculados a partir dos seus dados reais.',button('Cadastrar cliente','add-client'))+`<div class="stats">${stat('Clientes',app.companies.length,'Máximo permitido: 100')}${stat('Clientes ativos',app.companies.filter(x=>x.active).length,'Contas habilitadas')}${stat('Filtros PNG',app.filters.length,'Arquivos cadastrados')}${stat('Boletos atrasados',overdue.length,brl(unpaid.reduce((sum,i)=>sum+Number(i.amount),0))+' a receber')}</div>`+`<div class="card"><h2>Próximos vencimentos</h2>${table(['CLIENTE','VENCIMENTO','VALOR','STATUS'],app.invoices.slice().filter(i=>i.status==='pending').sort((a,b)=>a.due_date.localeCompare(b.due_date)).slice(0,8).map(i=>`<tr><td><b>${escapeHtml(companyName(i.company_id))}</b></td><td>${dateBR(i.due_date)}</td><td>${brl(i.amount)}</td><td>${badge(dueStatus(i))}</td></tr>`).join(''))}</div>`}
 function clients(){return header('GERENCIAMENTO','Clientes','Cada empresa terá seu próprio login e seus próprios filtros.',button('Novo cliente','add-client'))+`<div class="card">${table(['CLIENTE','SITUAÇÃO','MENSALIDADE','VENCIMENTO','AÇÕES'],app.companies.map(c=>`<tr><td><div class="company-admin-name"><span class="company-admin-logo">${brandImg(c,'company-admin-logo-img')||'<span>▣</span>'}</span><span><b>${escapeHtml(c.name)}</b><small>${escapeHtml(c.contact_email)}</small></span></div></td><td>${badge(c.active?'active':'inactive')}</td><td>${brl(c.monthly_fee)}</td><td>${dateBR(c.next_due_date)}</td><td><div class="actions">${action('edit-client',c.id,'Editar')}${action('reset-password',c.id,'Nova senha')}${action('remove-client',c.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
-function categories(){return header('ORGANIZAÇÃO','Categorias','Separe os filtros de cada empresa por assunto.',button('Nova categoria','add-category'))+`<div class="card">${table(['CATEGORIA','CLIENTE','FILTROS','AÇÕES'],app.categories.map(c=>`<tr><td><b>${escapeHtml(c.name)}</b></td><td>${escapeHtml(companyName(c.company_id))}</td><td>${app.filters.filter(f=>f.category_id===c.id).length}</td><td><div class="actions">${action('edit-category',c.id,'Editar')}${action('remove-category',c.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
-function filters(){return header('BIBLIOTECA','Filtros PNG','PNGs privados, organizados por empresa e categoria.',button('Enviar PNG','add-filter'))+`<div class="card">${app.filters.length?`<div class="filters-grid">${app.filters.map(f=>`<div class="filter-card"><div class="filter-image"><img data-img="${f.id}" alt="Filtro ${escapeHtml(f.name)}"></div><b>${escapeHtml(f.name)}</b><small>${escapeHtml(companyName(f.company_id))} • ${escapeHtml(categoryName(f.category_id))}</small><div class="actions">${action('remove-filter',f.id,'Excluir','danger')}</div></div>`).join('')}</div>`:'<div class="empty">Nenhum filtro cadastrado. Envie seu primeiro PNG transparente.</div>'}</div>`}
+
+function categoriesSection(){
+  const rows=app.categories.map(c=>{
+    const count=app.filters.filter(f=>f.category_id===c.id).length;
+    return `<tr>
+      <td><b>${escapeHtml(c.name)}</b></td>
+      <td>${escapeHtml(companyName(c.company_id))}</td>
+      <td><span class="category-count">${count} ${count===1?'filtro':'filtros'}</span></td>
+      <td><div class="actions">
+        ${action('edit-category',c.id,'Editar')}
+        ${action('remove-category',c.id,'Excluir','danger')}
+      </div></td>
+    </tr>`;
+  }).join('');
+  return `<div class="card category-management">
+    <div class="toolbar">
+      <div><h2>Categorias</h2><p class="muted">Organize os filtros por assunto. Crie uma categoria aqui ou durante o envio de um PNG.</p></div>
+      <button class="btn" type="button" data-act="add-category">＋ Nova categoria</button>
+    </div>
+    ${table(['CATEGORIA','EMPRESA','FILTROS','AÇÕES'],rows)}
+  </div>`;
+}
+function filters(){
+  return header('BIBLIOTECA','Filtros PNG','Gerencie categorias e envie os filtros de cada empresa em um só lugar.',button('Enviar PNG','add-filter'))+
+    categoriesSection()+
+    `<div class="card">
+      <div class="toolbar"><div><h2>Filtros cadastrados</h2><p class="muted">Arquivos PNG transparentes organizados por empresa e categoria.</p></div></div>
+      ${app.filters.length?`<div class="filters-grid">${app.filters.map(f=>`<div class="filter-card"><div class="filter-image"><img data-img="${f.id}" alt="Filtro ${escapeHtml(f.name)}"></div><b>${escapeHtml(f.name)}</b><small>${escapeHtml(companyName(f.company_id))} • ${escapeHtml(categoryName(f.category_id))}</small><div class="actions">${action('remove-filter',f.id,'Excluir','danger')}</div></div>`).join('')}</div>`:'<div class="empty">Nenhum filtro cadastrado. Envie seu primeiro PNG transparente.</div>'}
+    </div>`;
+}
 function finance(){const pending=app.invoices.filter(x=>x.status==='pending'),paid=app.invoices.filter(x=>x.status==='paid'),late=pending.filter(x=>x.due_date<today());return header('COBRANÇAS','Financeiro','Controle manual de boletos; sem integração bancária automática.',button('Nova cobrança','add-invoice'))+`<div class="stats">${stat('A receber',brl(pending.reduce((s,x)=>s+Number(x.amount),0)),pending.length+' cobranças abertas')}${stat('Recebido',brl(paid.reduce((s,x)=>s+Number(x.amount),0)),paid.length+' pagamentos registrados')}${stat('Atrasado',brl(late.reduce((s,x)=>s+Number(x.amount),0)),late.length+' cobranças vencidas')}${stat('Empresas',app.companies.length,'Clientes cadastrados')}</div><div class="card">${table(['CLIENTE','VENCIMENTO','VALOR','STATUS','AÇÕES'],app.invoices.map(x=>`<tr><td><b>${escapeHtml(companyName(x.company_id))}</b></td><td>${dateBR(x.due_date)}</td><td>${brl(x.amount)}</td><td>${badge(dueStatus(x))}</td><td><div class="actions">${action('toggle-paid',x.id,x.status==='paid'?'Reabrir':'Marcar pago')}${action('edit-invoice',x.id,'Editar')}${action('remove-invoice',x.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
 function settings(){const branding=app.settings.branding||{};return header('PERSONALIZAÇÃO','Configurações','Altere o nome da plataforma e o WhatsApp de suporte.')+`<div class="card"><form id="settingsForm" class="form">${field('appName','Nome da plataforma',branding.appName||'Camera Marketing Studio')}${field('supportWhatsapp','WhatsApp de suporte',branding.supportWhatsapp||'', 'text',false)}<button type="submit" class="btn btn-primary">Salvar configurações</button></form><p class="note">O limite de 100 clientes é aplicado pelo banco. As senhas ficam no Supabase Auth e os PNGs em um armazenamento privado.</p></div>`}
 function clientCategories(){
@@ -191,11 +219,90 @@ function companyModal(cid){
 }
 function categoryModal(cid){const c=app.categories.find(x=>x.id===cid);openModal(c?'Editar categoria':'Nova categoria',`<form class="form" id="categoryForm">${select('company_id','Empresa',companyOptions(c?.company_id))}${field('name','Categoria',c?.name||'')}${endForm}</form>`,'categoryForm');app.modal.recordId=c?.id||null;}
 function invoiceModal(iid){const i=app.invoices.find(x=>x.id===iid);openModal(i?'Editar cobrança':'Nova cobrança',`<form class="form" id="invoiceForm">${select('company_id','Empresa',companyOptions(i?.company_id))}${field('amount','Valor (R$)',i?.amount??0,'number')}${field('due_date','Vencimento',i?.due_date||today(),'date')}${select('status','Situação',option('pending','Pendente',!i||i.status==='pending')+option('paid','Pago',i?.status==='paid')+option('canceled','Cancelado',i?.status==='canceled'))}${field('notes','Observações',i?.notes||'','text',false)}${endForm}</form>`,'invoiceForm');app.modal.recordId=i?.id||null;}
-function filterModal(){openModal('Cadastrar filtro PNG',`<form class="form" id="filterForm">${select('company_id','Empresa',companyOptions())}<div class="field"><label>Categoria</label><select name="category_id" id="filterCategory" required></select></div>${field('name','Nome do filtro')}${field('sort_order','Ordem',0,'number')}<div class="field"><label>PNG transparente (máximo 12 MB)</label><input type="file" name="file" accept="image/png,.png" required></div><p class="muted">Recomendado: imagem vertical 1080 × 1920 com transparência real.</p>${endForm}</form>`,'filterForm');updateCategoryOptions();}
-function updateCategoryOptions(){const form=$('filterForm');if(!form)return;const clientId=form.elements.company_id.value;const target=$('filterCategory');target.innerHTML=app.categories.filter(c=>c.company_id===clientId).map(c=>option(c.id,c.name,false)).join('');}
-async function validatePNG(file){if(!file||file.type!=='image/png'||file.size>12582912)throw Error('Selecione um PNG válido de até 12 MB.');const uri=URL.createObjectURL(file);try{const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('PNG não reconhecido.'));img.src=uri;});const canvas=document.createElement('canvas');canvas.width=100;canvas.height=178;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,100,178);const pixels=ctx.getImageData(0,0,100,178).data;let transparent=false,visible=false;for(let i=3;i<pixels.length;i+=4){if(pixels[i]<240)transparent=true;if(pixels[i]>15)visible=true;if(transparent&&visible)break;}if(!transparent||!visible)throw Error('O filtro precisa ter elementos visíveis e fundo transparente.');}finally{URL.revokeObjectURL(uri);}}
-async function filterUpload(form){const file=form.elements.file.files[0];await validatePNG(file);const c=form.elements.company_id.value,category=form.elements.category_id.value;const path=`${c}/${id()}.png`;const {error:uploadError}=await api.storage.from('company-filters').upload(path,file,{contentType:'image/png',upsert:false});if(uploadError)throw uploadError;const payload={company_id:c,category_id:category,name:form.elements.name.value.trim(),sort_order:Number(form.elements.sort_order.value),storage_path:path};const {error}=await api.from('filters').insert(payload);if(error){await api.storage.from('company-filters').remove([path]);throw error;}}
 
+function filterModal(){
+  const content=`<form class="form" id="filterForm">
+    ${select('company_id','Empresa',companyOptions())}
+    <div class="field">
+      <label for="filterCategory">Categoria</label>
+      <select name="category_id" id="filterCategory" required></select>
+    </div>
+    <div class="field filter-new-category hidden" id="filterNewCategoryWrap">
+      <label for="filterNewCategory">Nome da nova categoria</label>
+      <input id="filterNewCategory" name="new_category_name" type="text" maxlength="100" placeholder="Ex.: Bom Dia, Ofertas, Financiamento">
+      <span class="muted">A nova categoria ficará disponível para os próximos filtros desta empresa.</span>
+    </div>
+    ${field('name','Nome do filtro')}
+    ${field('sort_order','Ordem',0,'number')}
+    <div class="field"><label>PNG transparente (máximo 12 MB)</label><input type="file" name="file" accept="image/png,.png" required></div>
+    <p class="muted">Recomendado: imagem vertical 1080 × 1920, com transparência real.</p>
+    ${endForm}
+  </form>`;
+  openModal('Cadastrar filtro PNG',content,'filterForm');
+  updateCategoryOptions();
+}
+function updateCategoryOptions(){
+  const form=$('filterForm');if(!form)return;
+  const companyId=form.elements.company_id.value;
+  const target=$('filterCategory');
+  if(!target)return;
+  const previous=target.value;
+  const existing=app.categories.filter(c=>c.company_id===companyId);
+  target.innerHTML=existing.map(c=>option(c.id,c.name,c.id===previous)).join('')+
+    option('__new__','＋ Criar nova categoria…',previous==='__new__'||!existing.length);
+  if(previous&&[...target.options].some(o=>o.value===previous))target.value=previous;
+  else if(!existing.length)target.value='__new__';
+  updateNewCategoryField();
+}
+function updateNewCategoryField(){
+  const form=$('filterForm');if(!form)return;
+  const isNew=form.elements.category_id.value==='__new__';
+  const wrap=$('filterNewCategoryWrap'),field=$('filterNewCategory');
+  if(wrap)wrap.classList.toggle('hidden',!isNew);
+  if(field){field.required=isNew;field.disabled=!isNew;}
+}
+async function validatePNG(file){if(!file||file.type!=='image/png'||file.size>12582912)throw Error('Selecione um PNG válido de até 12 MB.');const uri=URL.createObjectURL(file);try{const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('PNG não reconhecido.'));img.src=uri;});const canvas=document.createElement('canvas');canvas.width=100;canvas.height=178;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,100,178);const pixels=ctx.getImageData(0,0,100,178).data;let transparent=false,visible=false;for(let i=3;i<pixels.length;i+=4){if(pixels[i]<240)transparent=true;if(pixels[i]>15)visible=true;if(transparent&&visible)break;}if(!transparent||!visible)throw Error('O filtro precisa ter elementos visíveis e fundo transparente.');}finally{URL.revokeObjectURL(uri);}}
+
+async function filterUpload(form){
+  const file=form.elements.file.files[0];
+  await validatePNG(file);
+  const companyId=form.elements.company_id.value;
+  let categoryId=form.elements.category_id.value;
+  if(!app.companies.some(c=>c.id===companyId))throw Error('Selecione uma empresa válida.');
+  let createdCategoryId=null;
+  let path=null;
+  try{
+    if(categoryId==='__new__'){
+      const name=form.elements.new_category_name.value.trim();
+      if(!name||name.length>100)throw Error('Informe o nome da nova categoria (até 100 caracteres).');
+      // Nunca criar categoria em empresa diferente daquela escolhida para o PNG.
+      const {data,error}=await api.from('categories')
+        .insert({company_id:companyId,name})
+        .select('id').single();
+      if(error)throw error;
+      createdCategoryId=data.id;
+      categoryId=data.id;
+    }else if(!app.categories.some(c=>c.id===categoryId&&c.company_id===companyId)){
+      throw Error('Escolha uma categoria válida para esta empresa.');
+    }
+    path=`${companyId}/${id()}.png`;
+    const {error:uploadError}=await api.storage.from('company-filters')
+      .upload(path,file,{contentType:'image/png',upsert:false});
+    if(uploadError)throw uploadError;
+    const payload={company_id:companyId,category_id:categoryId,
+      name:form.elements.name.value.trim(),sort_order:Number(form.elements.sort_order.value),storage_path:path};
+    const {error}=await api.from('filters').insert(payload);
+    if(error)throw error;
+  }catch(error){
+    if(path)await api.storage.from('company-filters').remove([path]);
+    if(createdCategoryId){
+      // O envio falhou. Remover apenas a categoria recém-criada e vazia.
+      const {count}=await api.from('filters').select('id',{count:'exact',head:true}).eq('category_id',createdCategoryId);
+      if(count===0)await api.from('categories').delete().eq('id',createdCategoryId);
+    }
+    throw error;
+  }
+}
 async function validateCompanyLogo(file){
   if(!file)return;
   if(file.type!=='image/png'||file.size>2*1024*1024||file.size<8)
@@ -368,8 +475,16 @@ function saveCapturedPhoto(){
   else downloadCapturedPhoto();
 }
 
-async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='logout'){stopCamera();clearCapturedPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){const {error}=await api.from('categories').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='capture'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'||act==='photo-change-filter'){backToCamera();return;}}catch(error){toast(errorMessage(error));}}
+async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='logout'){stopCamera();clearCapturedPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
+  const paths=app.filters.filter(f=>f.category_id===uid).map(f=>f.storage_path).filter(Boolean);
+  const {error}=await api.from('categories').delete().eq('id',uid);
+  if(error)throw error;
+  if(paths.length){const {error:storageError}=await api.storage.from('company-filters').remove(paths);
+    if(storageError)toast('Categoria removida, mas alguns PNGs precisam de limpeza no armazenamento.');
+  }
+  await refresh();
+}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='capture'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'||act==='photo-change-filter'){backToCamera();return;}}catch(error){toast(errorMessage(error));}}
 $('root').addEventListener('click',click);
 $('root').addEventListener('submit',handleForm);
-$('root').addEventListener('change',event=>{if(event.target.id==='f_company_id'&&app.modal?.formId==='filterForm')updateCategoryOptions();});
+$('root').addEventListener('change',event=>{if(app.modal?.formId==='filterForm'){if(event.target.id==='f_company_id')updateCategoryOptions();if(event.target.id==='filterCategory')updateNewCategoryField();}});
 init();
