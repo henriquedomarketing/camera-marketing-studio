@@ -946,3 +946,53 @@ body.client-camera-menu-lock{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .client-camera-menu-backdrop,.client-camera-drawer{transition:none}
 }
+
+
+/* Ajuste solicitado: câmera grande, menu na posição anterior da logo (topo).
+   O vídeo segue enquadrado em 9:16, com tamanho adaptado à largura do aparelho. */
+.client-app.is-camera .client-camera-header{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  width:min(100%,530px);
+  height:54px;
+  min-height:54px;
+  padding:5px 14px;
+  margin:0 auto;
+  background:#fff;
+  border-bottom:1px solid #edf0f6;
+}
+.client-app.is-camera .client-camera-header .client-camera-menu-toggle{
+  position:static!important;
+  top:auto!important;left:auto!important;
+  width:43px;height:43px;
+  display:grid;place-items:center;
+  flex:0 0 43px;
+  margin:0;
+  border-radius:12px;
+  z-index:auto;
+}
+.client-app.is-camera .client-content{
+  padding:6px 10px calc(10px + env(safe-area-inset-bottom,0px))!important;
+}
+.client-app.is-camera .client-camera-screen,
+.client-app.is-camera .client-camera-screen .client-viewfinder-wrap{
+  max-width:440px;
+  width:100%;
+}
+.client-app.is-camera .client-viewfinder{
+  width:min(100%,420px)!important;
+  max-width:100%!important;
+  height:auto!important;
+  aspect-ratio:9/16!important;
+}
+@media(min-width:750px){
+  .client-app.is-camera .client-viewfinder{
+    width:min(100%,420px)!important;
+  }
+}
+@media(max-height:620px){
+  .client-app.is-camera .client-viewfinder{
+    width:min(100%,420px)!important;
+  }
+}
