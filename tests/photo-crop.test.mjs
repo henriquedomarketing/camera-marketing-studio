@@ -121,3 +121,15 @@ test('Voltar, Nova foto e Trocar filtro sempre chamam mesma rotina limpa',()=>{
   assert.match(handler,/\{backToCamera\(\);return;\}/);
   assert.doesNotMatch(handler,/backToCamera\(true\)/);
 });
+
+test('Foto importada mostra Voltar à câmera sobre o enquadramento',()=>{
+  const begin=source.indexOf('function cameraView(){');
+  const end=source.indexOf('function previewView(){',begin);
+  const camera=source.slice(begin,end);
+  assert.match(camera,/fromGallery\?['`]?<button type="button" class="client-gallery-back"/);
+  assert.match(camera,/data-act="use-camera"/);
+  assert.match(camera,/Voltar à câmera/);
+  assert.match(camera,/fromGallery\?'Voltar':'Alternar'/);
+  const handler=source.slice(source.indexOf('async function click(event)'),source.indexOf('function setClientCameraMenu('));
+  assert.match(handler,/if\(act==='use-camera'\)\{resetCameraSession\(\);return;\}/);
+});
