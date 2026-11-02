@@ -217,7 +217,15 @@ function companyModal(cid){
   openModal(c?'Editar cliente':'Cadastrar cliente',frm,'clientForm');
   app.modal.recordId=c?.id||null;
 }
-function categoryModal(cid){const c=app.categories.find(x=>x.id===cid);openModal(c?'Editar categoria':'Nova categoria',`<form class="form" id="categoryForm">${select('company_id','Empresa',companyOptions(c?.company_id))}${field('name','Categoria',c?.name||'')}${endForm}</form>`,'categoryForm');app.modal.recordId=c?.id||null;}
+function categoryModal(cid){
+  const c=app.categories.find(x=>x.id===cid);
+  const companyField=c
+    ? `<div class="field"><label>Empresa</label><div class="category-company-locked">${escapeHtml(companyName(c.company_id))}</div><input type="hidden" name="company_id" value="${escapeHtml(c.company_id)}"></div>`
+    : select('company_id','Empresa',companyOptions());
+  openModal(c?'Editar categoria':'Nova categoria',
+    `<form class="form" id="categoryForm">${companyField}${field('name','Categoria',c?.name||'')}${endForm}</form>`,'categoryForm');
+  app.modal.recordId=c?.id||null;
+}
 function invoiceModal(iid){const i=app.invoices.find(x=>x.id===iid);openModal(i?'Editar cobrança':'Nova cobrança',`<form class="form" id="invoiceForm">${select('company_id','Empresa',companyOptions(i?.company_id))}${field('amount','Valor (R$)',i?.amount??0,'number')}${field('due_date','Vencimento',i?.due_date||today(),'date')}${select('status','Situação',option('pending','Pendente',!i||i.status==='pending')+option('paid','Pago',i?.status==='paid')+option('canceled','Cancelado',i?.status==='canceled'))}${field('notes','Observações',i?.notes||'','text',false)}${endForm}</form>`,'invoiceForm');app.modal.recordId=i?.id||null;}
 
 function filterModal(){
