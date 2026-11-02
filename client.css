@@ -1306,3 +1306,35 @@ body.client-camera-menu-lock{overflow:hidden}
     font-size:8px;
   }
 }
+
+
+/* Créditos do criador nas páginas do cliente, nunca sobre a câmera. */
+.client-app .studio-credits.client-footer{
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  width:100%;
+  max-width:100%;
+  padding:15px 12px calc(17px + env(safe-area-inset-bottom,0px));
+  font-size:10px;
+  font-weight:450;
+  line-height:1.5;
+  letter-spacing:0;
+  text-align:center;
+}
+.client-app.is-home .studio-credits.client-footer{
+  background:#f6f7fb;
+  color:#7a87a1;
+}
+.client-app.is-preview .studio-credits.client-footer{
+  background:#fff;
+  color:#75849f;
+  border-top:1px solid #edf0f6;
+}
+.client-app .studio-credits.client-footer strong{
+  color:#001893;
+  font-weight:800;
+}
