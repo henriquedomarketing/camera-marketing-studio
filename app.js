@@ -62,13 +62,29 @@ function layout(content){const admin=app.profile?.role==='admin';
           <span class="client-brand-mark client-platform-mark">CM</span>
           <span class="client-brand-copy"><strong>camera marketing</strong><small>STUDIO</small></span>
         </div>`;
+    const cameraMode=type==='is-camera';
+    const cameraDrawer=cameraMode?`<div class="client-camera-menu-backdrop" data-act="close-client-menu" aria-hidden="true"></div>
+      <aside class="client-camera-drawer" id="clientCameraDrawer" aria-label="Menu de categorias" aria-hidden="true" inert>
+        <div class="client-camera-drawer-heading"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong>
+          <button type="button" class="client-camera-drawer-close" data-act="close-client-menu" aria-label="Fechar menu">✕</button>
+        </div>
+        <p class="client-camera-drawer-label">ESCOLHA UMA CATEGORIA</p>
+        <nav class="client-camera-drawer-list" aria-label="Categorias da empresa">
+          ${app.categories.map(c=>`<button type="button" class="client-camera-drawer-category ${app.selectedCategory===c.id?'selected':''}" data-act="client-switch-category" data-id="${escapeHtml(c.id)}" ${app.selectedCategory===c.id?'aria-current="page"':''}>${escapeHtml(c.name)}<span aria-hidden="true">›</span></button>`).join('')}
+        </nav>
+        <div class="client-camera-drawer-bottom">
+          <button type="button" data-act="back-categories">⌂ <span>Página inicial</span></button>
+          <button type="button" data-act="logout">↪ <span>Sair da conta</span></button>
+        </div>
+      </aside>`:'';
     return `<div class="client-app ${type}" ${home?`style="${brandStyle(app.company)}"`:''}>
-      <header class="client-header">
+      ${cameraMode?'':`<header class="client-header">
         ${clientBrand}
         <button type="button" class="client-logout" data-act="logout" aria-label="Sair da conta">Sair</button>
-      </header>
+      </header>`}
       <main class="client-content">${content}</main>
-      <footer class="client-footer">CAMERA MARKETING • FILTROS PERSONALIZADOS</footer>
+      ${cameraMode?'':`<footer class="client-footer">CAMERA MARKETING • FILTROS PERSONALIZADOS</footer>`}
+      ${cameraDrawer}
     </div>`;
   }
   const menu=[['dashboard','◫ Visão geral'],['clients','♙ Clientes'],['filters','▧ Filtros PNG'],['finance','▤ Financeiro'],['settings','⚙ Configurações']];
@@ -155,16 +171,13 @@ function cameraView(){
   const filters=app.filters.filter(f=>f.category_id===app.selectedCategory&&f.active);
   const fromGallery=Boolean(app.galleryPhoto);
   return `<section class="client-camera-screen">
-    <div class="client-camera-topline">
-      <button type="button" class="client-back" data-act="back-categories" aria-label="Voltar às categorias">‹ <span>Voltar</span></button>
-      <div class="client-category-title"><span class="client-eyebrow">CATEGORIA</span><strong>${escapeHtml(app.categories.find(c=>c.id===app.selectedCategory)?.name||'Filtros')}</strong></div>
-    </div>
     <div class="client-viewfinder-wrap">
       <div class="camera-frame client-viewfinder">
         ${fromGallery
           ? `<img id="galleryBase" class="client-gallery-image" src="${escapeHtml(app.galleryPhoto.url)}" alt="Foto escolhida na galeria, recortada ao centro em formato Stories">`
           : '<video id="cameraVideo" autoplay playsinline muted></video>'}
         <img class="hidden" id="cameraOverlay" alt="Filtro sobre a foto">
+        <button type="button" class="client-camera-menu-toggle" data-act="open-client-menu" aria-label="Abrir menu de categorias" aria-controls="clientCameraDrawer" aria-expanded="false"><span aria-hidden="true">☰</span></button>
         ${fromGallery?'<span class="client-gallery-indicator">FOTO DA GALERIA</span>':''}
       </div>
     </div>
@@ -217,7 +230,7 @@ function previewView(){
 }
 
 function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">CM</span><span>Camera Marketing Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p><button class="btn" data-act="logout">Sair</button></div></div>`}
-function render(){document.body.classList.remove('mobile-menu-lock');if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}const admin=app.profile.role==='admin';const content=admin?({dashboard,clients,filters,finance,settings}[app.page]||dashboard)():(app.page==='preview'&&app.captureData?previewView():app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());$('root').innerHTML=layout(content);hydrateImages();hydrateBrandLogos();if(!admin&&app.page==='camera'&&app.selectedCategory){if(!app.galleryPhoto)startCamera();if(app.selectedFilter)selectFilter(app.selectedFilter);}}
+function render(){document.body.classList.remove('mobile-menu-lock','client-camera-menu-lock');if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}const admin=app.profile.role==='admin';const content=admin?({dashboard,clients,filters,finance,settings}[app.page]||dashboard)():(app.page==='preview'&&app.captureData?previewView():app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());$('root').innerHTML=layout(content);hydrateImages();hydrateBrandLogos();if(!admin&&app.page==='camera'&&app.selectedCategory){if(!app.galleryPhoto)startCamera();if(app.selectedFilter)selectFilter(app.selectedFilter);}}
 async function loadData(){if(!app.user)return;const {data:profile,error}=await api.from('profiles').select('*').eq('id',app.user.id).single();if(error)throw error;app.profile=profile;const admin=profile.role==='admin';if(admin){const [a,b,c,d,s]=await Promise.all([api.from('companies').select('*').order('created_at',{ascending:false}),api.from('categories').select('*').order('sort_order'),api.from('filters').select('*').order('sort_order'),api.from('invoices').select('*').order('due_date',{ascending:true}),api.from('app_settings').select('*')]);for(const x of [a,b,c,d,s])if(x.error)throw x.error;app.companies=a.data;app.categories=b.data;app.filters=c.data;app.invoices=d.data;app.settings=Object.fromEntries(s.data.map(x=>[x.key,x.value]));app.page=['categories','camera'].includes(app.page)?'dashboard':app.page;}else{app.company=null;if(profile.company_id){const [co,cat,fil]=await Promise.all([api.from('companies').select('*').eq('id',profile.company_id).maybeSingle(),api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order'),api.from('filters').select('*').eq('company_id',profile.company_id).eq('active',true).order('sort_order')]);for(const x of [co,cat,fil])if(x.error)throw x.error;app.company=co.data;app.categories=cat.data;app.filters=fil.data;}app.page='categories';}render();}
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
@@ -612,7 +625,16 @@ function saveCapturedPhoto(){
   else downloadCapturedPhoto();
 }
 
-async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='logout'){stopCamera();clearCapturedPhoto();clearGalleryPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
+async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='open-client-menu'){setClientCameraMenu(true);return;}if(act==='close-client-menu'){setClientCameraMenu(false);return;}if(act==='client-switch-category'){
+  if(app.selectedCategory===uid){setClientCameraMenu(false);return;}
+  const next=app.categories.find(c=>c.id===uid);
+  if(!next)return;
+  clearGalleryPhoto();
+  stopCamera();
+  app.selectedCategory=uid;
+  app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;
+  app.page='camera';render();window.scrollTo(0,0);return;
+}if(act==='logout'){stopCamera();clearCapturedPhoto();clearGalleryPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
   const paths=app.filters.filter(f=>f.category_id===uid).map(f=>f.storage_path).filter(Boolean);
   const {error}=await api.from('categories').delete().eq('id',uid);
   if(error)throw error;
@@ -621,6 +643,19 @@ async function click(event){const target=event.target.closest('[data-act],[data-
   }
   await refresh();
 }return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){clearGalleryPhoto();app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='use-camera'){clearGalleryPhoto();render();return;}if(act==='pick-gallery'){$('galleryPhotoInput')?.click();return;}if(act==='capture'||act==='finish-gallery'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'){backToCamera(false);return;}if(act==='photo-change-filter'){backToCamera(true);return;}}catch(error){toast(errorMessage(error));}}
+function setClientCameraMenu(open){
+  const root=document.querySelector('.client-app.is-camera');
+  const drawer=$('clientCameraDrawer');
+  if(!root||!drawer)return;
+  root.classList.toggle('client-camera-menu-open',open);
+  drawer.inert=!open;
+  drawer.setAttribute('aria-hidden',String(!open));
+  const toggle=document.querySelector('.client-camera-menu-toggle');
+  toggle?.setAttribute('aria-expanded',String(open));
+  document.body.classList.toggle('client-camera-menu-lock',open);
+  if(open)drawer.querySelector('.client-camera-drawer-close')?.focus();
+  else toggle?.focus();
+}
 function setAdminMobileMenu(open){
   const layout=$('adminLayout'),button=document.querySelector('.mobile-menu-toggle');
   if(!layout)return;
@@ -632,6 +667,7 @@ function setAdminMobileMenu(open){
 }
 document.addEventListener('keydown',event=>{
   if(event.key==='Escape'&&$('adminLayout')?.classList.contains('admin-menu-open'))setAdminMobileMenu(false);
+  if(event.key==='Escape'&&document.querySelector('.client-camera-menu-open'))setClientCameraMenu(false);
 });
 window.addEventListener('resize',()=>{
   if(window.innerWidth>700&&$('adminLayout')?.classList.contains('admin-menu-open'))setAdminMobileMenu(false);
