@@ -65,3 +65,13 @@ test('A página oferece foto da galeria e mantém troca de filtros',()=>{
   assert.match(source,/const source=gallery\?gallery\.img:video/);
   assert.match(source,/ctx\.drawImage\(overlay,0,0,1080,1920\)/);
 });
+
+test('A tela de resultado usa Voltar em vez de Sair',()=>{
+  const begin=source.indexOf('function layout(content)');
+  const end=source.indexOf('function table(',begin);
+  const layout=source.slice(begin,end);
+  assert.match(layout,/type==='is-preview'\?[`]<header class="client-preview-header">/);
+  assert.match(layout,/data-act="photo-back"/);
+  assert.match(source,/if\(act==='photo-back'\)\{backToCamera\(true\);return;\}/);
+  assert.match(source,/function backToCamera\(keepGallery=false\)/);
+});
