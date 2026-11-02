@@ -1254,3 +1254,55 @@ body.client-camera-menu-lock{overflow:hidden}
   outline:3px solid #001893;
   outline-offset:3px;
 }
+
+/* Galeria: retorno visível à câmera antes de finalizar a foto. */
+.client-app.is-camera .client-gallery-back{
+  position:absolute;
+  top:12px;
+  left:12px;
+  z-index:6;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:44px;
+  padding:9px 12px;
+  color:#fff;
+  background:#001893ed;
+  border:1px solid #ffffff91;
+  border-radius:12px;
+  box-shadow:0 3px 13px #00000030;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.15;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.client-app.is-camera .client-gallery-back span{
+  font-size:20px;
+  font-weight:650;
+  line-height:1;
+}
+.client-app.is-camera .client-gallery-back:active{background:#001270;}
+.client-app.is-camera .client-gallery-back:focus-visible{
+  outline:3px solid #fff;
+  outline-offset:3px;
+}
+.client-app.is-camera .client-control-secondary[data-act="use-camera"]{
+  background:#fff;
+  color:#001893;
+  border:1px solid #cbd7ec;
+}
+@media(max-width:360px){
+  .client-app.is-camera .client-gallery-back{
+    top:8px;left:8px;
+    min-height:42px;
+    padding:8px 9px;
+    font-size:11px;
+  }
+  .client-app.is-camera .client-gallery-indicator{
+    top:8px;right:8px;
+    padding:6px 7px;
+    font-size:8px;
+  }
+}
