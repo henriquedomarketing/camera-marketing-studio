@@ -68,12 +68,14 @@ function layout(content){const admin=app.profile?.role==='admin';
         <div class="client-camera-drawer-heading"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong>
           <button type="button" class="client-camera-drawer-close" data-act="close-client-menu" aria-label="Fechar menu">✕</button>
         </div>
-        <p class="client-camera-drawer-label">ESCOLHA UMA CATEGORIA</p>
+        <button type="button" class="client-camera-drawer-home" data-act="back-categories">
+          <span aria-hidden="true">⌂</span><strong>Página inicial</strong><span class="client-drawer-chevron" aria-hidden="true">›</span>
+        </button>
+        <p class="client-camera-drawer-label">CATEGORIAS</p>
         <nav class="client-camera-drawer-list" aria-label="Categorias da empresa">
           ${app.categories.map(c=>`<button type="button" class="client-camera-drawer-category ${app.selectedCategory===c.id?'selected':''}" data-act="client-switch-category" data-id="${escapeHtml(c.id)}" ${app.selectedCategory===c.id?'aria-current="page"':''}>${escapeHtml(c.name)}<span aria-hidden="true">›</span></button>`).join('')}
         </nav>
         <div class="client-camera-drawer-bottom">
-          <button type="button" data-act="back-categories">⌂ <span>Página inicial</span></button>
           <button type="button" data-act="logout">↪ <span>Sair da conta</span></button>
         </div>
       </aside>`:'';
