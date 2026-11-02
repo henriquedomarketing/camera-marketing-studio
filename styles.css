@@ -118,3 +118,48 @@ body.mobile-menu-lock{overflow:hidden}
     transition:none;
   }
 }
+
+
+/* Identidade da plataforma: azul anil / azul-marinho escuro.
+   Cores cadastradas por empresa continuam exclusivas da tela inicial do cliente. */
+:root{
+  --cms-navy:#101F52;
+  --cms-indigo:#172D6F;
+  --cms-indigo-hover:#213A83;
+  --cms-soft:#F0F3FA;
+}
+.brand-mark{
+  background:var(--cms-indigo);
+  color:#fff;
+}
+.sidebar{background:#0E1B3D;}
+.sidebar .nav-btn.active,
+.sidebar .nav-btn:hover{
+  background:var(--cms-indigo);
+  color:#fff;
+}
+.btn-primary{
+  background:var(--cms-indigo);
+  border-color:var(--cms-indigo);
+  color:#fff;
+}
+.btn-primary:hover{background:var(--cms-indigo-hover);border-color:var(--cms-indigo-hover);}
+.subtle-button{color:var(--cms-indigo);}
+.field input:focus,
+.field select:focus,
+.field textarea:focus{outline-color:var(--cms-indigo);}
+.mobile-menu-toggle{
+  background:var(--cms-indigo);
+  color:#fff;border-color:var(--cms-indigo);
+}
+.mobile-menu-toggle:hover{background:var(--cms-indigo-hover);}
+.filter-card .pick.active{border-color:var(--cms-indigo);}
+#toast{background:#182A59;}
+@media(max-width:700px){
+  .admin-layout .sidebar{background:#0E1B3D;}
+  .admin-layout .mobile-menu-toggle{
+    background:var(--cms-indigo);
+    color:#fff;border-color:var(--cms-indigo);
+  }
+  .admin-layout .mobile-menu-toggle:hover{background:var(--cms-indigo-hover);}
+}
