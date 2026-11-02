@@ -75,6 +75,12 @@ function cameraView(){
       <button type="button" class="client-back" data-act="back-categories" aria-label="Voltar às categorias">‹ <span>Voltar</span></button>
       <div class="client-category-title"><span class="client-eyebrow">CATEGORIA</span><strong>${escapeHtml(app.categories.find(c=>c.id===app.selectedCategory)?.name||'Filtros')}</strong></div>
     </div>
+    <div class="client-viewfinder-wrap">
+      <div class="camera-frame client-viewfinder">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <img class="hidden" id="cameraOverlay" alt="Filtro sobre a câmera">
+      </div>
+    </div>
     <div class="client-filter-panel">
       <div class="client-filter-panel-top"><span>SELECIONE UM FILTRO</span><small>${filters.length} disponíveis</small></div>
       <div class="client-filter-strip" role="group" aria-label="Filtros disponíveis">
@@ -82,12 +88,6 @@ function cameraView(){
           <span class="client-filter-circle"><img data-img="${escapeHtml(f.id)}" alt="" loading="lazy"></span>
           <span class="client-filter-name">${escapeHtml(f.name)}</span>
         </button>`).join('')||'<span class="client-empty-strip">Nenhum filtro nesta categoria.</span>'}
-      </div>
-    </div>
-    <div class="client-viewfinder-wrap">
-      <div class="camera-frame client-viewfinder">
-        <video id="cameraVideo" autoplay playsinline muted></video>
-        <img class="hidden" id="cameraOverlay" alt="Filtro sobre a câmera">
       </div>
     </div>
     <div class="client-photo-controls">
