@@ -50,6 +50,16 @@ Uma nova migração (`20261102_004_auto_monthly_finance.sql`) sincroniza **mensa
 
 No painel, a **Visão geral** informa o valor a receber; em **Financeiro**, o tipo *Mensalidade* ou *Manual* fica identificado e o botão **Editar mensalidade** leva ao cadastro da empresa. Não há geração ou envio automático de boletos bancários, apenas controle financeiro dos lançamentos.
 
+## Pausar e reativar o acesso dos clientes
+
+Em **Painel administrativo → Clientes**, cada empresa dispõe de **Pausar acesso** e, quando pausada, **Reativar acesso**. Essa função usa `companies.access_paused`, separada do cadastro financeiro: **não cancela mensalidades, não apaga pagamentos, não exclui logins e não altera os filtros cadastrados**.
+
+- Quando uma empresa está pausada, o cliente consegue autenticar sua conta, mas **não pode utilizar categorias, câmera ou PNGs**. O aplicativo exibe a tela **“Acesso temporariamente pausado”**, orienta a entrar em contato com o suporte e oferece **Verificar novamente** e **Sair da conta**.
+- O telefone e o link do WhatsApp são carregados de **Configurações → WhatsApp de suporte** (registro `app_settings.branding.supportWhatsapp`). Basta configurar uma vez para que ele seja exibido aos clientes pausados e às contas aguardando ativação, sem cadastrar o mesmo número por empresa. Ao alterar o contato, o novo número aparece quando o cliente entrar ou atualizar a situação.
+- Se o telefone ainda não foi cadastrado, aparece um aviso neutro, **sem inventar número ou link**. Formatos brasileiros com DDD são aceitos, com ou sem `+55`.
+- O banco usa **RLS** para impedir que empresas pausadas leiam categorias, filtros e imagens privadas, mesmo mantendo uma sessão autenticada; administradores continuam com acesso para suporte e testes.
+- Para um cliente já conectado, as restrições do banco se aplicam a novas consultas imediatamente. Arquivos que já tenham sido carregados no navegador não podem ser retirados retroativamente; a tela de bloqueio aparece na próxima verificação de sessão/atualização.
+
 ## Créditos no rodapé
 
 O sistema apresenta, com visual discreto e responsivo, os créditos **“Desenvolvido por @henriquedomarketing”** e **“Desde 2025 · Todos os direitos reservados.”** na página de login, no painel administrativo, na página inicial das empresas e na tela de resultado da foto. A tela da câmera não exibe esse rodapé para manter o enquadramento e os controles desobstruídos.
