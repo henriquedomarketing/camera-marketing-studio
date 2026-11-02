@@ -72,7 +72,10 @@ function studioCredits(extraClass=''){
 }
 function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div>${studioCredits('studio-credits-auth')}</div>`}
 function layout(content){const admin=app.profile?.role==='admin';
-  if(!admin){
+  const testing=admin&&app.adminTest.active&&['camera','preview'].includes(app.page);
+  if(!admin||testing){
+    const testingCompany=testing?app.companies.find(c=>c.id===app.adminTest.companyId):null;
+    const shownCategories=testing?app.categories.filter(c=>c.company_id===app.adminTest.companyId):app.categories;
     const home=app.page==='categories';
     const type=home?'is-home':app.page==='preview'?'is-preview':'is-camera';
     const clientBrand=home
@@ -87,21 +90,21 @@ function layout(content){const admin=app.profile?.role==='admin';
     const cameraMode=type==='is-camera';
     const cameraDrawer=cameraMode?`<div class="client-camera-menu-backdrop" data-act="close-client-menu" aria-hidden="true"></div>
       <aside class="client-camera-drawer" id="clientCameraDrawer" aria-label="Menu de categorias" aria-hidden="true" inert>
-        <div class="client-camera-drawer-heading"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong>
+        <div class="client-camera-drawer-heading"><strong>${escapeHtml((testing?testingCompany:app.company)?.name||'Minha empresa')}</strong>
           <button type="button" class="client-camera-drawer-close" data-act="close-client-menu" aria-label="Fechar menu">✕</button>
         </div>
-        <button type="button" class="client-camera-drawer-home" data-act="back-categories">
-          <span aria-hidden="true">⌂</span><strong>Página inicial</strong><span class="client-drawer-chevron" aria-hidden="true">›</span>
+        <button type="button" class="client-camera-drawer-home" data-act="${testing?'exit-admin-test':'back-categories'}">
+          <span aria-hidden="true">⌂</span><strong>${testing?'Voltar aos testes':'Página inicial'}</strong><span class="client-drawer-chevron" aria-hidden="true">›</span>
         </button>
         <p class="client-camera-drawer-label">CATEGORIAS</p>
         <nav class="client-camera-drawer-list" aria-label="Categorias da empresa">
-          ${app.categories.map(c=>`<button type="button" class="client-camera-drawer-category ${app.selectedCategory===c.id?'selected':''}" data-act="client-switch-category" data-id="${escapeHtml(c.id)}" ${app.selectedCategory===c.id?'aria-current="page"':''}>${escapeHtml(c.name)}<span aria-hidden="true">›</span></button>`).join('')}
+          ${shownCategories.map(c=>`<button type="button" class="client-camera-drawer-category ${app.selectedCategory===c.id?'selected':''}" data-act="client-switch-category" data-id="${escapeHtml(c.id)}" ${app.selectedCategory===c.id?'aria-current="page"':''}>${escapeHtml(c.name)}<span aria-hidden="true">›</span></button>`).join('')}
         </nav>
         <div class="client-camera-drawer-bottom">
-          <button type="button" data-act="logout">↪ <span>Sair da conta</span></button>
+          ${testing?'<button type="button" data-act="exit-admin-test">← <span>Encerrar teste e voltar ao painel</span></button>':'<button type="button" data-act="logout">↪ <span>Sair da conta</span></button>'}
         </div>
       </aside>`:'';
-    return `<div class="client-app ${type}" ${home?`style="${brandStyle(app.company)}"`:''}>
+    return `<div class="client-app ${type} ${testing?'is-admin-test':''}" ${home?`style="${brandStyle(app.company)}"`:''}>
       ${cameraMode?`<header class="client-camera-header">
         <button type="button" class="client-camera-menu-toggle" data-act="open-client-menu" aria-label="Abrir menu de categorias" aria-controls="clientCameraDrawer" aria-expanded="false"><span aria-hidden="true">☰</span></button>
         <div class="client-top-filters" role="group" aria-label="Filtros disponíveis para esta categoria">
