@@ -197,11 +197,12 @@ function cameraView(){
           ? `<img id="galleryBase" class="client-gallery-image" src="${escapeHtml(app.galleryPhoto.url)}" alt="Foto escolhida na galeria, recortada ao centro em formato Stories">`
           : '<video id="cameraVideo" autoplay playsinline muted></video>'}
         <img class="hidden" id="cameraOverlay" alt="Filtro sobre a foto">
+        ${fromGallery?'<button type="button" class="client-gallery-back" data-act="use-camera" aria-label="Voltar à câmera sem a foto importada"><span aria-hidden="true">←</span> Voltar à câmera</button>':''}
         ${fromGallery?'<span class="client-gallery-indicator">FOTO DA GALERIA</span>':''}
       </div>
     </div>
     <div class="client-photo-controls">
-      <button type="button" data-act="${fromGallery?'use-camera':'flip-camera'}" class="client-control-secondary" aria-label="${fromGallery?'Voltar para câmera':'Alternar câmera'}" title="${fromGallery?'Voltar para câmera':'Alternar câmera'}"><span class="client-control-icon">${fromGallery?'◉':'⟳'}</span><small>${fromGallery?'Câmera':'Alternar'}</small></button>
+      <button type="button" data-act="${fromGallery?'use-camera':'flip-camera'}" class="client-control-secondary" aria-label="${fromGallery?'Voltar para câmera':'Alternar câmera'}" title="${fromGallery?'Voltar para câmera':'Alternar câmera'}"><span class="client-control-icon">${fromGallery?'←':'⟳'}</span><small>${fromGallery?'Voltar':'Alternar'}</small></button>
       <button type="button" data-act="capture" class="client-shutter" aria-label="${fromGallery?'Concluir foto e abrir opções de salvar e compartilhar':'Fotografar'}" title="${fromGallery?'Concluir foto e compartilhar':'Fotografar'}"><span></span></button>
       <button type="button" data-act="pick-gallery" class="client-control-secondary" aria-label="Escolher foto da galeria" title="Escolher foto da galeria"><span class="client-control-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 17 5.8-5.8 4.1 4.1 2.4-2.4L21 18"/></svg></span><small>Galeria</small></button>
       <input id="galleryPhotoInput" class="client-gallery-file-input" type="file" accept="image/*,.heic,.heif" aria-label="Escolher foto da galeria" tabindex="-1">
@@ -211,7 +212,7 @@ function cameraView(){
       <span class="client-gallery-finish-copy"><strong>Salvar ou compartilhar</strong><small>Concluir foto com o filtro selecionado</small></span>
       <span class="client-gallery-finish-arrow" aria-hidden="true">›</span>
     </button>`:''}
-    <p class="client-save-note">${fromGallery?'Escolha outro filtro se quiser. Depois toque em Salvar ou compartilhar.':'Fotografe ou escolha uma foto da galeria. Resultado em 1080 × 1920.'}</p>
+    <p class="client-save-note">${fromGallery?'Para descartar a imagem e usar a câmera, toque em Voltar à câmera.':'Fotografe ou escolha uma foto da galeria. Resultado em 1080 × 1920.'}</p>
   </section>`;
 }
 
