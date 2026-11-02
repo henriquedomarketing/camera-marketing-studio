@@ -723,3 +723,226 @@
   }
   .client-app.is-camera .client-gallery-finish-copy strong{font-size:13px;}
 }
+
+
+/* Camera mobile clean — prévia 9:16 e botão vermelho visíveis ao abrir. */
+.client-app.is-camera{
+  background:#fff!important;
+  min-height:100dvh;
+}
+.client-app.is-camera .client-content{
+  flex:1;
+  width:min(100%,530px);max-width:530px;
+  padding: max(7px,env(safe-area-inset-top,0px)) 11px
+           calc(8px + env(safe-area-inset-bottom,0px))!important;
+  justify-content:flex-start;
+}
+.client-app.is-camera .client-camera-screen{
+  margin:0 auto;
+  width:100%;
+  max-width:440px;
+  gap:0;
+}
+.client-app.is-camera .client-camera-screen .client-viewfinder-wrap{
+  width:100%;
+  margin:0 auto 8px;
+  display:flex;
+  justify-content:center;align-items:flex-start;
+}
+.client-app.is-camera .client-viewfinder{
+  flex:0 0 auto;
+  width:min(100%,36dvh,348px)!important;
+  height:auto!important;
+  aspect-ratio:9/16!important;
+  max-width:100%!important;
+  margin:0 auto!important;
+  border-radius:15px;
+  border:2px solid #e1e5ef;
+  box-shadow:0 5px 18px #111f421a;
+}
+.client-app.is-camera .client-viewfinder video,
+.client-app.is-camera .client-viewfinder img{
+  width:100%;height:100%;
+}
+.client-camera-menu-toggle{
+  appearance:none;
+  position:absolute;top:10px;left:10px;z-index:6;
+  display:grid;place-items:center;
+  width:42px;height:42px;
+  border:1px solid #ffffff9c;
+  background:#001893dd;
+  color:#fff;border-radius:12px;
+  font-size:22px;line-height:1;
+  box-shadow:0 3px 15px #00000025;
+  -webkit-tap-highlight-color:transparent;
+  cursor:pointer;
+}
+.client-camera-menu-toggle:active{
+  background:#001270;
+}
+.client-camera-menu-toggle:focus-visible,
+.client-camera-drawer-close:focus-visible,
+.client-camera-drawer-category:focus-visible{
+  outline:3px solid #7a9bff;outline-offset:3px;
+}
+.client-app.is-camera .client-photo-controls{
+  margin:0 auto 9px!important;
+  padding:6px 13px;
+  width:min(100%,330px);
+  max-width:330px;
+  min-height:69px;
+  border-radius:15px;
+}
+.client-app.is-camera .client-shutter{
+  height:57px;width:57px;
+  border-width:3px;padding:4px;
+}
+.client-app.is-camera .client-control-secondary{
+  width:63px;height:51px;min-height:51px;
+  padding:3px;border-radius:11px;
+}
+.client-app.is-camera .client-control-secondary .client-control-icon{
+  font-size:22px;
+}
+.client-app.is-camera .client-control-secondary small{
+  font-size:9px;
+}
+.client-app.is-camera .client-gallery-finish{
+  max-width:330px;
+  min-height:52px;
+  margin:0 auto 8px;
+  padding:8px 10px;
+}
+.client-app.is-camera .client-gallery-finish-icon{
+  width:33px;height:33px;flex-basis:33px;
+}
+.client-app.is-camera .client-filter-panel{
+  width:min(100%,400px);
+  margin:0 auto 0!important;
+  padding-top:7px;
+}
+.client-app.is-camera .client-filter-panel-top{
+  padding:1px 12px 7px;
+  font-size:10px;
+}
+.client-app.is-camera .client-filter-strip{
+  padding:2px 12px 9px!important;
+}
+.client-app.is-camera .client-filter-circle{
+  width:49px;height:49px;
+}
+.client-app.is-camera .client-filter-choice{
+  width:56px;flex-basis:56px;
+  gap:4px;
+}
+.client-app.is-camera .client-filter-choice .client-filter-name{
+  max-width:56px;
+  font-size:10px;
+}
+.client-app.is-camera .client-save-note{
+  margin:5px auto 0;
+  max-width:340px;
+  font-size:10px;
+  line-height:1.3;
+  color:#667590;
+}
+.client-camera-menu-backdrop{
+  position:fixed;inset:0;
+  z-index:95;
+  visibility:hidden;opacity:0;pointer-events:none;
+  background:#081634a6;
+  transition:visibility .2s,opacity .2s;
+}
+.client-camera-drawer{
+  position:fixed;inset:0 auto 0 0;
+  z-index:96;
+  width:min(325px,86vw);height:100dvh;
+  display:flex;flex-direction:column;
+  padding:calc(23px + env(safe-area-inset-top,0px)) 17px
+          calc(17px + env(safe-area-inset-bottom,0px));
+  background:#fff;color:#17274b;
+  border-radius:0 18px 18px 0;
+  box-shadow:14px 0 40px #0a183333;
+  transform:translate3d(-105%,0,0);
+  visibility:hidden;pointer-events:none;
+  transition:transform .23s ease,visibility .23s ease;
+}
+.client-camera-menu-open .client-camera-drawer{
+  transform:translate3d(0,0,0);
+  visibility:visible;pointer-events:auto;
+}
+.client-camera-menu-open .client-camera-menu-backdrop{
+  visibility:visible;opacity:1;pointer-events:auto;
+}
+body.client-camera-menu-lock{overflow:hidden}
+.client-camera-drawer-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;min-width:0;
+}
+.client-camera-drawer-heading strong{
+  font-size:15px;line-height:1.3;
+  letter-spacing:.1px;
+  color:#001893;
+  overflow-wrap:anywhere;
+}
+.client-camera-drawer-close{
+  display:grid;place-items:center;
+  width:39px;height:39px;flex-shrink:0;
+  border:1px solid #e1e6f2;background:#f5f7fc;
+  color:#243664;border-radius:11px;
+  font-size:19px;
+}
+.client-camera-drawer-label{
+  font-size:10px;letter-spacing:1.4px;font-weight:850;
+  color:#8491aa;margin:26px 0 12px;
+}
+.client-camera-drawer-list{
+  display:flex;flex-direction:column;gap:8px;
+  overflow:auto;overscroll-behavior:contain;
+  flex:1;min-height:0;
+}
+.client-camera-drawer-category{
+  border:1px solid #e5eaf3;
+  border-radius:12px;background:#f7f9fc;
+  color:#263654;text-align:left;
+  min-height:48px;padding:12px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;font-size:12px;font-weight:780;
+  overflow-wrap:anywhere;
+}
+.client-camera-drawer-category.selected{
+  border-color:#001893;
+  background:#e8edff;color:#001893;
+}
+.client-camera-drawer-category span{
+  color:inherit;font-size:20px;
+}
+.client-camera-drawer-bottom{
+  display:grid;gap:8px;
+  border-top:1px solid #e3e8f2;padding-top:13px;
+  margin-top:15px;
+}
+.client-camera-drawer-bottom button{
+  min-height:45px;
+  display:flex;align-items:center;gap:12px;
+  text-align:left;padding:11px 13px;
+  color:#001893;border:1px solid #e1e7f2;
+  background:#fff;border-radius:11px;
+  font-size:15px;font-weight:750;
+}
+.client-camera-drawer-bottom button span{
+  font-size:12px;
+}
+@media(min-width:750px){
+  .client-app.is-camera .client-viewfinder{
+    width:min(100%,39dvh,350px)!important;
+  }
+}
+@media(max-height:620px){
+  .client-app.is-camera .client-viewfinder{
+    width:min(100%,33dvh,280px)!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .client-camera-menu-backdrop,.client-camera-drawer{transition:none}
+}
