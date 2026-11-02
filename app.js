@@ -170,10 +170,15 @@ function cameraView(){
     </div>
     <div class="client-photo-controls">
       <button type="button" data-act="${fromGallery?'use-camera':'flip-camera'}" class="client-control-secondary" aria-label="${fromGallery?'Voltar para câmera':'Alternar câmera'}" title="${fromGallery?'Voltar para câmera':'Alternar câmera'}"><span class="client-control-icon">${fromGallery?'◉':'⟳'}</span><small>${fromGallery?'Câmera':'Alternar'}</small></button>
-      <button type="button" data-act="capture" class="client-shutter" aria-label="${fromGallery?'Aplicar filtro à foto':'Fotografar'}" title="${fromGallery?'Aplicar filtro à foto':'Fotografar'}"><span></span></button>
+      <button type="button" data-act="capture" class="client-shutter" aria-label="${fromGallery?'Concluir foto e abrir opções de salvar e compartilhar':'Fotografar'}" title="${fromGallery?'Concluir foto e compartilhar':'Fotografar'}"><span></span></button>
       <button type="button" data-act="pick-gallery" class="client-control-secondary" aria-label="Escolher foto da galeria" title="Escolher foto da galeria"><span class="client-control-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m3 17 5.8-5.8 4.1 4.1 2.4-2.4L21 18"/></svg></span><small>Galeria</small></button>
       <input id="galleryPhotoInput" class="client-gallery-file-input" type="file" accept="image/*,.heic,.heif" aria-label="Escolher foto da galeria" tabindex="-1">
     </div>
+    ${fromGallery?`<button type="button" class="client-gallery-finish" data-act="finish-gallery" aria-label="Concluir foto com filtro e abrir opções para salvar e compartilhar">
+      <span class="client-gallery-finish-icon" aria-hidden="true">✓</span>
+      <span class="client-gallery-finish-copy"><strong>Salvar ou compartilhar</strong><small>Concluir foto com o filtro selecionado</small></span>
+      <span class="client-gallery-finish-arrow" aria-hidden="true">›</span>
+    </button>`:''}
     <div class="client-filter-panel">
       <div class="client-filter-panel-top"><span>SELECIONE UM FILTRO</span><small>${filters.length} disponíveis</small></div>
       <div class="client-filter-strip" role="group" aria-label="Filtros disponíveis">
@@ -183,7 +188,7 @@ function cameraView(){
         </button>`).join('')||'<span class="client-empty-strip">Nenhum filtro nesta categoria.</span>'}
       </div>
     </div>
-    <p class="client-save-note">${fromGallery?'Troque o filtro pelas bolinhas e toque no botão vermelho para finalizar.':'Fotografe ou escolha uma foto da galeria. Resultado em 1080 × 1920.'}</p>
+    <p class="client-save-note">${fromGallery?'Escolha outro filtro se quiser. Depois toque em Salvar ou compartilhar.':'Fotografe ou escolha uma foto da galeria. Resultado em 1080 × 1920.'}</p>
   </section>`;
 }
 
@@ -511,7 +516,7 @@ async function loadGalleryPhoto(file){
     app.galleryPhoto={url:uri,img,file};
     render();
     window.scrollTo(0,0);
-    toast('Foto carregada! Selecione o filtro e toque no botão vermelho para finalizar.');
+    toast('Foto carregada! Troque o filtro se quiser e toque em Salvar ou compartilhar.');
   }catch(error){
     URL.revokeObjectURL(uri);
     toast(errorMessage(error));
@@ -528,7 +533,14 @@ async function capture(){
   if(!filter)return;
   app.processing=true;
   const shutter=document.querySelector('[data-act="capture"]');
+  const finishButton=document.querySelector('[data-act="finish-gallery"]');
   if(shutter)shutter.disabled=true;
+  if(finishButton){
+    finishButton.disabled=true;
+    finishButton.setAttribute('aria-busy','true');
+    const title=finishButton.querySelector('strong');
+    if(title)title.textContent='Preparando sua foto...';
+  }
   try{
     const src=await mediaUrl(filter);
     const overlay=new Image();
@@ -555,7 +567,16 @@ async function capture(){
     render();
     window.scrollTo(0,0);
   }catch(error){toast(errorMessage(error));}
-  finally{app.processing=false;if(shutter?.isConnected)shutter.disabled=false;}
+  finally{
+    app.processing=false;
+    if(shutter?.isConnected)shutter.disabled=false;
+    if(finishButton?.isConnected){
+      finishButton.disabled=false;
+      finishButton.removeAttribute('aria-busy');
+      const title=finishButton.querySelector('strong');
+      if(title)title.textContent='Salvar ou compartilhar';
+    }
+  }
 }
 
 function shareCapturedPhoto(target='general'){
@@ -599,7 +620,7 @@ async function click(event){const target=event.target.closest('[data-act],[data-
     if(storageError)toast('Categoria removida, mas alguns PNGs precisam de limpeza no armazenamento.');
   }
   await refresh();
-}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){clearGalleryPhoto();app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='use-camera'){clearGalleryPhoto();render();return;}if(act==='pick-gallery'){$('galleryPhotoInput')?.click();return;}if(act==='capture'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'){backToCamera(false);return;}if(act==='photo-change-filter'){backToCamera(true);return;}}catch(error){toast(errorMessage(error));}}
+}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){clearGalleryPhoto();app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='use-camera'){clearGalleryPhoto();render();return;}if(act==='pick-gallery'){$('galleryPhotoInput')?.click();return;}if(act==='capture'||act==='finish-gallery'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'){backToCamera(false);return;}if(act==='photo-change-filter'){backToCamera(true);return;}}catch(error){toast(errorMessage(error));}}
 function setAdminMobileMenu(open){
   const layout=$('adminLayout'),button=document.querySelector('.mobile-menu-toggle');
   if(!layout)return;
