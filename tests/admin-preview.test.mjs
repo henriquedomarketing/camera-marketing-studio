@@ -38,7 +38,8 @@ test('Sem categoria não permite abrir câmera de testes',()=>{
   const app={companies:[{id:'c1',name:'Cliente sem filtros'}],categories:[],filters:[],
     adminTest:{active:false,companyId:null,categoryId:null}};
   const html=createTestPage(app,option,escapeHtml,header)();
-  assert.match(html,/data-act="start-admin-test" disabled/);
+  assert.match(html,/<button type="button" class="btn btn-primary" disabled>◉ Abrir câmera para testar<\/button>/);
+  assert.doesNotMatch(html,/data-act="start-admin-test"/);
 });
 
 test('Admin abre câmera e volta ao painel mantendo login',()=>{
