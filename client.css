@@ -1210,3 +1210,47 @@ body.client-camera-menu-lock{overflow:hidden}
 .client-app.is-camera .client-camera-drawer-category:focus-visible{
   outline:3px solid #dfe5ff;outline-offset:2px;
 }
+
+/* Tela de resultado: cabeçalho mínimo com botão Voltar. */
+.client-app.is-preview .client-preview-header{
+  width:min(100%,530px);
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  margin:0 auto;
+  padding:9px 15px;
+  background:#fff;
+  border-bottom:1px solid #edf0f6;
+}
+.client-app.is-preview .client-preview-back{
+  appearance:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:40px;
+  padding:8px 15px;
+  background:#f4f6fc;
+  border:1px solid #d9e2f2;
+  border-radius:11px;
+  color:#001893;
+  font-size:13px;
+  font-weight:800;
+  line-height:1;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.client-app.is-preview .client-preview-back span{
+  font-size:21px;
+  font-weight:600;
+  line-height:1;
+}
+.client-app.is-preview .client-preview-back:hover{
+  background:#eaf0ff;
+  border-color:#b7c6ee;
+}
+.client-app.is-preview .client-preview-back:focus-visible{
+  outline:3px solid #001893;
+  outline-offset:3px;
+}
