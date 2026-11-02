@@ -19,7 +19,9 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 2. Primeiro acesso do administrador como conta pendente, com liberação segura pelo proprietário do projeto.
 3. Dashboard com indicadores reais, cadastro/edição/exclusão de empresas, mensalidades e vencimentos.
 4. Cadastro de categorias e PNGs por empresa (arquivos privados).
-5. Câmera do navegador com PNG transparente sobreposto e exportação de foto 1080×1920.
+5. Câmera do navegador com PNG transparente sobreposto e fotografia 1080×1920. Depois de fotografar, o cliente vê **uma tela de resultado com prévia** em vez de baixar automaticamente: Compartilhar, Instagram Stories, WhatsApp, Salvar no celular, Nova foto e Trocar filtro. A foto permanece **temporariamente no navegador**, sem envio automático ao banco.
+
+**Compartilhamento mobile:** o aplicativo usa a Web Share API quando o navegador aceita compartilhar arquivos. Os botões Instagram Stories e WhatsApp abrem a seleção nativa do sistema; não publicam automaticamente nem conseguem forçar qual aplicativo ou recurso será aberto. Em iPhone, "Salvar no celular" usa o menu nativo para escolher "Salvar Imagem" ou "Salvar em Arquivos", quando disponível. Em outros casos, oferece download PNG.
 6. Alteração da senha dos clientes via Edge Function autenticada.
 7. Controle manual de cobranças. **Não** emite boletos nem consulta bancos.
 8. Configuração do nome da plataforma e WhatsApp de suporte.
