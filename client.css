@@ -308,3 +308,122 @@
   .client-camera-screen .client-filter-panel{margin-bottom:0}
   .client-camera-screen .client-photo-controls{margin-top:9px}
 }
+
+
+/* Personalização exclusiva por empresa: mantém a foto/logo PNG original. */
+.client-app {
+  --brand-primary: #071C70;
+  --brand-accent: #DB2032;
+  --brand-on-primary: #fff;
+  --brand-on-accent: #fff;
+  background: var(--brand-primary);
+}
+.client-app.is-camera,
+.client-app.is-preview { background:var(--brand-primary); }
+.client-app .client-header {
+  background:var(--brand-primary);
+  color:var(--brand-on-primary);
+}
+.client-brand { color:var(--brand-on-primary); }
+.client-brand-copy strong,.client-brand-copy small { color:var(--brand-on-primary); }
+.client-logout { color:var(--brand-on-primary);border-color:currentColor; }
+.client-brand-mark {
+  position:relative;overflow:hidden;
+  background:#ffffff20;color:var(--brand-on-primary);
+  border:1px solid #ffffff52;
+}
+.client-brand-logo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;background:transparent;}
+.client-brand-fallback{display:grid;place-items:center;width:100%;height:100%;}
+.client-app.is-home .client-content{background:#f6f7fb;color:#17284c;}
+.client-app.is-home .client-home{justify-content:flex-start;padding-bottom:30px;}
+.client-app.is-home .client-home-heading {
+  background:var(--brand-primary);
+  color:var(--brand-on-primary);
+  padding:23px 20px 28px;
+  margin:-12px -23px 24px;
+  border-radius:0 0 24px 24px;
+  text-align:center;
+}
+.client-app.is-home .client-home-heading h1,
+.client-app.is-home .client-home-heading p,
+.client-app.is-home .client-home-heading .client-eyebrow{color:var(--brand-on-primary);}
+.client-app.is-home .client-home-heading h1{font-size:clamp(22px,5.7vw,29px);margin:8px 0;}
+.client-app.is-home .client-home-heading p{font-size:12px;opacity:.85;}
+.client-company-logo-wrap{
+  height:174px;width:min(86%,240px);max-width:240px;
+  margin:0 auto 18px;
+  display:grid;place-items:center;
+}
+.client-company-logo{
+  width:100%;height:100%;object-fit:contain;
+  display:block;
+  filter:none;
+}
+.client-logo-fallback{
+  font-size:38px;font-weight:950;
+  color:var(--brand-on-primary);
+  border:2px solid currentColor;border-radius:20px;
+  padding:28px;
+}
+.client-app.is-home .client-category-item{
+  background:var(--brand-accent);
+  color:var(--brand-on-accent);
+  border-color:transparent;
+  border-radius:11px;
+  box-shadow:0 7px 17px #101e4020;
+  min-height:57px;
+}
+.client-app.is-home .client-category-item:hover,
+.client-app.is-home .client-category-item:focus-visible {
+  background:var(--brand-accent);
+  color:var(--brand-on-accent);
+  filter:brightness(.94);
+}
+.client-app.is-home .client-category-item .client-category-symbol{
+  background:#ffffff24;color:var(--brand-on-accent);
+}
+.client-app.is-home .client-category-item .client-category-arrow,
+.client-app.is-home .client-category-item small{color:var(--brand-on-accent);}
+.client-app.is-home .client-category-item small{opacity:.82;}
+.client-app.is-home .client-footer{
+  color:#7c879f;background:#f6f7fb;
+}
+.client-app.is-camera .client-filter-choice.active .client-filter-circle{
+  border-color:var(--brand-accent);
+  box-shadow:0 0 0 3px #ffffffb0,0 7px 17px #0000004b;
+}
+.client-app.is-camera .client-shutter span{background:var(--brand-accent);}
+.client-app .client-result-share{color:var(--brand-primary);}
+@media(max-width:430px){
+  .client-app.is-home .client-home-heading{margin-left:-17px;margin-right:-17px;}
+  .client-company-logo-wrap{height:150px;margin-bottom:13px;}
+  .client-app.is-home .client-category-item{min-height:54px;}
+}
+/* Administração: edição de identidade visual e miniatura autenticada. */
+.company-admin-name{display:flex;align-items:center;gap:11px;min-width:180px;}
+.company-admin-name>span:last-child{min-width:0}
+.company-admin-logo{
+  display:grid;place-items:center;width:44px;height:44px;flex-shrink:0;
+  border:1px solid #dfe5f0;border-radius:12px;background:#f0f3fb;overflow:hidden;
+}
+.company-admin-logo-img{width:100%;height:100%;object-fit:contain;}
+.branding-form-section{
+  border:1px solid #dfe5f2;border-radius:14px;
+  padding:15px;display:grid;gap:13px;background:#f7f9ff;
+}
+.branding-form-section>strong{font-size:14px;color:#25375a;}
+.branding-form-section>p{font-size:11px;color:#637394;line-height:1.55;margin:-6px 0 1px;}
+.brand-color-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.brand-color-grid input[type=color]{height:48px;width:100%;padding:4px;cursor:pointer;background:white;}
+.branding-form-section input[type=file]{
+  padding:11px;background:white;font-size:12px;max-width:100%;
+}
+.brand-form-current-logo{
+  display:flex;align-items:center;gap:10px;color:#60718e;
+  font-size:11px;
+}
+.brand-form-logo-img{
+  display:block;width:66px;height:66px;object-fit:contain;
+  background:#fff;border:1px solid #e4e8f1;border-radius:10px;
+}
+@media(max-width:350px){.brand-color-grid{grid-template-columns:1fr;}}
