@@ -78,10 +78,12 @@ Deno.serve(async (req: Request) => {
 
   if (action === "delete") {
     if (!companyId) return json({ error: "Informe a empresa." }, 400);
-    const { data: exists } = await adminApi.from("companies").select("id").eq("id", companyId).maybeSingle();
+    const { data: exists } = await adminApi.from("companies").select("id,logo_path").eq("id", companyId).maybeSingle();
     if (!exists) return json({ error: "Empresa não encontrada." }, 404);
     const { data: filterRows } = await adminApi.from("filters").select("storage_path").eq("company_id", companyId);
     const paths = (filterRows || []).map((row) => row.storage_path).filter(Boolean);
+    // O arquivo de identidade visual fica na mesma pasta privada da empresa.
+    if (exists.logo_path) paths.push(exists.logo_path);
     if (paths.length) {
       const { error: storageError } = await adminApi.storage.from("company-filters").remove(paths);
       if (storageError) return json({ error: "Erro ao limpar PNGs. A empresa não foi excluída." }, 500);
