@@ -18,12 +18,12 @@ declare
   due_date date;
 begin
   base_month := pg_catalog.date_trunc('month',p_from::timestamp)::date;
-  last_day := pg_catalog.extract(day from (base_month + interval '1 month - 1 day'))::integer;
-  due_date := base_month + (pg_catalog.least(p_day,last_day)-1);
+  last_day := extract(day from (base_month + interval '1 month - 1 day'))::integer;
+  due_date := base_month + (least(p_day,last_day)-1);
   if due_date < p_from then
     base_month := (base_month + interval '1 month')::date;
-    last_day := pg_catalog.extract(day from (base_month + interval '1 month - 1 day'))::integer;
-    due_date := base_month + (pg_catalog.least(p_day,last_day)-1);
+    last_day := extract(day from (base_month + interval '1 month - 1 day'))::integer;
+    due_date := base_month + (least(p_day,last_day)-1);
   end if;
   return due_date;
 end;$$;
@@ -35,13 +35,13 @@ declare
   next_month date := (pg_catalog.date_trunc('month',p_due::timestamp) + interval '1 month')::date;
   last_day integer;
 begin
-  last_day := pg_catalog.extract(day from (next_month + interval '1 month - 1 day'))::integer;
-  return next_month + (pg_catalog.least(p_day,last_day)-1);
+  last_day := extract(day from (next_month + interval '1 month - 1 day'))::integer;
+  return next_month + (least(p_day,last_day)-1);
 end;$$;
 
 -- Cadastro sem "próximo vencimento": preencher automaticamente usando due_day.
 create or replace function private.set_company_first_due()
-returns trigger language plpgsql set search_path='' as $$
+returns trigger language plpgsql security definer set search_path='' as $
 begin
   if new.active and new.monthly_fee > 0 and new.next_due_date is null then
     new.next_due_date := private.monthly_due_on_or_after(current_date,new.due_day);
