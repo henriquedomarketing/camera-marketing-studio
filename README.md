@@ -26,6 +26,16 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 7. Controle manual de cobranças. **Não** emite boletos nem consulta bancos.
 8. Configuração do nome da plataforma e WhatsApp de suporte.
 
+## Administração de filtros e categorias
+
+No painel do administrador, a navegação possui **uma única área "Filtros PNG"** para:
+- consultar, criar, renomear ou excluir categorias de cada empresa;
+- cadastrar filtros novos escolhendo **uma categoria já existente** ou **"＋ Criar nova categoria…"** no mesmo formulário;
+- preencher o nome da nova categoria apenas quando essa opção é selecionada;
+- validar o PNG e registrar a nova categoria vinculada à empresa selecionada, seguida do envio do filtro.
+
+Se ocorrer erro no envio após criar uma categoria, o aplicativo tenta desfazer a categoria nova quando ainda estiver vazia. Os dados de categorias e filtros antigos continuam nas mesmas tabelas protegidas por RLS.
+
 ## Identidade visual personalizada por empresa
 
 O administrador cadastra, na mesma tela de **Novo cliente**, a logo original em **PNG de exatamente 500 × 500 pixels**, com até **2 MB**, e escolhe:
