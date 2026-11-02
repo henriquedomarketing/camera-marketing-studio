@@ -10,7 +10,7 @@ const brl = n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const dateBR = d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
 const today=()=>new Date().toISOString().slice(0,10);
 const id=()=>crypto.randomUUID();
-const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false,captureData:null };
+const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false,captureData:null,galleryPhoto:null,cameraRequestId:0 };
 let toastTimer;
 const toast=(message)=>{const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),5000)};
 const errorMessage=error=>error?.message||'Não foi possível concluir esta operação.';
@@ -33,10 +33,21 @@ const field=(name,label,value='',type='text',required=true,minLength=0)=>`<div c
 const select=(name,label,opts)=>`<div class="field"><label for="f_${name}">${label}</label><select name="${name}" id="f_${name}" required>${opts}</select></div>`;
 const companyOptions=(selected='')=>app.companies.map(c=>option(c.id,c.name,c.id===selected)).join('');
 const endForm='<div class="form-actions"><button type="button" class="btn" data-act="close-modal">Cancelar</button><button class="btn btn-primary" type="submit">Salvar</button></div>';
-function stopCamera(){if(app.stream){app.stream.getTracks().forEach(t=>t.stop());app.stream=null;}}
+function stopCamera(){
+  app.cameraRequestId++;
+  if(app.stream){app.stream.getTracks().forEach(t=>t.stop());app.stream=null;}
+}
+function clearGalleryPhoto(){
+  if(app.galleryPhoto?.url)URL.revokeObjectURL(app.galleryPhoto.url);
+  app.galleryPhoto=null;
+}
 function clearCapturedPhoto(){if(app.captureData?.url)URL.revokeObjectURL(app.captureData.url);app.captureData=null;}
-function backToCamera(){clearCapturedPhoto();app.page='camera';render();window.scrollTo(0,0);}
-function navigate(page){document.body.classList.remove('mobile-menu-lock');if(app.page==='camera'&&page!=='camera')stopCamera();if(page!=='preview')clearCapturedPhoto();app.page=page;app.selectedFilter=null;render();window.scrollTo(0,0);}
+function backToCamera(keepGallery=false){
+  clearCapturedPhoto();
+  if(!keepGallery)clearGalleryPhoto();
+  app.page='camera';render();window.scrollTo(0,0);
+}
+function navigate(page){document.body.classList.remove('mobile-menu-lock');if(app.page==='camera'&&page!=='camera')stopCamera();if(page!=='preview')clearCapturedPhoto();if(page!=='camera')clearGalleryPhoto();app.page=page;app.selectedFilter=null;render();window.scrollTo(0,0);}
 function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div></div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   if(!admin){
@@ -142,6 +153,7 @@ function clientCategories(){
 }
 function cameraView(){
   const filters=app.filters.filter(f=>f.category_id===app.selectedCategory&&f.active);
+  const fromGallery=Boolean(app.galleryPhoto);
   return `<section class="client-camera-screen">
     <div class="client-camera-topline">
       <button type="button" class="client-back" data-act="back-categories" aria-label="Voltar às categorias">‹ <span>Voltar</span></button>
@@ -149,14 +161,18 @@ function cameraView(){
     </div>
     <div class="client-viewfinder-wrap">
       <div class="camera-frame client-viewfinder">
-        <video id="cameraVideo" autoplay playsinline muted></video>
-        <img class="hidden" id="cameraOverlay" alt="Filtro sobre a câmera">
+        ${fromGallery
+          ? `<img id="galleryBase" class="client-gallery-image" src="${escapeHtml(app.galleryPhoto.url)}" alt="Foto escolhida na galeria, recortada ao centro em formato Stories">`
+          : '<video id="cameraVideo" autoplay playsinline muted></video>'}
+        <img class="hidden" id="cameraOverlay" alt="Filtro sobre a foto">
+        ${fromGallery?'<span class="client-gallery-indicator">FOTO DA GALERIA</span>':''}
       </div>
     </div>
     <div class="client-photo-controls">
-      <button type="button" data-act="flip-camera" class="client-control-secondary" aria-label="Alternar câmera" title="Alternar câmera"><span class="client-control-icon">⟳</span><small>Alternar</small></button>
-      <button type="button" data-act="capture" class="client-shutter" aria-label="Fotografar" title="Fotografar"><span></span></button>
-      <button type="button" data-act="activate-camera" class="client-control-secondary" aria-label="Ativar câmera" title="Ativar câmera"><span class="client-control-icon">◎</span><small>Ativar</small></button>
+      <button type="button" data-act="${fromGallery?'use-camera':'flip-camera'}" class="client-control-secondary" aria-label="${fromGallery?'Voltar para câmera':'Alternar câmera'}" title="${fromGallery?'Voltar para câmera':'Alternar câmera'}"><span class="client-control-icon">${fromGallery?'◉':'⟳'}</span><small>${fromGallery?'Câmera':'Alternar'}</small></button>
+      <button type="button" data-act="capture" class="client-shutter" aria-label="${fromGallery?'Aplicar filtro à foto':'Fotografar'}" title="${fromGallery?'Aplicar filtro à foto':'Fotografar'}"><span></span></button>
+      <button type="button" data-act="pick-gallery" class="client-control-secondary" aria-label="Escolher foto da galeria" title="Escolher foto da galeria"><span class="client-control-icon" aria-hidden="true">▧</span><small>Galeria</small></button>
+      <input id="galleryPhotoInput" class="client-gallery-file-input" type="file" accept="image/*,.heic,.heif" aria-label="Escolher foto da galeria" tabindex="-1">
     </div>
     <div class="client-filter-panel">
       <div class="client-filter-panel-top"><span>SELECIONE UM FILTRO</span><small>${filters.length} disponíveis</small></div>
@@ -167,7 +183,7 @@ function cameraView(){
         </button>`).join('')||'<span class="client-empty-strip">Nenhum filtro nesta categoria.</span>'}
       </div>
     </div>
-    <p class="client-save-note">Escolha um filtro e fotografe. Arquivo final em 1080 × 1920.</p>
+    <p class="client-save-note">${fromGallery?'Troque o filtro pelas bolinhas e toque no botão vermelho para finalizar.':'Fotografe ou escolha uma foto da galeria. Resultado em 1080 × 1920.'}</p>
   </section>`;
 }
 
@@ -196,7 +212,7 @@ function previewView(){
 }
 
 function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">CM</span><span>Camera Marketing Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p><button class="btn" data-act="logout">Sair</button></div></div>`}
-function render(){document.body.classList.remove('mobile-menu-lock');if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}const admin=app.profile.role==='admin';const content=admin?({dashboard,clients,filters,finance,settings}[app.page]||dashboard)():(app.page==='preview'&&app.captureData?previewView():app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());$('root').innerHTML=layout(content);hydrateImages();hydrateBrandLogos();if(!admin&&app.page==='camera'&&app.selectedCategory){startCamera();if(app.selectedFilter)selectFilter(app.selectedFilter);}}
+function render(){document.body.classList.remove('mobile-menu-lock');if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}const admin=app.profile.role==='admin';const content=admin?({dashboard,clients,filters,finance,settings}[app.page]||dashboard)():(app.page==='preview'&&app.captureData?previewView():app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());$('root').innerHTML=layout(content);hydrateImages();hydrateBrandLogos();if(!admin&&app.page==='camera'&&app.selectedCategory){if(!app.galleryPhoto)startCamera();if(app.selectedFilter)selectFilter(app.selectedFilter);}}
 async function loadData(){if(!app.user)return;const {data:profile,error}=await api.from('profiles').select('*').eq('id',app.user.id).single();if(error)throw error;app.profile=profile;const admin=profile.role==='admin';if(admin){const [a,b,c,d,s]=await Promise.all([api.from('companies').select('*').order('created_at',{ascending:false}),api.from('categories').select('*').order('sort_order'),api.from('filters').select('*').order('sort_order'),api.from('invoices').select('*').order('due_date',{ascending:true}),api.from('app_settings').select('*')]);for(const x of [a,b,c,d,s])if(x.error)throw x.error;app.companies=a.data;app.categories=b.data;app.filters=c.data;app.invoices=d.data;app.settings=Object.fromEntries(s.data.map(x=>[x.key,x.value]));app.page=['categories','camera'].includes(app.page)?'dashboard':app.page;}else{app.company=null;if(profile.company_id){const [co,cat,fil]=await Promise.all([api.from('companies').select('*').eq('id',profile.company_id).maybeSingle(),api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order'),api.from('filters').select('*').eq('company_id',profile.company_id).eq('active',true).order('sort_order')]);for(const x of [co,cat,fil])if(x.error)throw x.error;app.company=co.data;app.categories=cat.data;app.filters=fil.data;}app.page='categories';}render();}
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
@@ -426,7 +442,24 @@ async function handleForm(event){event.preventDefault();const form=event.target;
 }if(form.id==='categoryForm'){const p={company_id:values.company_id,name:values.name.trim()};const q=app.modal.recordId?api.from('categories').update(p).eq('id',app.modal.recordId):api.from('categories').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='invoiceForm'){const p={company_id:values.company_id,amount:Number(values.amount),due_date:values.due_date,status:values.status,paid_at:values.status==='paid'?new Date().toISOString():null,notes:values.notes||null};const q=app.modal.recordId?api.from('invoices').update(p).eq('id',app.modal.recordId):api.from('invoices').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='filterForm')await filterUpload(form);if(form.id==='passwordForm')await manager({action:'reset_password',company_id:app.modal.recordId,password:values.password});if(form.id==='settingsForm'){const branding={...app.settings.branding,appName:values.appName,supportWhatsapp:values.supportWhatsapp};const {error}=await api.from('app_settings').upsert({key:'branding',value:branding});if(error)throw error;}app.modal=null;await loadData();toast('Alterações salvas com sucesso.');}catch(error){toast(errorMessage(error))}finally{if(button?.isConnected)button.disabled=false;}}
 async function mediaUrl(filter){if(app.images.has(filter.id))return app.images.get(filter.id);const {data,error}=await api.storage.from('company-filters').download(filter.storage_path);if(error)throw error;const uri=URL.createObjectURL(data);app.images.set(filter.id,uri);return uri;}
 async function hydrateImages(){const imgs=document.querySelectorAll('[data-img]');for(const element of imgs){const filter=app.filters.find(f=>f.id===element.dataset.img);if(!filter)continue;mediaUrl(filter).then(url=>{if(element.isConnected)element.src=url}).catch(()=>{if(element.isConnected)element.alt='PNG indisponível';});}}
-async function startCamera(facing='environment'){const video=$('cameraVideo');if(!video)return;stopCamera();try{const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}}});app.stream=stream;video.srcObject=stream;await video.play();app.facing=facing;}catch(error){toast('Autorize a câmera no Safari ou Chrome. '+errorMessage(error))}}
+async function startCamera(facing='environment'){
+  const video=$('cameraVideo');
+  if(!video||app.galleryPhoto)return;
+  stopCamera();
+  const requestId=app.cameraRequestId;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}}});
+    // Ao escolher uma foto da galeria ou sair da tela, descartar solicitações de câmera pendentes.
+    if(requestId!==app.cameraRequestId||!video.isConnected||app.galleryPhoto||app.page!=='camera'){
+      stream.getTracks().forEach(t=>t.stop());
+      return;
+    }
+    app.stream=stream;video.srcObject=stream;await video.play();app.facing=facing;
+  }catch(error){
+    if(requestId===app.cameraRequestId&&app.page==='camera'&&!app.galleryPhoto)
+      toast('Autorize a câmera no Safari ou Chrome. '+errorMessage(error));
+  }
+}
 function selectFilter(fid){
   app.selectedFilter=fid;
   document.querySelectorAll('.client-filter-choice').forEach(b=>{
@@ -446,12 +479,51 @@ function selectFilter(fid){
   }).catch(error=>toast('Não foi possível carregar o filtro: '+errorMessage(error)));
 }
 
+
+function drawSourceCover(ctx,source,width,height){
+  const sw=source.videoWidth||source.naturalWidth;
+  const sh=source.videoHeight||source.naturalHeight;
+  if(!sw||!sh)throw new Error('Não foi possível ler as dimensões da imagem.');
+  // Equivalent to object-fit: cover; object-position: center, for all orientations.
+  const scale=Math.max(width/sw,height/sh);
+  const cropW=width/scale,cropH=height/scale;
+  const sx=(sw-cropW)/2,sy=(sh-cropH)/2;
+  ctx.drawImage(source,sx,sy,cropW,cropH,0,0,width,height);
+}
+async function loadGalleryPhoto(file){
+  if(!file)return;
+  if(app.processing)return toast('Aguarde a geração da imagem anterior.');
+  if(!/^image\\//i.test(file.type)&&!/\\.(?:jpe?g|png|webp|heic|heif)$/i.test(file.name||''))
+    return toast('Escolha uma foto válida da galeria.');
+  if(file.size>25*1024*1024)return toast('A foto deve ter até 25 MB.');
+  const uri=URL.createObjectURL(file);
+  const img=new Image();
+  try{
+    await new Promise((resolve,reject)=>{
+      img.onload=resolve;
+      img.onerror=()=>reject(new Error('Não foi possível abrir esta foto. Tente JPEG ou PNG.'));
+      img.src=uri;
+    });
+    if(!img.naturalWidth||!img.naturalHeight)throw new Error('A imagem selecionada está vazia.');
+    if(app.page!=='camera'||!app.user){URL.revokeObjectURL(uri);return;}
+    stopCamera();
+    clearGalleryPhoto();
+    app.galleryPhoto={url:uri,img,file};
+    render();
+    window.scrollTo(0,0);
+    toast('Foto carregada! Selecione o filtro e toque no botão vermelho para finalizar.');
+  }catch(error){
+    URL.revokeObjectURL(uri);
+    toast(errorMessage(error));
+  }
+}
 async function capture(){
   if(app.processing)return;
+  const gallery=app.galleryPhoto;
   const video=$('cameraVideo');
-  if(!video||!video.videoWidth||!video.videoHeight||!app.selectedFilter){
-    toast('Ative a câmera e selecione um filtro.');return;
-  }
+  if(!app.selectedFilter)return toast('Selecione um filtro.');
+  if(!gallery&&(!video||!video.videoWidth||!app.stream))
+    return toast('Ative a câmera ou escolha uma foto da galeria.');
   const filter=app.filters.find(f=>f.id===app.selectedFilter);
   if(!filter)return;
   app.processing=true;
@@ -465,15 +537,14 @@ async function capture(){
       if(overlay.complete&&overlay.naturalWidth>0){resolve();return;}
       overlay.onload=resolve;overlay.onerror=()=>reject(new Error('Não foi possível aplicar o PNG ao resultado.'));
     });
-    if(!video.videoWidth||!app.stream)throw new Error('A câmera parou. Ative-a novamente.');
+    const source=gallery?gallery.img:video;
+    if(!gallery&&(!video.videoWidth||!app.stream))throw new Error('A câmera parou. Ative-a novamente.');
+    if(gallery&&!gallery.img.naturalWidth)throw new Error('Reabra a foto da galeria.');
     const canvas=document.createElement('canvas');
     canvas.width=1080;canvas.height=1920;
     const ctx=canvas.getContext('2d');
     if(!ctx)throw new Error('Não foi possível preparar a fotografia.');
-    const sw=video.videoWidth,sh=video.videoHeight,ratio=9/16;
-    let cw=sw,ch=sw/ratio;
-    if(ch>sh){ch=sh;cw=sh*ratio;}
-    ctx.drawImage(video,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,1080,1920);
+    drawSourceCover(ctx,source,1080,1920);
     ctx.drawImage(overlay,0,0,1080,1920);
     const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Não foi possível gerar a foto.')),'image/png'));
     const name='camera-marketing-'+Date.now()+'.png';
@@ -486,6 +557,7 @@ async function capture(){
   }catch(error){toast(errorMessage(error));}
   finally{app.processing=false;if(shutter?.isConnected)shutter.disabled=false;}
 }
+
 function shareCapturedPhoto(target='general'){
   const photo=app.captureData;
   if(!photo){toast('Fotografe primeiro para compartilhar.');return;}
@@ -519,7 +591,7 @@ function saveCapturedPhoto(){
   else downloadCapturedPhoto();
 }
 
-async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='logout'){stopCamera();clearCapturedPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
+async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='logout'){stopCamera();clearCapturedPhoto();clearGalleryPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
   const paths=app.filters.filter(f=>f.category_id===uid).map(f=>f.storage_path).filter(Boolean);
   const {error}=await api.from('categories').delete().eq('id',uid);
   if(error)throw error;
@@ -527,7 +599,7 @@ async function click(event){const target=event.target.closest('[data-act],[data-
     if(storageError)toast('Categoria removida, mas alguns PNGs precisam de limpeza no armazenamento.');
   }
   await refresh();
-}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='capture'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'||act==='photo-change-filter'){backToCamera();return;}}catch(error){toast(errorMessage(error));}}
+}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){clearGalleryPhoto();app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='use-camera'){clearGalleryPhoto();render();return;}if(act==='pick-gallery'){$('galleryPhotoInput')?.click();return;}if(act==='capture'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'){backToCamera(false);return;}if(act==='photo-change-filter'){backToCamera(true);return;}}catch(error){toast(errorMessage(error));}}
 function setAdminMobileMenu(open){
   const layout=$('adminLayout'),button=document.querySelector('.mobile-menu-toggle');
   if(!layout)return;
@@ -546,5 +618,5 @@ window.addEventListener('resize',()=>{
 
 $('root').addEventListener('click',click);
 $('root').addEventListener('submit',handleForm);
-$('root').addEventListener('change',event=>{if(app.modal?.formId==='filterForm'){if(event.target.id==='f_company_id')updateCategoryOptions();if(event.target.id==='filterCategory')updateNewCategoryField();}});
+$('root').addEventListener('change',event=>{if(app.modal?.formId==='filterForm'){if(event.target.id==='f_company_id')updateCategoryOptions();if(event.target.id==='filterCategory')updateNewCategoryField();}if(event.target.id==='galleryPhotoInput'){const file=event.target.files?.[0];event.target.value='';if(file)loadGalleryPhoto(file);}});
 init();
