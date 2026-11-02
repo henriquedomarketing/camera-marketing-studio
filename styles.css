@@ -177,3 +177,56 @@ body.mobile-menu-lock{overflow:hidden}
   .admin-layout .sidebar .nav-btn.active{background:var(--cms-indigo-hover);}
   .admin-layout .mobile-menu-toggle{background:var(--cms-indigo);border-color:var(--cms-indigo);}
 }
+
+
+/* Rodapé institucional — visível no login e painel, sem interferir na câmera. */
+.studio-credits{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:4px;
+  width:100%;
+  padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));
+  color:#74829a;
+  font-size:11px;
+  font-weight:450;
+  line-height:1.5;
+  letter-spacing:0;
+  text-align:center;
+}
+.studio-credits strong{
+  color:#001893;
+  font-weight:800;
+}
+.studio-credits-admin{
+  margin-top:auto;
+  border-top:1px solid #e5ebf5;
+  background:#f7f9fd;
+}
+.admin-layout .workspace{
+  display:flex;
+  flex-direction:column;
+  min-height:100dvh;
+}
+.admin-layout .workspace>.content{
+  width:100%;
+  flex:1 0 auto;
+}
+.auth-layout{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+}
+.studio-credits-auth{
+  flex:0 0 auto;
+  max-width:425px;
+  padding-top:3px;
+  padding-bottom:4px;
+  background:transparent;
+}
+@media(max-width:600px){
+  .studio-credits{font-size:10px;gap:3px;padding-left:12px;padding-right:12px;}
+}
