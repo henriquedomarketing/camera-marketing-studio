@@ -10,7 +10,7 @@ const brl = n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const dateBR = d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
 const today=()=>new Date().toISOString().slice(0,10);
 const id=()=>crypto.randomUUID();
-const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false };
+const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false,captureData:null };
 let toastTimer;
 const toast=(message)=>{const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),5000)};
 const errorMessage=error=>error?.message||'Não foi possível concluir esta operação.';
@@ -28,7 +28,9 @@ const select=(name,label,opts)=>`<div class="field"><label for="f_${name}">${lab
 const companyOptions=(selected='')=>app.companies.map(c=>option(c.id,c.name,c.id===selected)).join('');
 const endForm='<div class="form-actions"><button type="button" class="btn" data-act="close-modal">Cancelar</button><button class="btn btn-primary" type="submit">Salvar</button></div>';
 function stopCamera(){if(app.stream){app.stream.getTracks().forEach(t=>t.stop());app.stream=null;}}
-function navigate(page){if(app.page==='camera'&&page!=='camera')stopCamera();app.page=page;app.selectedFilter=null;render();window.scrollTo(0,0);}
+function clearCapturedPhoto(){if(app.captureData?.url)URL.revokeObjectURL(app.captureData.url);app.captureData=null;}
+function backToCamera(){clearCapturedPhoto();app.page='camera';render();window.scrollTo(0,0);}
+function navigate(page){if(app.page==='camera'&&page!=='camera')stopCamera();if(page!=='preview')clearCapturedPhoto();app.page=page;app.selectedFilter=null;render();window.scrollTo(0,0);}
 function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div></div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   if(!admin){
@@ -96,8 +98,33 @@ function cameraView(){
     <p class="client-save-note">Escolha um filtro e fotografe. Arquivo final em 1080 × 1920.</p>
   </section>`;
 }
+
+function previewView(){
+  if(!app.captureData)return '<div class="client-empty">Não há fotografia disponível.</div>';
+  return `<section class="client-result" aria-label="Resultado da fotografia">
+    <div class="client-result-heading"><span class="client-eyebrow">FOTO FINALIZADA · 1080 × 1920</span>
+      <h1>Sua foto ficou pronta! <span aria-hidden="true">✨</span></h1>
+      <p>Confira o resultado com o filtro aplicado e escolha como deseja usar.</p>
+    </div>
+    <figure class="client-result-preview"><img src="${escapeHtml(app.captureData.url)}" alt="Prévia da foto capturada com o filtro aplicado"><figcaption>Pronta para publicar nos Stories</figcaption></figure>
+    <div class="client-result-actions">
+      <button type="button" class="client-result-btn client-result-share" data-act="photo-share"><span aria-hidden="true">↗</span> Compartilhar foto</button>
+      <div class="client-result-grid">
+        <button type="button" class="client-result-btn client-result-instagram" data-act="photo-instagram"><span aria-hidden="true">◎</span> Instagram Stories</button>
+        <button type="button" class="client-result-btn client-result-whatsapp" data-act="photo-whatsapp"><span aria-hidden="true">✆</span> WhatsApp</button>
+      </div>
+      <button type="button" class="client-result-btn client-result-save" data-act="photo-save"><span aria-hidden="true">↓</span> Salvar no celular</button>
+      <div class="client-result-secondary">
+        <button type="button" data-act="photo-retake">↻ Nova foto</button>
+        <button type="button" data-act="photo-change-filter">◉ Trocar filtro</button>
+      </div>
+    </div>
+    <p class="client-result-note">Instagram e WhatsApp dependem das opções disponíveis no compartilhamento do seu celular. No iPhone, use <b>Salvar Imagem</b> ou <b>Salvar em Arquivos</b> para guardar a foto.</p>
+  </section>`;
+}
+
 function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">CM</span><span>Camera Marketing Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p><button class="btn" data-act="logout">Sair</button></div></div>`}
-function render(){if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}const admin=app.profile.role==='admin';const content=admin?({dashboard,clients,categories,filters,finance,settings}[app.page]||dashboard)():(app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());$('root').innerHTML=layout(content);hydrateImages();if(!admin&&app.page==='camera'&&app.selectedCategory){startCamera();if(app.selectedFilter)selectFilter(app.selectedFilter);}}
+function render(){if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}const admin=app.profile.role==='admin';const content=admin?({dashboard,clients,categories,filters,finance,settings}[app.page]||dashboard)():(app.page==='preview'&&app.captureData?previewView():app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());$('root').innerHTML=layout(content);hydrateImages();if(!admin&&app.page==='camera'&&app.selectedCategory){startCamera();if(app.selectedFilter)selectFilter(app.selectedFilter);}}
 async function loadData(){if(!app.user)return;const {data:profile,error}=await api.from('profiles').select('*').eq('id',app.user.id).single();if(error)throw error;app.profile=profile;const admin=profile.role==='admin';if(admin){const [a,b,c,d,s]=await Promise.all([api.from('companies').select('*').order('created_at',{ascending:false}),api.from('categories').select('*').order('sort_order'),api.from('filters').select('*').order('sort_order'),api.from('invoices').select('*').order('due_date',{ascending:true}),api.from('app_settings').select('*')]);for(const x of [a,b,c,d,s])if(x.error)throw x.error;app.companies=a.data;app.categories=b.data;app.filters=c.data;app.invoices=d.data;app.settings=Object.fromEntries(s.data.map(x=>[x.key,x.value]));app.page=['categories','camera'].includes(app.page)?'dashboard':app.page;}else{app.company=null;if(profile.company_id){const [co,cat,fil]=await Promise.all([api.from('companies').select('*').eq('id',profile.company_id).maybeSingle(),api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order'),api.from('filters').select('*').eq('company_id',profile.company_id).eq('active',true).order('sort_order')]);for(const x of [co,cat,fil])if(x.error)throw x.error;app.company=co.data;app.categories=cat.data;app.filters=fil.data;}app.page='categories';}render();}
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
@@ -154,8 +181,81 @@ function selectFilter(fid){
     img.classList.remove('hidden');
   }).catch(error=>toast('Não foi possível carregar o filtro: '+errorMessage(error)));
 }
-function capture(){const video=$('cameraVideo');if(!video||!video.videoWidth||!app.selectedFilter)return toast('Ative a câmera e selecione um filtro.');const filter=app.filters.find(f=>f.id===app.selectedFilter);if(!filter)return;mediaUrl(filter).then(src=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;const ctx=canvas.getContext('2d');const sw=video.videoWidth,sh=video.videoHeight,ratio=9/16;let cw=sw,ch=sw/ratio;if(ch>sh){ch=sh;cw=sh*ratio;}ctx.drawImage(video,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,1080,1920);ctx.drawImage(img,0,0,1080,1920);canvas.toBlob(blob=>{if(!blob)return toast('Não foi possível gerar a imagem.');const url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download='camera-marketing-'+Date.now()+'.png';anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Download solicitado! Confira seus arquivos.');},'image/png');};img.src=src}).catch(error=>toast(errorMessage(error)));}
-async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='logout'){stopCamera();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){const {error}=await api.from('categories').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='capture'){capture();return;}}catch(error){toast(errorMessage(error));}}
+
+async function capture(){
+  if(app.processing)return;
+  const video=$('cameraVideo');
+  if(!video||!video.videoWidth||!video.videoHeight||!app.selectedFilter){
+    toast('Ative a câmera e selecione um filtro.');return;
+  }
+  const filter=app.filters.find(f=>f.id===app.selectedFilter);
+  if(!filter)return;
+  app.processing=true;
+  const shutter=document.querySelector('[data-act="capture"]');
+  if(shutter)shutter.disabled=true;
+  try{
+    const src=await mediaUrl(filter);
+    const overlay=new Image();
+    overlay.src=src;
+    await new Promise((resolve,reject)=>{
+      if(overlay.complete&&overlay.naturalWidth>0){resolve();return;}
+      overlay.onload=resolve;overlay.onerror=()=>reject(new Error('Não foi possível aplicar o PNG ao resultado.'));
+    });
+    if(!video.videoWidth||!app.stream)throw new Error('A câmera parou. Ative-a novamente.');
+    const canvas=document.createElement('canvas');
+    canvas.width=1080;canvas.height=1920;
+    const ctx=canvas.getContext('2d');
+    if(!ctx)throw new Error('Não foi possível preparar a fotografia.');
+    const sw=video.videoWidth,sh=video.videoHeight,ratio=9/16;
+    let cw=sw,ch=sw/ratio;
+    if(ch>sh){ch=sh;cw=sh*ratio;}
+    ctx.drawImage(video,(sw-cw)/2,(sh-ch)/2,cw,ch,0,0,1080,1920);
+    ctx.drawImage(overlay,0,0,1080,1920);
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Não foi possível gerar a foto.')),'image/png'));
+    const name='camera-marketing-'+Date.now()+'.png';
+    clearCapturedPhoto();
+    app.captureData={blob,file:new File([blob],name,{type:'image/png'}),url:URL.createObjectURL(blob),name};
+    stopCamera();
+    app.page='preview';
+    render();
+    window.scrollTo(0,0);
+  }catch(error){toast(errorMessage(error));}
+  finally{app.processing=false;if(shutter?.isConnected)shutter.disabled=false;}
+}
+function shareCapturedPhoto(target='general'){
+  const photo=app.captureData;
+  if(!photo){toast('Fotografe primeiro para compartilhar.');return;}
+  const file=photo.file;
+  if(typeof navigator.share!=='function'||(typeof navigator.canShare==='function'&&!navigator.canShare({files:[file]}))){
+    toast('O compartilhamento de imagens não está disponível aqui. Use Salvar no celular e abra a imagem no aplicativo desejado.');
+    return;
+  }
+  if(target==='whatsapp')toast('Na lista de aplicativos, escolha WhatsApp para enviar a foto.');
+  if(target==='instagram')toast('Na lista de aplicativos, escolha Instagram e, se disponível, Stories.');
+  if(target==='save')toast('No iPhone, escolha Salvar Imagem ou Salvar em Arquivos.');
+  // Must be invoked directly from the button's user gesture; do not await before navigator.share.
+  navigator.share({files:[file],title:'Foto com filtro'})
+    .catch(error=>{
+      if(error?.name!=='AbortError')toast('Não foi possível compartilhar. Tente Salvar no celular.');
+    });
+}
+function downloadCapturedPhoto(){
+  const photo=app.captureData;
+  if(!photo){toast('Fotografe primeiro para salvar.');return;}
+  const a=document.createElement('a');
+  a.href=photo.url;a.download=photo.name;
+  document.body.appendChild(a);a.click();a.remove();
+  toast('Download solicitado. Confira Arquivos ou Downloads no celular.');
+}
+function saveCapturedPhoto(){
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const canShareFile=app.captureData && typeof navigator.share==='function' &&
+    (typeof navigator.canShare!=='function'||navigator.canShare({files:[app.captureData.file]}));
+  if(isIOS&&canShareFile)shareCapturedPhoto('save');
+  else downloadCapturedPhoto();
+}
+
+async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='logout'){stopCamera();clearCapturedPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){const {error}=await api.from('categories').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){app.selectedCategory=uid;app.selectedFilter=app.filters.find(f=>f.category_id===uid&&f.active)?.id||null;app.page='camera';render();return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='capture'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-retake'||act==='photo-change-filter'){backToCamera();return;}}catch(error){toast(errorMessage(error));}}
 $('root').addEventListener('click',click);
 $('root').addEventListener('submit',handleForm);
 $('root').addEventListener('change',event=>{if(event.target.id==='f_company_id'&&app.modal?.formId==='filterForm')updateCategoryOptions();});
