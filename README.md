@@ -36,6 +36,20 @@ No painel do administrador, a navegação possui **uma única área "Filtros PNG
 
 Se ocorrer erro no envio após criar uma categoria, o aplicativo tenta desfazer a categoria nova quando ainda estiver vazia. Os dados de categorias e filtros antigos continuam nas mesmas tabelas protegidas por RLS.
 
+## Testar filtros sem sair do painel (administrador)
+
+A aba **Testar filtros** aparece no menu administrativo, ao lado de **Filtros PNG**. O administrador escolhe a empresa e a categoria para visualizar as miniaturas dos PNGs **somente daquele cliente**. Em seguida, toca em **Abrir câmera para testar**.
+
+- O teste usa **a mesma prévia de câmera, filtros, importação da galeria, recorte 1080 × 1920 e tela de compartilhamento dos funcionários**, mas conserva a sessão de administrador; não é necessário login do cliente.
+- O menu lateral da câmera mostra apenas as categorias da empresa selecionada e substitui **Sair da conta** por **Encerrar teste e voltar ao painel**. Na tela final, **Voltar** reinicia a câmera normalmente.
+- A seleção é limitada a uma empresa e categoria válidas; navegar ou fotografar não modifica empresas, categorias nem filtros salvos no banco.
+
+## Mensalidades e Financeiro sincronizados
+
+Uma nova migração (`20261102_004_auto_monthly_finance.sql`) sincroniza **mensalidade, ativação e próximo vencimento** com o Financeiro. Empresa ativa com mensalidade acima de zero recebe uma cobrança automática pendente, sem duplicar o lançamento do mesmo ciclo. Alterações de valor ou vencimento atualizam a mensalidade pendente. A inativação cancela as mensalidades automáticas pendentes; os pagamentos já feitos são preservados. Ao marcar uma mensalidade automática como paga, o próximo vencimento é calculado para o mês seguinte. **Cobranças manuais** permanecem independentes.
+
+No painel, a **Visão geral** informa o valor a receber; em **Financeiro**, o tipo *Mensalidade* ou *Manual* fica identificado e o botão **Editar mensalidade** leva ao cadastro da empresa. Não há geração ou envio automático de boletos bancários, apenas controle financeiro dos lançamentos.
+
 ## Créditos no rodapé
 
 O sistema apresenta, com visual discreto e responsivo, os créditos **“Desenvolvido por @henriquedomarketing”** e **“Desde 2025 · Todos os direitos reservados.”** na página de login, no painel administrativo, na página inicial das empresas e na tela de resultado da foto. A tela da câmera não exibe esse rodapé para manter o enquadramento e os controles desobstruídos.
