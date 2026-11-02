@@ -180,6 +180,28 @@ function filters(){
       ${app.filters.length?`<div class="filters-grid">${app.filters.map(f=>`<div class="filter-card"><div class="filter-image"><img data-img="${f.id}" alt="Filtro ${escapeHtml(f.name)}"></div><b>${escapeHtml(f.name)}</b><small>${escapeHtml(companyName(f.company_id))} • ${escapeHtml(categoryName(f.category_id))}</small><div class="actions">${action('remove-filter',f.id,'Excluir','danger')}</div></div>`).join('')}</div>`:'<div class="empty">Nenhum filtro cadastrado. Envie seu primeiro PNG transparente.</div>'}
     </div>`;
 }
+function testFilters(){
+  const company=app.companies.find(c=>c.id===app.adminTest.companyId)||app.companies[0]||null;
+  const companyId=company?.id||null;
+  const cats=app.categories.filter(c=>c.company_id===companyId);
+  const category=cats.find(c=>c.id===app.adminTest.categoryId)||cats[0]||null;
+  app.adminTest.companyId=companyId;
+  app.adminTest.categoryId=category?.id||null;
+  const entries=app.filters.filter(f=>f.company_id===companyId&&f.category_id===category?.id&&f.active);
+  const companyField=`<div class="field"><label for="testCompanySelect">Empresa</label><select id="testCompanySelect" ${app.companies.length?'':'disabled'}>${app.companies.map(c=>option(c.id,c.name,c.id===companyId)).join('')}</select></div>`;
+  const categoryField=`<div class="field"><label for="testCategorySelect">Categoria</label><select id="testCategorySelect" ${cats.length?'':'disabled'}>${cats.map(c=>option(c.id,c.name,c.id===category?.id)).join('')}</select></div>`;
+  const thumbs=entries.map(f=>`<div class="test-filter-item"><div class="test-filter-thumb"><img data-img="${escapeHtml(f.id)}" alt="Prévia do filtro ${escapeHtml(f.name)}"></div><span>${escapeHtml(f.name)}</span></div>`).join('');
+  return header('FERRAMENTAS','Testar filtros','Experimente os filtros de cada cliente sem sair da sua conta de administrador.')+
+    `<div class="card admin-test-card">
+      <div class="admin-test-heading"><span class="admin-test-symbol">◉</span><div><h2>Prévia do cliente</h2><p class="muted">Escolha empresa e categoria para abrir a mesma câmera usada pelos funcionários.</p></div></div>
+      <div class="admin-test-selection">${companyField}${categoryField}</div>
+      <div class="admin-test-summary"><div><strong>${entries.length}</strong> ${entries.length===1?'filtro disponível':'filtros disponíveis'}${company?' • '+escapeHtml(company.name):''}</div>
+        ${category?'<button type="button" class="btn btn-primary" data-act="start-admin-test">◉ Abrir câmera para testar</button>':'<button type="button" class="btn btn-primary" disabled>◉ Abrir câmera para testar</button>'}
+      </div>
+      ${thumbs?`<div class="admin-test-filter-thumbs" aria-label="Filtros nesta categoria">${thumbs}</div>`:'<p class="muted admin-test-empty">Sem filtros ativos nesta categoria. Cadastre um PNG em Filtros PNG e volte para testar.</p>'}
+      <p class="admin-test-explanation">Fotografe, importe imagens da galeria, alterne filtros e gere o resultado em 1080 × 1920. Você permanece conectado como administrador, sem alterar cadastros.</p>
+    </div>`;
+}
 function finance(){const pending=app.invoices.filter(x=>x.status==='pending'),paid=app.invoices.filter(x=>x.status==='paid'),late=pending.filter(x=>x.due_date<today());return header('COBRANÇAS','Financeiro','Controle manual de boletos; sem integração bancária automática.',button('Nova cobrança','add-invoice'))+`<div class="stats">${stat('A receber',brl(pending.reduce((s,x)=>s+Number(x.amount),0)),pending.length+' cobranças abertas')}${stat('Recebido',brl(paid.reduce((s,x)=>s+Number(x.amount),0)),paid.length+' pagamentos registrados')}${stat('Atrasado',brl(late.reduce((s,x)=>s+Number(x.amount),0)),late.length+' cobranças vencidas')}${stat('Empresas',app.companies.length,'Clientes cadastrados')}</div><div class="card">${table(['CLIENTE','VENCIMENTO','VALOR','STATUS','AÇÕES'],app.invoices.map(x=>`<tr><td><b>${escapeHtml(companyName(x.company_id))}</b></td><td>${dateBR(x.due_date)}</td><td>${brl(x.amount)}</td><td>${badge(dueStatus(x))}</td><td><div class="actions">${action('toggle-paid',x.id,x.status==='paid'?'Reabrir':'Marcar pago')}${action('edit-invoice',x.id,'Editar')}${action('remove-invoice',x.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
 function settings(){const branding=app.settings.branding||{};return header('PERSONALIZAÇÃO','Configurações','Altere o nome da plataforma e o WhatsApp de suporte.')+`<div class="card"><form id="settingsForm" class="form">${field('appName','Nome da plataforma',branding.appName||'Camera Marketing Studio')}${field('supportWhatsapp','WhatsApp de suporte',branding.supportWhatsapp||'', 'text',false)}<button type="submit" class="btn btn-primary">Salvar configurações</button></form><p class="note">O limite de 100 clientes é aplicado pelo banco. As senhas ficam no Supabase Auth e os PNGs em um armazenamento privado.</p></div>`}
 function clientCategories(){
@@ -255,7 +277,23 @@ function previewView(){
 }
 
 function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">CM</span><span>Camera Marketing Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p><button class="btn" data-act="logout">Sair</button></div></div>`}
-function render(){document.body.classList.remove('mobile-menu-lock','client-camera-menu-lock');if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}const admin=app.profile.role==='admin';const content=admin?({dashboard,clients,filters,finance,settings}[app.page]||dashboard)():(app.page==='preview'&&app.captureData?previewView():app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());$('root').innerHTML=layout(content);hydrateImages();hydrateBrandLogos();if(!admin&&app.page==='camera'&&app.selectedCategory){if(!app.galleryPhoto)startCamera();if(app.selectedFilter)selectFilter(app.selectedFilter);}}
+function render(){
+  document.body.classList.remove('mobile-menu-lock','client-camera-menu-lock');
+  if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}
+  if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}
+  const admin=app.profile.role==='admin';
+  const testing=admin&&app.adminTest.active&&['camera','preview'].includes(app.page);
+  const content=admin&&!testing
+    ? ({dashboard,clients,filters,'test-filters':testFilters,finance,settings}[app.page]||dashboard)()
+    : (app.page==='preview'&&app.captureData?previewView():
+       app.page==='camera'&&app.selectedCategory?cameraView():clientCategories());
+  $('root').innerHTML=layout(content);
+  hydrateImages();hydrateBrandLogos();
+  if((!admin||testing)&&app.page==='camera'&&app.selectedCategory){
+    if(!app.galleryPhoto)startCamera();
+    if(app.selectedFilter)selectFilter(app.selectedFilter);
+  }
+}
 async function loadData(){if(!app.user)return;const {data:profile,error}=await api.from('profiles').select('*').eq('id',app.user.id).single();if(error)throw error;app.profile=profile;const admin=profile.role==='admin';if(admin){const [a,b,c,d,s]=await Promise.all([api.from('companies').select('*').order('created_at',{ascending:false}),api.from('categories').select('*').order('sort_order'),api.from('filters').select('*').order('sort_order'),api.from('invoices').select('*').order('due_date',{ascending:true}),api.from('app_settings').select('*')]);for(const x of [a,b,c,d,s])if(x.error)throw x.error;app.companies=a.data;app.categories=b.data;app.filters=c.data;app.invoices=d.data;app.settings=Object.fromEntries(s.data.map(x=>[x.key,x.value]));app.page=['categories','camera'].includes(app.page)?'dashboard':app.page;}else{app.company=null;if(profile.company_id){const [co,cat,fil]=await Promise.all([api.from('companies').select('*').eq('id',profile.company_id).maybeSingle(),api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order'),api.from('filters').select('*').eq('company_id',profile.company_id).eq('active',true).order('sort_order')]);for(const x of [co,cat,fil])if(x.error)throw x.error;app.company=co.data;app.categories=cat.data;app.filters=fil.data;}app.page='categories';}render();}
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
