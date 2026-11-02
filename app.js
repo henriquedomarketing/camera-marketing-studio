@@ -17,7 +17,7 @@ const errorMessage=error=>error?.message||'Não foi possível concluir esta oper
 
 const brandColor=(v,fallback)=>typeof v==='string'&&/^#[0-9a-fA-F]{6}$/.test(v)?v:fallback;
 function brandInk(hex){const h=brandColor(hex,'#DB2032').slice(1);const c=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return c[0]*.2126+c[1]*.7152+c[2]*.0722>.38?'#131D34':'#FFFFFF';}
-function brandStyle(company){const main=brandColor(company?.primary_color,'#071C70'),accent=brandColor(company?.accent_color,'#DB2032');return `--brand-primary:${main};--brand-accent:${accent};--brand-on-accent:${brandInk(accent)};`;}
+function brandStyle(company){const main=brandColor(company?.primary_color,'#071C70'),accent=brandColor(company?.accent_color,'#DB2032');return `--brand-primary:${main};--brand-accent:${accent};--brand-on-accent:${brandInk(accent)};--brand-on-primary:${brandInk(main)};`;}
 const brandImg=(company,cls)=>company?.logo_path?`<img data-brand-logo="${escapeHtml(company.id)}" class="${cls}" alt="Logo da ${escapeHtml(company.name)}">`:'';
 
 const option=(value,text,selected)=>`<option value="${escapeHtml(value)}" ${selected?'selected':''}>${escapeHtml(text)}</option>`;
