@@ -40,12 +40,20 @@ function navigate(page){document.body.classList.remove('mobile-menu-lock');if(ap
 function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div></div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   if(!admin){
-    return `<div class="client-app ${app.page==='categories'?'is-home':'is-camera'}" style="${brandStyle(app.company)}">
+    const home=app.page==='categories';
+    const type=home?'is-home':app.page==='preview'?'is-preview':'is-camera';
+    const clientBrand=home
+      ? `<div class="client-brand">
+          <span class="client-brand-mark"><span class="client-brand-fallback">FP</span>${brandImg(app.company,'client-brand-logo')}</span>
+          <span class="client-brand-copy"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong><small>FILTROS PERSONALIZADOS</small></span>
+        </div>`
+      : `<div class="client-brand client-platform-brand">
+          <span class="client-brand-mark client-platform-mark">CM</span>
+          <span class="client-brand-copy"><strong>camera marketing</strong><small>STUDIO</small></span>
+        </div>`;
+    return `<div class="client-app ${type}" ${home?`style="${brandStyle(app.company)}"`:''}>
       <header class="client-header">
-        <div class="client-brand"><span class="client-brand-mark"><span class="client-brand-fallback">FP</span>${brandImg(app.company,'client-brand-logo')}</span>
-          <span class="client-brand-copy"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong>
-          <small>FILTROS PERSONALIZADOS</small></span>
-        </div>
+        ${clientBrand}
         <button type="button" class="client-logout" data-act="logout" aria-label="Sair da conta">Sair</button>
       </header>
       <main class="client-content">${content}</main>
@@ -115,10 +123,14 @@ function settings(){const branding=app.settings.branding||{};return header('PERS
 function clientCategories(){
   return `<section class="client-home">
     <div class="client-home-heading">
-      <div class="client-company-logo-wrap">${brandImg(app.company,'client-company-logo')||'<span class="client-logo-fallback">FP</span>'}</div>
-      <span class="client-eyebrow">BEM-VINDO À ${escapeHtml(app.company?.name||'SUA EMPRESA')}</span>
-      <h1>Escolha uma categoria</h1>
-      <p>Selecione o tema para abrir a câmera e criar seu conteúdo.</p>
+      <div class="client-company-logo-wrap">
+        ${brandImg(app.company,'client-company-logo')||'<span class="client-logo-fallback">FP</span>'}
+      </div>
+      <div class="client-home-heading-copy">
+        <span class="client-eyebrow">BEM-VINDO À ${escapeHtml(app.company?.name||'SUA EMPRESA')}</span>
+        <h1>Escolha uma categoria</h1>
+        <p>Selecione o tema para abrir a câmera e criar seu conteúdo.</p>
+      </div>
     </div>
     <div class="client-category-grid">${app.categories.map(c=>`<button type="button" data-act="open-category" data-id="${escapeHtml(c.id)}" class="client-category-item">
       <span class="client-category-symbol">▦</span>
@@ -141,6 +153,11 @@ function cameraView(){
         <img class="hidden" id="cameraOverlay" alt="Filtro sobre a câmera">
       </div>
     </div>
+    <div class="client-photo-controls">
+      <button type="button" data-act="flip-camera" class="client-control-secondary" aria-label="Alternar câmera" title="Alternar câmera"><span class="client-control-icon">⟳</span><small>Alternar</small></button>
+      <button type="button" data-act="capture" class="client-shutter" aria-label="Fotografar" title="Fotografar"><span></span></button>
+      <button type="button" data-act="activate-camera" class="client-control-secondary" aria-label="Ativar câmera" title="Ativar câmera"><span class="client-control-icon">◎</span><small>Ativar</small></button>
+    </div>
     <div class="client-filter-panel">
       <div class="client-filter-panel-top"><span>SELECIONE UM FILTRO</span><small>${filters.length} disponíveis</small></div>
       <div class="client-filter-strip" role="group" aria-label="Filtros disponíveis">
@@ -149,11 +166,6 @@ function cameraView(){
           <span class="client-filter-name">${escapeHtml(f.name)}</span>
         </button>`).join('')||'<span class="client-empty-strip">Nenhum filtro nesta categoria.</span>'}
       </div>
-    </div>
-    <div class="client-photo-controls">
-      <button type="button" data-act="flip-camera" class="client-control-secondary" aria-label="Alternar câmera" title="Alternar câmera"><span class="client-control-icon">⟳</span><small>Alternar</small></button>
-      <button type="button" data-act="capture" class="client-shutter" aria-label="Fotografar" title="Fotografar"><span></span></button>
-      <button type="button" data-act="activate-camera" class="client-control-secondary" aria-label="Ativar câmera" title="Ativar câmera"><span class="client-control-icon">◎</span><small>Ativar</small></button>
     </div>
     <p class="client-save-note">Escolha um filtro e fotografe. Arquivo final em 1080 × 1920.</p>
   </section>`;
