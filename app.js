@@ -57,7 +57,13 @@ function resetCameraSession(categoryId=app.selectedCategory){
 }
 function backToCamera(){resetCameraSession();}
 function navigate(page){document.body.classList.remove('mobile-menu-lock');if(app.page==='camera'&&page!=='camera')stopCamera();if(page!=='preview')clearCapturedPhoto();if(page!=='camera')clearGalleryPhoto();app.page=page;app.selectedFilter=null;render();window.scrollTo(0,0);}
-function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div></div>`}
+function studioCredits(extraClass=''){
+  return `<footer class="studio-credits ${extraClass}" aria-label="Créditos do aplicativo">
+    <span>Desenvolvido por <strong>@henriquedomarketing</strong></span>
+    <span>Desde 2025 · Todos os direitos reservados.</span>
+  </footer>`;
+}
+function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div>${studioCredits('studio-credits-auth')}</div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   if(!admin){
     const home=app.page==='categories';
@@ -104,7 +110,7 @@ function layout(content){const admin=app.profile?.role==='admin';
         <button type="button" class="client-logout" data-act="logout" aria-label="Sair da conta">Sair</button>
       </header>`}
       <main class="client-content">${content}</main>
-      ${cameraMode?'':`<footer class="client-footer">CAMERA MARKETING • FILTROS PERSONALIZADOS</footer>`}
+      ${cameraMode?'':studioCredits('client-footer')}
       ${cameraDrawer}
     </div>`;
   }
@@ -130,6 +136,7 @@ function layout(content){const admin=app.profile?.role==='admin';
         <div class="topbar-right"><span class="chip">Conta autenticada</span><button class="btn" data-act="logout">Sair</button></div>
       </header>
       <main class="content">${content}</main>
+      ${studioCredits('studio-credits-admin')}
     </div>
   </div>${app.modal?`<div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>${escapeHtml(app.modal.title)}</h2><button class="btn" data-act="close-modal">✕</button></div>${app.modal.content}</div></div>`:''}`;
 }
