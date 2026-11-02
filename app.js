@@ -691,12 +691,21 @@ function saveCapturedPhoto(){
   else downloadCapturedPhoto();
 }
 
-async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='open-client-menu'){setClientCameraMenu(true);return;}if(act==='close-client-menu'){setClientCameraMenu(false);return;}if(act==='client-switch-category'){
+async function click(event){const target=event.target.closest('[data-act],[data-nav]');if(!target)return;if(target.dataset.nav){navigate(target.dataset.nav);return;}const act=target.dataset.act,uid=target.dataset.id;try{if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='start-admin-test'){
+  if(app.profile?.role!=='admin')return;
+  const co=app.companies.find(c=>c.id===app.adminTest.companyId);
+  const ca=app.categories.find(c=>c.id===app.adminTest.categoryId&&c.company_id===co?.id);
+  if(!co||!ca)return toast('Selecione uma empresa e categoria válidas.');
+  app.adminTest.active=true;
+  resetCameraSession(ca.id);
+  return;
+}if(act==='exit-admin-test'){exitAdminTest();return;}
+if(act==='open-client-menu'){setClientCameraMenu(true);return;}if(act==='close-client-menu'){setClientCameraMenu(false);return;}if(act==='client-switch-category'){
   const next=app.categories.find(c=>c.id===uid);
-  if(!next)return;
+  if(!next||(app.adminTest.active&&next.company_id!==app.adminTest.companyId))return;
   if(app.selectedCategory===uid){setClientCameraMenu(false);return;}
   resetCameraSession(uid);return;
-}if(act==='logout'){stopCamera();clearCapturedPhoto();clearGalleryPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
+}if(act==='logout'){app.adminTest.active=false;stopCamera();clearCapturedPhoto();clearGalleryPhoto();app.images.forEach(v=>URL.revokeObjectURL(v));app.images.clear();await api.auth.signOut();app.user=null;app.profile=null;app.company=null;app.modal=null;render();return;}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
   const paths=app.filters.filter(f=>f.category_id===uid).map(f=>f.storage_path).filter(Boolean);
   const {error}=await api.from('categories').delete().eq('id',uid);
   if(error)throw error;
@@ -704,7 +713,12 @@ async function click(event){const target=event.target.closest('[data-act],[data-
     if(storageError)toast('Categoria removida, mas alguns PNGs precisam de limpeza no armazenamento.');
   }
   await refresh();
-}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){if(app.categories.some(c=>c.id===uid))resetCameraSession(uid);return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){selectFilter(uid);return;}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='use-camera'){resetCameraSession();return;}if(act==='pick-gallery'){$('galleryPhotoInput')?.click();return;}if(act==='capture'||act==='finish-gallery'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-back'||act==='photo-retake'||act==='photo-change-filter'){backToCamera();return;}}catch(error){toast(errorMessage(error));}}
+}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){if(app.categories.some(c=>c.id===uid))resetCameraSession(uid);return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){
+  const f=app.filters.find(x=>x.id===uid);
+  if(!f||f.category_id!==app.selectedCategory||
+     (app.adminTest.active&&f.company_id!==app.adminTest.companyId))return;
+  selectFilter(uid);return;
+}if(act==='activate-camera'){await startCamera();return;}if(act==='flip-camera'){await startCamera(app.facing==='user'?'environment':'user');return;}if(act==='use-camera'){resetCameraSession();return;}if(act==='pick-gallery'){$('galleryPhotoInput')?.click();return;}if(act==='capture'||act==='finish-gallery'){capture();return;}if(act==='photo-share'){shareCapturedPhoto();return;}if(act==='photo-instagram'){shareCapturedPhoto('instagram');return;}if(act==='photo-whatsapp'){shareCapturedPhoto('whatsapp');return;}if(act==='photo-save'){saveCapturedPhoto();return;}if(act==='photo-back'||act==='photo-retake'||act==='photo-change-filter'){backToCamera();return;}}catch(error){toast(errorMessage(error));}}
 function setClientCameraMenu(open){
   const root=document.querySelector('.client-app.is-camera');
   const drawer=$('clientCameraDrawer');
@@ -737,5 +751,17 @@ window.addEventListener('resize',()=>{
 
 $('root').addEventListener('click',click);
 $('root').addEventListener('submit',handleForm);
-$('root').addEventListener('change',event=>{if(app.modal?.formId==='filterForm'){if(event.target.id==='f_company_id')updateCategoryOptions();if(event.target.id==='filterCategory')updateNewCategoryField();}if(event.target.id==='galleryPhotoInput'){const file=event.target.files?.[0];event.target.value='';if(file)loadGalleryPhoto(file);}});
+$('root').addEventListener('change',event=>{
+  if(app.profile?.role==='admin'&&app.page==='test-filters'){
+    if(event.target.id==='testCompanySelect'){
+      app.adminTest.companyId=event.target.value;
+      app.adminTest.categoryId=null;
+      render();return;
+    }
+    if(event.target.id==='testCategorySelect'){
+      app.adminTest.categoryId=event.target.value;
+      render();return;
+    }
+  }
+if(app.modal?.formId==='filterForm'){if(event.target.id==='f_company_id')updateCategoryOptions();if(event.target.id==='filterCategory')updateNewCategoryField();}if(event.target.id==='galleryPhotoInput'){const file=event.target.files?.[0];event.target.value='';if(file)loadGalleryPhoto(file);}});
 init();
