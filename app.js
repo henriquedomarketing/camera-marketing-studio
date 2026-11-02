@@ -493,7 +493,7 @@ function drawSourceCover(ctx,source,width,height){
 async function loadGalleryPhoto(file){
   if(!file)return;
   if(app.processing)return toast('Aguarde a geração da imagem anterior.');
-  if(!/^image\\//i.test(file.type)&&!/\\.(?:jpe?g|png|webp|heic|heif)$/i.test(file.name||''))
+  if(!(typeof file.type==='string'&&file.type.startsWith('image/'))&&!/\.(?:jpe?g|png|webp|heic|heif)$/i.test(file.name||''))
     return toast('Escolha uma foto válida da galeria.');
   if(file.size>25*1024*1024)return toast('A foto deve ter até 25 MB.');
   const uri=URL.createObjectURL(file);
