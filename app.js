@@ -78,7 +78,9 @@ function layout(content){const admin=app.profile?.role==='admin';
         </div>
       </aside>`:'';
     return `<div class="client-app ${type}" ${home?`style="${brandStyle(app.company)}"`:''}>
-      ${cameraMode?'':`<header class="client-header">
+      ${cameraMode?`<header class="client-camera-header">
+        <button type="button" class="client-camera-menu-toggle" data-act="open-client-menu" aria-label="Abrir menu de categorias" aria-controls="clientCameraDrawer" aria-expanded="false"><span aria-hidden="true">☰</span></button>
+      </header>`:`<header class="client-header">
         ${clientBrand}
         <button type="button" class="client-logout" data-act="logout" aria-label="Sair da conta">Sair</button>
       </header>`}
@@ -177,7 +179,6 @@ function cameraView(){
           ? `<img id="galleryBase" class="client-gallery-image" src="${escapeHtml(app.galleryPhoto.url)}" alt="Foto escolhida na galeria, recortada ao centro em formato Stories">`
           : '<video id="cameraVideo" autoplay playsinline muted></video>'}
         <img class="hidden" id="cameraOverlay" alt="Filtro sobre a foto">
-        <button type="button" class="client-camera-menu-toggle" data-act="open-client-menu" aria-label="Abrir menu de categorias" aria-controls="clientCameraDrawer" aria-expanded="false"><span aria-hidden="true">☰</span></button>
         ${fromGallery?'<span class="client-gallery-indicator">FOTO DA GALERIA</span>':''}
       </div>
     </div>
