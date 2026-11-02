@@ -41,7 +41,7 @@ end;$$;
 
 -- Cadastro sem "próximo vencimento": preencher automaticamente usando due_day.
 create or replace function private.set_company_first_due()
-returns trigger language plpgsql security definer set search_path='' as $
+returns trigger language plpgsql security definer set search_path='' as $$
 begin
   if new.active and new.monthly_fee > 0 and new.next_due_date is null then
     new.next_due_date := private.monthly_due_on_or_after(current_date,new.due_day);
