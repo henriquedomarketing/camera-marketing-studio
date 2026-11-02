@@ -291,3 +291,20 @@
 @media(prefers-reduced-motion:reduce){
   .client-result-btn{transition:none}
 }
+
+/* Filtros imediatamente abaixo do enquadramento da câmera.
+   Mantém a faixa horizontal e os controles de captura em seguida. */
+.client-camera-screen .client-viewfinder-wrap{
+  margin-bottom:12px;
+}
+.client-camera-screen .client-filter-panel{
+  margin-bottom:0;
+}
+.client-camera-screen .client-photo-controls{
+  margin-top:11px;
+}
+@media(max-width:430px){
+  .client-camera-screen .client-viewfinder-wrap{margin-bottom:9px}
+  .client-camera-screen .client-filter-panel{margin-bottom:0}
+  .client-camera-screen .client-photo-controls{margin-top:9px}
+}
