@@ -36,6 +36,10 @@ No painel do administrador, a navegação possui **uma única área "Filtros PNG
 
 Se ocorrer erro no envio após criar uma categoria, o aplicativo tenta desfazer a categoria nova quando ainda estiver vazia. Os dados de categorias e filtros antigos continuam nas mesmas tabelas protegidas por RLS.
 
+## Créditos no rodapé
+
+O sistema apresenta, com visual discreto e responsivo, os créditos **“Desenvolvido por @henriquedomarketing”** e **“Desde 2025 · Todos os direitos reservados.”** na página de login, no painel administrativo, na página inicial das empresas e na tela de resultado da foto. A tela da câmera não exibe esse rodapé para manter o enquadramento e os controles desobstruídos.
+
 ## Aparência e fluxo mobile (novembro de 2026)
 
 - **Apenas a tela inicial do cliente** usa a logo PNG original e as cores da empresa. A logo fica em moldura quadrada compacta, sem sobrepor os títulos; o PNG não é alterado. PNG com fundo branco não é necessariamente transparente, portanto prefira a logo com canal alfa para não exibir quadrado branco.
