@@ -350,3 +350,176 @@ body.mobile-menu-lock{overflow:hidden}
   .admin-test-summary{align-items:stretch;flex-direction:column;}
   .admin-test-summary .btn{width:100%;}
 }
+
+
+/* Controle de suspensão de clientes e tela segura de contato com suporte. */
+.actions .client-access-pause{
+  border:1px solid #f2c8cd;
+  background:#fff6f6;
+  color:#ad3042;
+  font-weight:750;
+}
+.actions .client-access-resume{
+  border:1px solid #a9dfc4;
+  background:#f0fbf4;
+  color:#116e48;
+  font-weight:780;
+}
+.settings-support-hint{
+  margin:-5px 0 9px;
+  color:#71819c;
+  font-size:12px;
+  line-height:1.5;
+}
+.access-paused-layout{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:21px;
+  width:100%;
+  min-height:100dvh;
+  padding:28px 18px calc(25px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(160deg,#f8faff 0%,#f1f4fb 100%);
+}
+.access-paused-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:15px;
+  width:min(100%,460px);
+  padding:32px 27px 25px;
+  border-radius:21px;
+  border:1px solid #dfe6f2;
+  background:#fff;
+  box-shadow:0 17px 35px #0c224310;
+  text-align:center;
+}
+.access-paused-brand{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:11px;
+  color:#001893;
+  font-size:14px;
+  letter-spacing:-.35px;
+}
+.access-paused-brand .brand-mark{
+  width:43px;
+  height:43px;
+  flex:0 0 43px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  font-weight:850;
+  font-size:14px;
+}
+.access-paused-brand strong{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  line-height:1.25;
+  text-align:left;
+}
+.access-paused-brand small{
+  color:#8190aa;
+  font-size:10px;
+  font-weight:750;
+  letter-spacing:1.7px;
+}
+.access-paused-icon{
+  display:grid;
+  place-items:center;
+  width:58px;
+  height:58px;
+  margin-top:10px;
+  border-radius:17px;
+  background:#f0f3fd;
+  font-size:27px;
+}
+.access-paused-card h1{
+  margin:0;
+  max-width:340px;
+  font-size:clamp(21px,5.3vw,27px);
+  line-height:1.2;
+  letter-spacing:-.75px;
+  font-weight:850;
+  color:#152857;
+}
+.access-paused-description{
+  margin:0;
+  max-width:355px;
+  font-size:13px;
+  line-height:1.75;
+  color:#657693;
+}
+.support-phone{
+  margin:3px 0 0;
+  padding:13px 19px;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  border-radius:12px;
+  background:#f5f7ff;
+  border:1px solid #e0e6fc;
+}
+.support-phone span{
+  color:#75849b;
+  font-size:11px;
+}
+.support-phone strong{
+  color:#001893;
+  font-size:19px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.support-not-configured{
+  font-size:12px;
+  line-height:1.6;
+  max-width:350px;
+  margin:0;
+}
+.support-whatsapp-button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  max-width:360px;
+  min-height:48px;
+  padding:12px 15px;
+  border-radius:12px;
+  text-align:center;
+  text-decoration:none;
+  background:#001893;
+  color:#fff;
+  font-size:13px;
+  font-weight:790;
+}
+.access-paused-actions{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:6px;
+  padding-top:14px;
+  border-top:1px solid #edf0f7;
+}
+.access-paused-actions .btn{
+  min-height:41px;
+  border-radius:11px;
+  font-size:12px;
+}
+.access-paused-logout{
+  color:#657590;
+  background:#f7f8fb;
+}
+@media(max-width:450px){
+  .access-paused-card{padding:26px 17px 21px;gap:13px;}
+  .access-paused-actions{flex-direction:column;}
+  .access-paused-actions .btn{width:100%;}
+  .support-phone strong{font-size:17px;}
+}
