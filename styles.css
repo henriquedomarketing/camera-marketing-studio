@@ -588,3 +588,49 @@ body.mobile-menu-lock{overflow:hidden}
 .optional-billing-section .field{margin:0;}
 .free-client-label{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:#ecf8f1;color:#28704d;font-size:11px;font-weight:700;white-space:nowrap;}
 @media(max-width:600px){.optional-billing-section{padding:13px;}}
+
+
+/* Categorias: ordenar por arrastar com mouse, toque ou setas. */
+.category-order-controls{
+  display:flex;align-items:end;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;margin:-2px 0 15px;
+}
+.category-company-picker{display:grid;gap:5px;min-width:210px;max-width:330px;flex:1;color:#657594;font-size:11px;font-weight:750}
+.category-company-picker select{
+  width:100%;min-height:41px;padding:9px 12px;border:1px solid #dce5f2;border-radius:10px;
+  background:#f9fbff;color:#273a5c;font-size:12px;font-weight:650;
+}
+.category-order-hint{color:#8290a7;font-size:11px;line-height:1.55;padding-bottom:3px}
+.category-sort-table{min-width:670px}
+.category-sort-table thead th:first-child,
+.category-sort-table tbody td:first-child{width:64px;text-align:center}
+.category-order-grip-cell{padding:7px 10px!important}
+.category-drag-handle{
+  display:inline-grid;place-items:center;width:38px;height:38px;
+  border:1px solid #dce5f4;border-radius:10px;
+  color:#001893;background:#f1f4ff;
+  cursor:grab;font-size:25px;font-weight:800;line-height:1;
+  touch-action:none;user-select:none;-webkit-user-select:none;
+}
+.category-drag-handle:active,.category-row-dragging .category-drag-handle{cursor:grabbing;background:#e1e8ff}
+.category-drag-handle:focus-visible,.category-company-picker select:focus-visible{
+  outline:2px solid #001893;outline-offset:3px;
+}
+.category-row-dragging{background:#eef2ff!important;box-shadow:inset 0 0 0 2px #001893}
+.category-row-dragging td{background:#eef2ff}
+.category-actions{align-items:center}
+.category-move-button{
+  min-width:32px;min-height:33px;padding:5px 7px;
+  border-color:#dce5f2;color:#001893;font-size:17px;line-height:1;
+}
+.category-move-button:disabled,.category-drag-handle:disabled{
+  opacity:.35;cursor:not-allowed;
+}
+@media(max-width:700px){
+  .category-order-controls{align-items:stretch;flex-direction:column;gap:8px}
+  .category-company-picker{max-width:none;width:100%}
+  .category-order-hint{font-size:11px}
+  .category-sort-table{min-width:635px}
+  .category-drag-handle{width:40px;height:42px}
+  .category-actions{gap:4px}
+}
