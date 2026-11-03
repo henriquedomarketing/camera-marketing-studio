@@ -634,3 +634,297 @@ body.mobile-menu-lock{overflow:hidden}
   .category-drag-handle{width:40px;height:42px}
   .category-actions{gap:4px}
 }
+
+
+/* Biblioteca de filtros: clique para ver o PNG completo e editar no mesmo lugar. */
+.filter-library-section .toolbar{margin-bottom:13px;}
+.filter-library-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:flex-end;
+  gap:12px;
+  margin:0 0 17px;
+  padding:13px;
+  border:1px solid #e2e9f5;
+  background:#f7f9fd;
+  border-radius:12px;
+}
+.filter-library-toolbar label{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-width:180px;
+  flex:1 1 180px;
+  font-size:11px;
+  font-weight:730;
+  color:#425573;
+}
+.filter-library-toolbar select{
+  background:#fff;
+  border:1px solid #d9e3f3;
+  border-radius:9px;
+  min-width:0;
+  width:100%;
+  min-height:41px;
+  padding:8px 11px;
+  font-size:12px;
+  color:#24365a;
+}
+.filter-library-count{
+  flex:0 0 auto;
+  padding:9px 10px;
+  margin-left:auto;
+  font-size:11px;
+  color:#60738f;
+}
+.filters-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:14px;
+}
+.filter-card{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  min-width:0;
+  padding:8px;
+  border:1px solid #dfe7f4;
+  border-radius:13px;
+  background:#fff;
+  transition:border-color .16s,box-shadow .16s,transform .16s;
+}
+.filter-card:hover{
+  border-color:#7d9ad8;
+  box-shadow:0 9px 20px #102e6a10;
+  transform:translateY(-1px);
+}
+.filter-card-open{
+  appearance:none;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  width:100%;
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:zoom-in;
+  text-align:left;
+  color:#001893;
+}
+.filter-card-open .filter-image{
+  display:grid;
+  place-items:center;
+  width:100%;
+  aspect-ratio:9/13;
+  border:1px solid #e4ebf6;
+  border-radius:10px;
+  overflow:hidden;
+}
+.filter-card-open .filter-image img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.filter-card-zoom{
+  align-self:center;
+  font-size:10px;
+  font-weight:780;
+  padding:3px 0;
+}
+.filter-card-info{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+  padding:7px 4px 4px;
+}
+.filter-card-info b,.filter-card-info small{
+  display:block;
+  width:100%;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.filter-card-info b{font-size:13px;font-weight:800;color:#1b2e4f;}
+.filter-card-info small{font-size:11px;color:#7b8ba5;}
+.filter-card-manage{
+  width:100%;
+  margin:3px 0 0;
+  padding:9px 8px;
+  font-size:11px;
+  border-radius:9px;
+  font-weight:790;
+  color:#001893;
+  background:#f1f4ff;
+  border:1px solid #d9e2fd;
+}
+.filter-card-open:focus-visible,.filter-card-manage:focus-visible{
+  outline:3px solid #001893;
+  outline-offset:2px;
+}
+
+/* Modal ampliado com PNG inteiro à esquerda e controles à direita. */
+.modal.modal-filter-preview{
+  width:min(960px,100%);
+  max-height:calc(100dvh - 30px);
+  padding:19px 22px 22px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.modal-filter-preview .modal-head{
+  margin-bottom:15px;
+  padding-bottom:11px;
+  border-bottom:1px solid #edf1f8;
+  gap:10px;
+}
+.modal-filter-preview .modal-head h2{
+  font-size:19px;
+  line-height:1.3;
+  overflow-wrap:anywhere;
+}
+.filter-editor-layout{
+  display:grid;
+  grid-template-columns:minmax(245px,0.95fr) minmax(275px,1fr);
+  gap:23px;
+  align-items:start;
+}
+.filter-editor-visual{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.filter-editor-large-preview{
+  display:grid;
+  place-items:center;
+  position:relative;
+  width:min(100%,350px);
+  aspect-ratio:9/16;
+  max-height:68dvh;
+  overflow:hidden;
+  border:1px solid #dce6f5;
+  border-radius:14px;
+  background:repeating-conic-gradient(#e6eaf3 0% 25%,#fff 0% 50%) 50% / 22px 22px;
+  box-shadow:0 6px 23px #22345c14;
+}
+.filter-editor-large-preview img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+}
+.filter-editor-large-preview.is-dark{
+  background:#101827;
+  border-color:#263654;
+}
+.filter-editor-preview-caption{
+  padding:0;
+  margin:2px 0 0;
+  color:#687b9b;
+  font-size:11px;
+  text-align:center;
+}
+.filter-editor-bg-toggle{
+  border:1px solid #dbe4f4;
+  background:#fff;
+  color:#001893;
+  border-radius:9px;
+  padding:8px 12px;
+  font-size:11px;
+  font-weight:760;
+  cursor:pointer;
+}
+.filter-editor-fields{
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  min-width:0;
+  padding-top:5px;
+}
+.filter-editor-fields .field{
+  margin:0;
+}
+.filter-editor-kicker{
+  margin:0;
+  font-size:10px;
+  color:#8295b5;
+  letter-spacing:2px;
+  font-weight:860;
+}
+.filter-editor-company{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  border:1px solid #e2e8f3;
+  background:#f8faff;
+  padding:12px 13px;
+  border-radius:11px;
+}
+.filter-editor-company span{
+  font-size:10px;
+  color:#8b99b0;
+}
+.filter-editor-company strong{
+  font-size:13px;
+  color:#263959;
+}
+.filter-editor-file-note{
+  display:block;
+  color:#7283a1;
+  line-height:1.6;
+  margin-top:6px;
+  font-size:11px;
+}
+.filter-editor-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:4px;
+}
+.filter-editor-save{
+  flex:1 1 185px;
+  min-height:43px;
+}
+.filter-editor-delete{
+  background:#fff7f7;
+  color:#ae3042;
+  border-color:#f2c6ce;
+  min-height:41px;
+  width:100%;
+  font-weight:760;
+}
+.filter-editor-delete:hover{
+  background:#ffeded;
+}
+@media(max-width:720px){
+  .modal.modal-filter-preview{
+    padding:13px 14px 17px;
+  }
+  .filter-editor-layout{
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
+  }
+  .filter-editor-large-preview{
+    width:min(100%,285px);
+    max-height:49dvh;
+  }
+  .filter-editor-fields{gap:11px;}
+  .filter-library-toolbar label{min-width:140px;}
+  .filter-library-count{margin-left:0;}
+}
+@media(max-width:400px){
+  .filter-editor-large-preview{
+    width:min(100%,240px);
+    max-height:45dvh;
+  }
+  .modal.modal-filter-preview .modal-head h2{font-size:16px;}
+  .filters-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  .filter-card-info b{font-size:12px;}
+  .filter-card-info small{font-size:10px;}
+}
