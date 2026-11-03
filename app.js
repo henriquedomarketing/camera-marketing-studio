@@ -81,7 +81,8 @@ function layout(content){const admin=app.profile?.role==='admin';
     const home=app.page==='categories';
     const type=home?'is-home':app.page==='preview'?'is-preview':'is-camera';
     const clientBrand=home
-      ? `<div class="client-brand client-brand-without-icon">
+      ? `<div class="client-brand client-brand-without-icon client-brand-with-studio-logo">
+          <span class="client-header-studio-logo" aria-hidden="true"><img src="./assets/filtros-studio-mark.svg" alt="" decoding="async"></span>
           <span class="client-brand-copy"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong><small>FILTROS PERSONALIZADOS</small></span>
         </div>`
       : `<div class="client-brand client-platform-brand">
