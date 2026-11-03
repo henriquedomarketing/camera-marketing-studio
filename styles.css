@@ -569,3 +569,22 @@ body.mobile-menu-lock{overflow:hidden}
   font-size:11px;
   line-height:1.5;
 }
+
+
+/* Cliente gratuito: contato e campos financeiros opcionais. */
+.optional-billing-section{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  margin-top:15px;
+  padding:17px;
+  border:1px solid #e1e7f2;
+  background:#f8faff;
+  border-radius:15px;
+}
+.optional-billing-section>strong{color:#25365b;font-size:14px;}
+.optional-billing-section>strong span{font-size:11px;font-weight:500;color:#8592aa;}
+.optional-billing-section>.muted{font-size:12px;line-height:1.6;margin:0 0 6px;}
+.optional-billing-section .field{margin:0;}
+.free-client-label{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;background:#ecf8f1;color:#28704d;font-size:11px;font-weight:700;white-space:nowrap;}
+@media(max-width:600px){.optional-billing-section{padding:13px;}}
