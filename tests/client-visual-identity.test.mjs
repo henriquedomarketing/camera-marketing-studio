@@ -15,13 +15,14 @@ test('A logo do cliente permanece centralizada, não no cabeçalho',()=>{
   assert.match(layout,/escapeHtml\(app\.company\?\.name\|\|'Minha empresa'\)/);
 });
 
-test('Menu da câmera usa a identidade da empresa e respeita a prévia administrativa',()=>{
+test('Menu da câmera usa a identidade fixa do Filtros Studio inclusive no teste admin',()=>{
   assert.match(layout,/id="clientCameraDrawer" style="\$\{brandStyle\(testing\?testingCompany:app\.company\)\}"/);
-  assert.match(css,/\.client-app\.is-camera \.client-camera-drawer\{\s*background:var\(--brand-primary,#001893\)/);
-  assert.match(css,/color:var\(--brand-on-primary,#fff\)/);
-  assert.match(css,/\.client-app\.is-camera \.client-camera-drawer-category\.selected\{\s*background:var\(--brand-accent,#fff\)/);
-  assert.match(css,/color:var\(--brand-on-accent,#001893\)/);
-  assert.match(app,/function brandStyle\(company\)/);
+  assert.match(app,/function brandStyle\(_company\)/);
+  assert.match(app,/--brand-primary:#001893;--brand-accent:#eaf0ff/);
+  const design=readFileSync(new URL('../studio-redesign.css',import.meta.url),'utf8');
+  assert.match(design,/\.client-app\.is-camera \.client-camera-drawer \{/);
+  assert.match(design,/background:linear-gradient\(170deg,#001893/);
+  assert.match(design,/\.client-app\.is-camera \.client-camera-drawer-category\.selected \{/);
   assert.match(app,/function brandInk\(hex\)/);
 });
 
@@ -43,9 +44,10 @@ test('A visualização da câmera continua com menu, filtros e botões ativos',(
   assert.match(layout,/cameraMode\?'':studioCredits/);
 });
 
-test('Botão de menu usa a cor principal do cliente e muda no modo teste do admin',()=>{
+test('Botão do menu segue azul FS para todos os clientes, mesmo no teste administrativo',()=>{
   assert.match(layout,/<header class="client-camera-header" style="\$\{brandStyle\(testing\?testingCompany:app\.company\)\}">/);
-  assert.match(css,/\.client-app\.is-camera \.client-camera-header \.client-camera-menu-toggle\{\s*background:var\(--brand-primary,#001893\)/);
-  assert.match(css,/color:var\(--brand-on-primary,#fff\)/);
-  assert.match(css,/border-color:var\(--brand-primary,#001893\)/);
+  const design=readFileSync(new URL('../studio-redesign.css',import.meta.url),'utf8');
+  assert.match(design,/\.client-app\.is-camera \.client-camera-header \.client-camera-menu-toggle \{/);
+  assert.match(design,/background:linear-gradient\(145deg,#2757f5,#001893\) !important/);
+  assert.match(design,/color:#fff !important/);
 });
