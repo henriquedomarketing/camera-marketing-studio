@@ -148,7 +148,7 @@ function layout(content){const admin=app.profile?.role==='admin';
       <main class="content">${content}</main>
       ${studioCredits('studio-credits-admin')}
     </div>
-  </div>${app.modal?`<div class="overlay" id="overlay"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>${escapeHtml(app.modal.title)}</h2><button class="btn" data-act="close-modal">✕</button></div>${app.modal.content}</div></div>`:''}`;
+  </div>${app.modal?`<div class="overlay" id="overlay"><div class="modal ${app.modal.formId==='editFilterForm'?'modal-filter-preview':''}" role="dialog" aria-modal="true" aria-label="${escapeHtml(app.modal.title)}"><div class="modal-head"><h2>${escapeHtml(app.modal.title)}</h2><button class="btn" data-act="close-modal">✕</button></div>${app.modal.content}</div></div>`:''}`;
 }
 function table(headings,rows){return `<div class="table-wrap"><table class="table"><thead><tr>${headings.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td class="empty" colspan="${headings.length}">Nenhum registro encontrado</td></tr>`}</tbody></table></div>`}
 function dashboard(){const overdue=app.invoices.filter(i=>dueStatus(i)==='overdue'),unpaid=app.invoices.filter(i=>i.status==='pending');return header('DASHBOARD','Visão geral','Os indicadores abaixo são calculados a partir dos seus dados reais.',button('Cadastrar cliente','add-client'))+`<div class="stats">${stat('Clientes',app.companies.length,'Máximo permitido: 100')}${stat('Clientes ativos',app.companies.filter(x=>x.active).length,'Contas habilitadas')}${stat('Filtros PNG',app.filters.length,'Arquivos cadastrados')}${stat('A receber',brl(unpaid.reduce((sum,i)=>sum+Number(i.amount),0)),unpaid.length+' cobranças abertas • '+overdue.length+' vencidas')}</div>`+`<div class="card"><h2>Próximos vencimentos</h2>${table(['CLIENTE','VENCIMENTO','VALOR','STATUS'],app.invoices.slice().filter(i=>i.status==='pending').sort((a,b)=>a.due_date.localeCompare(b.due_date)).slice(0,8).map(i=>`<tr><td><b>${escapeHtml(companyName(i.company_id))}</b></td><td>${dateBR(i.due_date)}</td><td>${brl(i.amount)}</td><td>${badge(dueStatus(i))}</td></tr>`).join(''))}</div>`}
@@ -265,11 +265,40 @@ async function categoryOrderPointerEnd(event,cancel=false){
 }
 
 function filters(){
+  const availableCompanies=app.companies;
+  const selectedCompany=availableCompanies.some(c=>c.id===app.filterLibraryCompanyId)?app.filterLibraryCompanyId:'';
+  if(!selectedCompany)app.filterLibraryCompanyId='';
+  const availableCategories=app.categories.filter(c=>!selectedCompany||c.company_id===selectedCompany);
+  const selectedCategory=availableCategories.some(c=>c.id===app.filterLibraryCategoryId)?app.filterLibraryCategoryId:'';
+  if(!selectedCategory)app.filterLibraryCategoryId='';
+  const visible=app.filters.filter(f=>(!selectedCompany||f.company_id===selectedCompany)&&(!selectedCategory||f.category_id===selectedCategory));
+  const selectors=`<div class="filter-library-toolbar">
+    <label>Empresa <select id="filterLibraryCompany" aria-label="Filtrar PNGs por empresa">
+      ${option('','Todas as empresas',!selectedCompany)}
+      ${availableCompanies.map(c=>option(c.id,c.name,c.id===selectedCompany)).join('')}
+    </select></label>
+    <label>Categoria <select id="filterLibraryCategory" aria-label="Filtrar PNGs por categoria">
+      ${option('','Todas as categorias',!selectedCategory)}
+      ${availableCategories.map(c=>option(c.id,`${companyName(c.company_id)} · ${c.name}`,c.id===selectedCategory)).join('')}
+    </select></label>
+    <span class="filter-library-count">${visible.length} ${visible.length===1?'filtro encontrado':'filtros encontrados'}</span>
+  </div>`;
   return header('BIBLIOTECA','Filtros PNG','Gerencie categorias e envie os filtros de cada empresa em um só lugar.',button('Enviar PNG','add-filter'))+
     categoriesSection()+
-    `<div class="card">
-      <div class="toolbar"><div><h2>Filtros cadastrados</h2><p class="muted">Arquivos PNG transparentes organizados por empresa e categoria.</p></div></div>
-      ${app.filters.length?`<div class="filters-grid">${app.filters.map(f=>`<div class="filter-card"><div class="filter-image"><img data-img="${f.id}" alt="Filtro ${escapeHtml(f.name)}"></div><b>${escapeHtml(f.name)}</b><small>${escapeHtml(companyName(f.company_id))} • ${escapeHtml(categoryName(f.category_id))}</small><div class="actions">${action('remove-filter',f.id,'Excluir','danger')}</div></div>`).join('')}</div>`:'<div class="empty">Nenhum filtro cadastrado. Envie seu primeiro PNG transparente.</div>'}
+    `<div class="card filter-library-section">
+      <div class="toolbar"><div><h2>Filtros cadastrados</h2><p class="muted">Clique em um PNG para ampliar, substituir, mudar a categoria ou excluir.</p></div></div>
+      ${selectors}
+      ${visible.length?`<div class="filters-grid">${visible.map(f=>`<article class="filter-card">
+        <button type="button" class="filter-card-open" data-act="view-filter" data-id="${escapeHtml(f.id)}" aria-label="Visualizar e gerenciar ${escapeHtml(f.name)}">
+          <span class="filter-image"><img data-img="${escapeHtml(f.id)}" alt="" loading="lazy"></span>
+          <span class="filter-card-zoom" aria-hidden="true">⤢ Ampliar PNG</span>
+        </button>
+        <div class="filter-card-info">
+          <b title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</b>
+          <small title="${escapeHtml(companyName(f.company_id))} · ${escapeHtml(categoryName(f.category_id))}">${escapeHtml(companyName(f.company_id))} · ${escapeHtml(categoryName(f.category_id))}</small>
+          <button type="button" class="small-action filter-card-manage" data-act="view-filter" data-id="${escapeHtml(f.id)}">Visualizar e editar</button>
+        </div>
+      </article>`).join('')}</div>`:'<div class="empty">Nenhum filtro nesta seleção. Escolha outra empresa ou categoria.</div>'}
     </div>`;
 }
 function testFilters(){
@@ -494,7 +523,8 @@ async function manager(body){
   return data;
 }
 function openModal(title,body,formId){app.modal={title,content:body,formId};render();}
-function closeModal(){app.modal=null;render();}
+function clearFilterDraftUrl(){if(app.filterDraftUrl){URL.revokeObjectURL(app.filterDraftUrl);app.filterDraftUrl=null;}}
+function closeModal(){clearFilterDraftUrl();app.modal=null;render();}
 // Sem mensalidade, o cliente é gratuito/isento. Não criar vencimento nem cobrança.
 function clientBillingFromForm(values){
   const amountText=String(values.monthly_fee??'').trim().replace(',','.');
