@@ -70,7 +70,7 @@ function studioCredits(extraClass=''){
     <span>Desde 2025 · Todos os direitos reservados.</span>
   </footer>`;
 }
-function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div>${studioCredits('studio-credits-auth')}</div>`}
+function authMarkup(){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div><h1>Bem-vindo de volta</h1><p class="muted">Entre para acessar seu painel ou os filtros da sua empresa.</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,0)}<button class="btn btn-primary btn-full" type="submit">Entrar</button><div id="authError" class="auth-error"></div></form><a class="auth-support-link" href="https://wa.me/5544997497915?text=${encodeURIComponent('Olá! Preciso de suporte com o Filtros Studio.')}" target="_blank" rel="noopener noreferrer" aria-label="SUPORT: falar com o suporte pelo WhatsApp">SUPORT</a></div>${studioCredits('studio-credits-auth')}</div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   const testing=admin&&app.adminTest.active&&['camera','preview'].includes(app.page);
   if(!admin||testing){
@@ -304,7 +304,7 @@ function pausedClientView(){
 function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">FS</span><span>Filtros Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p>${supportContactMarkup()}<button class="btn" data-act="logout">Sair</button></div></div>`}
 function render(){
   document.body.classList.remove('mobile-menu-lock','client-camera-menu-lock');
-  if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}
+  if(!app.user){$('root').innerHTML=authMarkup();return;}
   if(!app.profile||app.profile.role!=='admin'&&!app.company){$('root').innerHTML=waiting();return;}
   if(app.profile.role!=='admin'&&(app.company?.access_paused||app.company?.active===false)){
     stopCamera();clearCapturedPhoto();clearGalleryPhoto();
@@ -368,7 +368,7 @@ async function loadData(){
 }
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
-async function authSubmit(form){const data=Object.fromEntries(new FormData(form));$('authError').textContent='';const submit=form.querySelector('button[type=submit]');submit.disabled=true;try{const {data:auth,error}=app.register?await api.auth.signUp({email:data.email,password:data.password}):await api.auth.signInWithPassword({email:data.email,password:data.password});if(error)throw error;if(!auth.session){toast('Cadastro recebido! Confira seu e-mail para confirmar a conta.');app.register=false;render();return;}app.user=auth.user;await loadData();}catch(error){const node=$('authError');if(node)node.textContent=errorMessage(error)}finally{if(submit.isConnected)submit.disabled=false;}}
+async function authSubmit(form){const data=Object.fromEntries(new FormData(form));$('authError').textContent='';const submit=form.querySelector('button[type=submit]');submit.disabled=true;try{const {data:auth,error}=await api.auth.signInWithPassword({email:data.email,password:data.password});if(error)throw error;app.user=auth.user;await loadData();}catch(error){const node=$('authError');if(node)node.textContent=errorMessage(error)}finally{if(submit.isConnected)submit.disabled=false;}}
 async function manager(body){
   const {data,error}=await api.functions.invoke('manage-client',{body});
   if(error){
@@ -765,7 +765,7 @@ async function click(event){const target=event.target.closest('[data-act],[data-
   if(app.company?.access_paused||app.company?.active===false)toast('O acesso ainda está pausado. Entre em contato com o suporte.');
   else if(app.company)toast('Acesso liberado! Você já pode utilizar os filtros.');
   return;
-}if(act==='login-view'||act==='register-view'){app.register=act==='register-view';render();return;}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='start-admin-test'){
+}if(act==='open-mobile-menu'){setAdminMobileMenu(true);return;}if(act==='close-mobile-menu'){setAdminMobileMenu(false);return;}if(act==='start-admin-test'){
   if(app.profile?.role!=='admin')return;
   const co=app.companies.find(c=>c.id===app.adminTest.companyId);
   const ca=app.categories.find(c=>c.id===app.adminTest.categoryId&&c.company_id===co?.id);
