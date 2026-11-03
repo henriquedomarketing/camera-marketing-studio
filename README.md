@@ -85,7 +85,7 @@ O sistema apresenta, com visual discreto e responsivo, os créditos **“Desenvo
 
 ## Identidade visual personalizada por empresa
 
-O administrador cadastra, na mesma tela de **Novo cliente**, a logo original em **PNG de exatamente 500 × 500 pixels**, com até **2 MB**, e escolhe:
+O administrador cadastra, na mesma tela de **Novo cliente**, a logo original em **PNG de qualquer dimensão ou proporção** (quadrada, horizontal ou vertical), com até **2 MB**, sem esticar ou cortar a imagem na interface, e escolhe:
 - **Cor principal**, utilizada no cabeçalho e no plano de fundo do cliente;
 - **Cor dos botões**, utilizada nas categorias e no botão de fotografar.
 
