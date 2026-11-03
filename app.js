@@ -72,7 +72,7 @@ function studioCredits(extraClass=''){
     <span>Desde 2025 · Todos os direitos reservados.</span>
   </footer>`;
 }
-function authMarkup(){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div><h1>Bem-vindo de volta</h1><p class="muted">Entre para acessar seu painel ou os filtros da sua empresa.</p><form class="form" id="authForm">${field('login','Nome de usuário','','text')}${field('password','Senha','','password',true,0)}<p class="auth-login-help">Administrador: entre com seu e-mail habitual.</p><button class="btn btn-primary btn-full" type="submit">Entrar</button><div id="authError" class="auth-error"></div></form><a class="auth-support-link" href="https://wa.me/5544997497915?text=${encodeURIComponent('Olá! Preciso de suporte com o Filtros Studio.')}" target="_blank" rel="noopener noreferrer" aria-label="SUPORT: falar com o suporte pelo WhatsApp">SUPORT</a></div>${studioCredits('studio-credits-auth')}</div>`}
+function authMarkup(){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark fs-logo-mark"><img src="./assets/filtros-studio-mark.svg" alt="" aria-hidden="true"></span><span>Filtros<small>STUDIO</small></span></div><h1>Bem-vindo de volta</h1><p class="muted">Entre para acessar seu painel ou os filtros da sua empresa.</p><form class="form" id="authForm">${field('login','Nome de usuário','','text')}${field('password','Senha','','password',true,0)}<p class="auth-login-help">Administrador: entre com seu e-mail habitual.</p><button class="btn btn-primary btn-full" type="submit">Entrar</button><div id="authError" class="auth-error"></div></form><a class="auth-support-link" href="https://wa.me/5544997497915?text=${encodeURIComponent('Olá! Preciso de suporte com o Filtros Studio.')}" target="_blank" rel="noopener noreferrer" aria-label="SUPORT: falar com o suporte pelo WhatsApp">SUPORT</a></div>${studioCredits('studio-credits-auth')}</div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   const testing=admin&&app.adminTest.active&&['camera','preview'].includes(app.page);
   if(!admin||testing){
@@ -85,7 +85,7 @@ function layout(content){const admin=app.profile?.role==='admin';
           <span class="client-brand-copy"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong><small>FILTROS PERSONALIZADOS</small></span>
         </div>`
       : `<div class="client-brand client-platform-brand">
-          <span class="client-brand-mark client-platform-mark">FS</span>
+          <span class="client-brand-mark client-platform-mark fs-logo-mark"><img src="./assets/filtros-studio-mark.svg" alt="" aria-hidden="true"></span>
           <span class="client-brand-copy"><strong>Filtros</strong><small>STUDIO</small></span>
         </div>`;
     const cameraMode=type==='is-camera';
@@ -130,7 +130,7 @@ function layout(content){const admin=app.profile?.role==='admin';
     <button type="button" class="mobile-menu-backdrop" data-act="close-mobile-menu" tabindex="-1" aria-label="Fechar menu"></button>
     <aside class="sidebar" id="adminSidebar" aria-label="Menu administrativo">
       <div class="admin-sidebar-head">
-        <div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div>
+        <div class="brand"><span class="brand-mark fs-logo-mark"><img src="./assets/filtros-studio-mark.svg" alt="" aria-hidden="true"></span><span>Filtros<small>STUDIO</small></span></div>
         <button type="button" class="sidebar-close" data-act="close-mobile-menu" aria-label="Fechar menu">✕</button>
       </div>
       <nav aria-label="Navegação do painel">${menu.map(([value,title])=>`<button class="nav-btn ${app.page===value?'active':''}" data-nav="${value}">${title}</button>`).join('')}</nav>
@@ -411,7 +411,7 @@ function supportContactMarkup(){
 function pausedClientView(){
   return '<div class="access-paused-layout">'+
     '<section class="card access-paused-card" role="status" aria-live="polite">'+
-      '<div class="access-paused-brand"><span class="brand-mark">FS</span><strong>Filtros <small>STUDIO</small></strong></div>'+
+      '<div class="access-paused-brand"><span class="brand-mark fs-logo-mark"><img src="./assets/filtros-studio-mark.svg" alt="" aria-hidden="true"></span><strong>Filtros <small>STUDIO</small></strong></div>'+
       '<div class="access-paused-icon" aria-hidden="true">🔒</div>'+
       '<h1>Acesso temporariamente pausado</h1>'+
       '<p class="access-paused-description">O acesso aos filtros desta empresa está temporariamente indisponível. Para verificar sua situação e solicitar a regularização, entre em contato com nosso suporte.</p>'+
@@ -421,7 +421,7 @@ function pausedClientView(){
         '<button type="button" class="btn access-paused-logout" data-act="logout">Sair da conta</button>'+
       '</div></section>'+studioCredits('studio-credits-auth')+'</div>';
 }
-function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">FS</span><span>Filtros Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p>${supportContactMarkup()}<button class="btn" data-act="logout">Sair</button></div></div>`}
+function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark fs-logo-mark"><img src="./assets/filtros-studio-mark.svg" alt="" aria-hidden="true"></span><span>Filtros Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p>${supportContactMarkup()}<button class="btn" data-act="logout">Sair</button></div></div>`}
 function render(){
   document.body.classList.remove('mobile-menu-lock','client-camera-menu-lock');
   if(!app.user){$('root').innerHTML=authMarkup();return;}
