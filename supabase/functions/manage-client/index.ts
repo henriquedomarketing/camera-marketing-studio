@@ -9,7 +9,7 @@ const cors = {
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: cors });
 const safeText = (value: unknown, max = 120) => typeof value === "string" ? value.trim().slice(0, max) : "";
 const usernamePattern = /^[a-z][a-z0-9_-]{2,31}$/;
-const normalizeUsername = (value: unknown) => safeText(value, 32).toLowerCase();
+const normalizeUsername = (value: unknown) => typeof value === "string" ? value.trim().toLowerCase() : "";
 const internalAuthEmail = (username: string) => `${username}@usuarios.filtros.studio`;
 
 Deno.serve(async (req: Request) => {
@@ -47,6 +47,7 @@ Deno.serve(async (req: Request) => {
       name, login_username: username, contact_email: null, phone: safeText(body.phone, 50),
       monthly_fee: monthlyFee, due_day: dueDay, next_due_date: body.next_due_date || null
     }).select("id").single();
+    if (companyError?.code === "23505") return json({ error: "Esse nome de usuário já está em uso. Escolha outro." }, 409);
     if (companyError || !createdCompany) return json({ error: companyError?.message || "Não foi possível criar a empresa." }, 400);
     const { data: createdUser, error: userError } = await adminApi.auth.admin.createUser({
       email: internalAuthEmail(username), password, email_confirm: true,
