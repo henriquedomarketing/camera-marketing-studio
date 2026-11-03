@@ -38,7 +38,7 @@ test('A visualização da câmera continua com menu, filtros e botões ativos',(
   assert.match(layout,/data-act="choose-filter"/);
   assert.match(camera,/data-act="capture"/);
   assert.match(camera,/data-act="pick-gallery"/);
-  assert.match(camera,/data-act="flip-camera"/);
+  assert.match(camera,/fromGallery\?'use-camera':'flip-camera'/);
   assert.match(layout,/studioCredits\('client-footer'\)/);
   assert.match(layout,/cameraMode\?'':studioCredits/);
 });
