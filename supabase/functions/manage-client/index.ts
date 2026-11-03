@@ -8,7 +8,9 @@ const cors = {
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: cors });
 const safeText = (value: unknown, max = 120) => typeof value === "string" ? value.trim().slice(0, max) : "";
-const validEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const usernamePattern = /^[a-z][a-z0-9_-]{2,31}$/;
+const normalizeUsername = (value: unknown) => safeText(value, 32).toLowerCase();
+const internalAuthEmail = (username: string) => `${username}@usuarios.filtros.studio`;
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
@@ -31,23 +33,23 @@ Deno.serve(async (req: Request) => {
   const companyId = safeText(body.company_id, 50);
   const password = typeof body.password === "string" ? body.password : "";
   const name = safeText(body.name, 120);
-  const email = safeText(body.email, 160).toLowerCase();
+  const username = normalizeUsername(body.username);
 
   if (action === "create") {
-    if (!name || name.length < 2 || !validEmail(email) || password.length < 8 || password.length > 128) {
-      return json({ error: "Preencha empresa, e-mail válido e senha de 8 a 128 caracteres." }, 400);
+    if (!name || name.length < 2 || !usernamePattern.test(username) || password.length < 8 || password.length > 128) {
+      return json({ error: "Informe empresa, usuário de 3 a 32 caracteres (letras, números, _ ou -) e senha de 8 a 128 caracteres." }, 400);
     }
     const monthlyFee = Number(body.monthly_fee ?? 0);
     const dueDay = Number(body.due_day ?? 10);
     if (!Number.isFinite(monthlyFee) || monthlyFee < 0 || monthlyFee > 100000 || !Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)
       return json({ error: "Valor ou dia do vencimento inválido." }, 400);
     const { data: createdCompany, error: companyError } = await adminApi.from("companies").insert({
-      name, contact_email: email, phone: safeText(body.phone, 50),
+      name, login_username: username, contact_email: null, phone: safeText(body.phone, 50),
       monthly_fee: monthlyFee, due_day: dueDay, next_due_date: body.next_due_date || null
     }).select("id").single();
     if (companyError || !createdCompany) return json({ error: companyError?.message || "Não foi possível criar a empresa." }, 400);
     const { data: createdUser, error: userError } = await adminApi.auth.admin.createUser({
-      email, password, email_confirm: true,
+      email: internalAuthEmail(username), password, email_confirm: true,
       user_metadata: { display_name: name }
     });
     if (userError || !createdUser.user) {
@@ -62,7 +64,38 @@ Deno.serve(async (req: Request) => {
       await adminApi.from("companies").delete().eq("id", createdCompany.id);
       return json({ error: "Erro ao associar login à empresa." }, 500);
     }
-    return json({ ok: true, company_id: createdCompany.id, email });
+    return json({ ok: true, company_id: createdCompany.id, username });
+  }
+
+  if (action === "update_username") {
+    if (!companyId || !usernamePattern.test(username))
+      return json({ error: "Informe uma empresa e um usuário válido de 3 a 32 caracteres." }, 400);
+    const { data: company, error: companyError } = await adminApi.from("companies")
+      .select("id,login_username").eq("id", companyId).maybeSingle();
+    if (companyError || !company) return json({ error: "Empresa não encontrada." }, 404);
+    if (company.login_username === username) return json({ ok: true, username });
+    const { data: login, error: loginError } = await adminApi.from("profiles")
+      .select("id").eq("company_id", companyId).eq("role", "client").maybeSingle();
+    if (loginError || !login) return json({ error: "Login do cliente não encontrado." }, 404);
+    const { data: exists, error: existsError } = await adminApi.from("companies")
+      .select("id").eq("login_username", username).neq("id", companyId).maybeSingle();
+    if (existsError) return json({ error: "Não foi possível validar o usuário." }, 500);
+    if (exists) return json({ error: "Esse nome de usuário já está em uso." }, 409);
+    const { error: updatedLoginError } = await adminApi.auth.admin.updateUserById(login.id, {
+      email: internalAuthEmail(username), email_confirm: true
+    });
+    if (updatedLoginError) return json({ error: "Esse usuário não está disponível ou não foi possível atualizá-lo." }, 409);
+    const { error: updatedCompanyError } = await adminApi.from("companies")
+      .update({ login_username: username }).eq("id", companyId);
+    if (updatedCompanyError) {
+      if (company.login_username && usernamePattern.test(company.login_username)) {
+        await adminApi.auth.admin.updateUserById(login.id, {
+          email: internalAuthEmail(company.login_username), email_confirm: true
+        });
+      }
+      return json({ error: "Não foi possível atualizar o nome de usuário. Tente novamente." }, 409);
+    }
+    return json({ ok: true, username });
   }
 
   if (action === "reset_password") {
