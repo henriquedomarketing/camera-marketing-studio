@@ -65,7 +65,7 @@ body{
 }
 .auth-card .btn-primary,
 .admin-layout .btn-primary{
-  background:linear-gradient(114deg,#5a9cff 0%,#3478fa 21%,#2054ec 54%,#071caa 100%) !important;
+  background:linear-gradient(114deg,#3266e9 0%,#2e62d9 21%,#2054cf 54%,#071caa 100%) !important;
   color:#fff !important;
   border:1px solid rgba(100,160,255,.82) !important;
   border-radius:18px;
@@ -151,7 +151,7 @@ body{
   gap:9px;
   border-radius:25px !important;
   border:1px solid rgba(113,169,255,.95) !important;
-  background:linear-gradient(113deg,#5b9fff 0%,#367efb 22%,#285de9 57%,#081b9c 100%) !important;
+  background:linear-gradient(113deg,#3266e9 0%,#2e62d9 22%,#2357d5 57%,#081b9c 100%) !important;
   box-shadow:
     0 11px 23px rgba(19,66,200,.23),
     0 3px 7px rgba(11,38,135,.10),
@@ -175,7 +175,7 @@ body{
 }
 .client-app.is-home .client-category-item:hover,
 .client-app.is-home .client-category-item:focus-visible{
-  background:linear-gradient(113deg,#66aaff 0%,#4388ff 22%,#306aff 57%,#0b22b2 100%) !important;
+  background:linear-gradient(113deg,#3a6bdd 0%,#3266e9 22%,#285cdb 57%,#0b22b2 100%) !important;
   border-color:rgba(185,215,255,.99) !important;
   box-shadow:0 15px 28px rgba(19,66,200,.30),
     0 4px 9px rgba(11,38,135,.09),
@@ -218,7 +218,7 @@ body{
 
 /* Smaller glass-blue secondary buttons, including the mobile camera menu toggle. */
 .client-app.is-camera .client-camera-header .client-camera-menu-toggle{
-  background:linear-gradient(136deg,#69b0ff 0%,#3375fa 29%,#1746e7 60%,#001893 100%) !important;
+  background:linear-gradient(136deg,#3266e9 0%,#2860dd 29%,#1746cd 60%,#001893 100%) !important;
   color:#fff !important;
   border:1px solid rgba(130,180,255,.90) !important;
   border-radius:18px !important;
@@ -251,7 +251,7 @@ body{
 .client-app.is-camera .client-camera-drawer-home,
 .client-app.is-camera .client-camera-drawer-category,
 .client-app.is-camera .client-camera-drawer-bottom button{
-  background:linear-gradient(115deg,#5d9eff 0%,#377cf5 25%,#2559e7 60%,#081d9c 100%) !important;
+  background:linear-gradient(115deg,#3266e9 0%,#2e62d9 25%,#2357d5 60%,#081d9c 100%) !important;
   border:1px solid rgba(129,177,255,.93) !important;
   border-radius:18px !important;
   color:#fff !important;
@@ -264,11 +264,11 @@ body{
 .client-app.is-camera .client-camera-drawer-home:hover,
 .client-app.is-camera .client-camera-drawer-category:not(.selected):hover,
 .client-app.is-camera .client-camera-drawer-bottom button:hover{
-  background:linear-gradient(115deg,#70aaff 0%,#4489fd 24%,#2c64f2 60%,#1129b4 100%) !important;
+  background:linear-gradient(115deg,#3a6bdd 0%,#3266e9 24%,#285cdb 60%,#1129b4 100%) !important;
   transform:translateY(-1px);
 }
 .client-app.is-camera .client-camera-drawer-category.selected{
-  background:linear-gradient(115deg,#4a86fb 0%,#2c61e8 38%,#001893 100%) !important;
+  background:linear-gradient(115deg,#2e64fc 0%,#245bec 38%,#001893 100%) !important;
   border:1px solid #668fff !important;
   color:#fff !important;
   box-shadow:0 8px 19px rgba(21,56,166,.31),
