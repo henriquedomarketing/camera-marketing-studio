@@ -37,3 +37,63 @@
   .client-app.is-home .client-brand-with-studio-logo{gap:7px}
   .client-app.is-home .client-header-studio-logo{flex-basis:28px;width:28px;height:28px}
 }
+
+/* Alinhamento óptico e proporções consistentes da marca no login. */
+.auth-card .brand{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:12px !important;
+  width:100%;
+  max-width:100%;
+  margin:0 auto 24px !important;
+  text-align:left !important;
+}
+.auth-card .brand .brand-mark.fs-logo-mark{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex:0 0 62px !important;
+  width:62px !important;
+  height:62px !important;
+  min-width:62px !important;
+  min-height:62px !important;
+  padding:7px !important;
+  box-sizing:border-box !important;
+  border-radius:17px !important;
+  line-height:1 !important;
+}
+.auth-card .brand .brand-mark.fs-logo-mark img{
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:center !important;
+}
+.auth-card .brand>span:last-child{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+  line-height:1.05 !important;
+  font-size:clamp(22px,5vw,28px) !important;
+  letter-spacing:-.035em !important;
+}
+.auth-card .brand>span:last-child small{
+  display:block;
+  margin-top:5px;
+  font-size:clamp(12px,3vw,14px) !important;
+  line-height:1.15 !important;
+  letter-spacing:.19em !important;
+  font-weight:400 !important;
+}
+@media(max-width:380px){
+  .auth-card .brand{gap:10px !important}
+  .auth-card .brand .brand-mark.fs-logo-mark{
+    flex-basis:54px !important;
+    width:54px !important;
+    height:54px !important;
+    min-width:54px !important;
+    min-height:54px !important;
+  }
+}
