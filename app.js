@@ -105,7 +105,7 @@ function layout(content){const admin=app.profile?.role==='admin';
         </div>
       </aside>`:'';
     return `<div class="client-app ${type} ${testing?'is-admin-test':''}" ${home?`style="${brandStyle(app.company)}"`:''}>
-      ${cameraMode?`<header class="client-camera-header">
+      ${cameraMode?`<header class="client-camera-header" style="${brandStyle(testing?testingCompany:app.company)}">
         <button type="button" class="client-camera-menu-toggle" data-act="open-client-menu" aria-label="Abrir menu de categorias" aria-controls="clientCameraDrawer" aria-expanded="false"><span aria-hidden="true">☰</span></button>
         <div class="client-top-filters" role="group" aria-label="Filtros disponíveis para esta categoria">
           ${app.filters.filter(f=>f.category_id===app.selectedCategory&&f.active).map(f=>`<button type="button" class="client-filter-choice ${app.selectedFilter===f.id?'active':''}" data-act="choose-filter" data-id="${escapeHtml(f.id)}" aria-label="Selecionar filtro ${escapeHtml(f.name)}" aria-pressed="${app.selectedFilter===f.id}">
