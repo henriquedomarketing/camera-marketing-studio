@@ -1338,3 +1338,9 @@ body.client-camera-menu-lock{overflow:hidden}
   color:#001893;
   font-weight:800;
 }
+
+
+/* A imagem de marca aparece somente depois de carregar por completo.
+   Falhas no arquivo exibem iniciais discretas, nunca "Logo indisponível". */
+img[data-brand-logo] {visibility:hidden;}
+img[data-brand-logo].brand-image-ready {visibility:visible;}
