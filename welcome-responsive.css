@@ -107,3 +107,96 @@
   color:#e7efff !important;
   opacity:1 !important;
 }
+
+/* Camadas de luz independentes: fundo da página, cabeçalho e cartão azul. */
+.client-app.is-home{
+  background:linear-gradient(145deg,#f9fbff,#eaf2ff,#f7faff) !important;
+  overflow-x:clip;
+}
+.client-app.is-home::before{
+  animation:fsAmbientFloat 19s ease-in-out infinite alternate;
+}
+.client-app.is-home::after{
+  animation:fsAmbientFloatReverse 23s ease-in-out infinite alternate;
+}
+.client-app.is-home .client-header{
+  background:linear-gradient(110deg,rgba(255,255,255,.96),rgba(231,241,255,.88),rgba(255,255,255,.96)) !important;
+  background-size:210% 210% !important;
+  animation:fsHeaderGlow 18s ease-in-out infinite alternate;
+}
+.client-app.is-home .client-home-heading{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:linear-gradient(125deg,#3374f2,#1458dc,#061b9e,#3374f2) !important;
+  background-size:240% 240% !important;
+  animation:fsBlueDrift 16s ease-in-out infinite alternate;
+}
+.client-app.is-home .client-home-heading::before,
+.client-app.is-home .client-home-heading::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  z-index:-1;
+  width:75%;
+  aspect-ratio:1;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.22);
+}
+.client-app.is-home .client-home-heading::before{
+  left:-48%;top:-58%;
+  background:radial-gradient(circle at 65% 70%,rgba(140,220,255,.48),rgba(69,155,255,.16) 48%,transparent 72%);
+  animation:fsOrbOne 20s ease-in-out infinite alternate;
+}
+.client-app.is-home .client-home-heading::after{
+  right:-47%;bottom:-64%;
+  background:radial-gradient(circle at 35% 30%,rgba(89,193,255,.38),rgba(34,111,241,.13) 52%,transparent 75%);
+  animation:fsOrbTwo 24s ease-in-out infinite alternate;
+}
+.client-app.is-home .client-home-heading h1{
+  font-size:clamp(30px,8vw,40px) !important;
+  margin:13px 0 12px !important;
+}
+.client-app.is-home .client-home-heading-copy{
+  position:relative;
+  z-index:1;
+}
+.client-app.is-home .client-company-logo-wrap{
+  position:relative;
+  z-index:1;
+}
+@keyframes fsAmbientFloat{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(25px,30px,0) scale(1.14)}
+}
+@keyframes fsAmbientFloatReverse{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(-25px,-25px,0) scale(1.12)}
+}
+@keyframes fsHeaderGlow{
+  from{background-position:0% 50%}
+  to{background-position:100% 50%}
+}
+@keyframes fsBlueDrift{
+  from{background-position:0% 35%}
+  to{background-position:100% 65%}
+}
+@keyframes fsOrbOne{
+  from{transform:translate3d(0,0,0) rotate(0deg)}
+  to{transform:translate3d(30px,24px,0) rotate(12deg)}
+}
+@keyframes fsOrbTwo{
+  from{transform:translate3d(0,0,0) scale(1)}
+  to{transform:translate3d(-24px,-20px,0) scale(1.1)}
+}
+@media(prefers-reduced-motion:reduce){
+  .client-app.is-home,
+  .client-app.is-home::before,
+  .client-app.is-home::after,
+  .client-app.is-home .client-header,
+  .client-app.is-home .client-home-heading,
+  .client-app.is-home .client-home-heading::before,
+  .client-app.is-home .client-home-heading::after{
+    animation:none !important;
+  }
+}
