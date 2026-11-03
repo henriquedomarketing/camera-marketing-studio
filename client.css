@@ -1344,3 +1344,100 @@ body.client-camera-menu-lock{overflow:hidden}
    Falhas no arquivo exibem iniciais discretas, nunca "Logo indisponível". */
 img[data-brand-logo] {visibility:hidden;}
 img[data-brand-logo].brand-image-ready {visibility:visible;}
+
+
+/* Identidade por empresa apenas no menu lateral, preservando câmera branca
+   e botões com a identidade azul do próprio Filtros Studio. */
+.client-app.is-camera .client-camera-drawer{
+  background:var(--brand-primary,#001893);
+  color:var(--brand-on-primary,#fff);
+  border-right:1px solid color-mix(in srgb,var(--brand-on-primary,#fff) 23%,transparent);
+}
+.client-app.is-camera .client-camera-drawer-heading strong,
+.client-app.is-camera .client-camera-drawer-label{
+  color:var(--brand-on-primary,#fff);
+}
+.client-app.is-camera .client-camera-drawer-label{
+  opacity:.75;
+}
+.client-app.is-camera .client-camera-drawer-close,
+.client-app.is-camera .client-camera-drawer-home,
+.client-app.is-camera .client-camera-drawer-category,
+.client-app.is-camera .client-camera-drawer-bottom button{
+  color:var(--brand-on-primary,#fff);
+  background:color-mix(in srgb,var(--brand-primary,#001893) 89%,var(--brand-on-primary,#fff));
+  border:1px solid color-mix(in srgb,var(--brand-on-primary,#fff) 34%,transparent);
+}
+.client-app.is-camera .client-camera-drawer-home strong,
+.client-app.is-camera .client-camera-drawer-category span,
+.client-app.is-camera .client-camera-drawer-bottom button span{
+  color:inherit;
+}
+.client-app.is-camera .client-camera-drawer-category.selected{
+  background:var(--brand-accent,#fff);
+  color:var(--brand-on-accent,#001893);
+  border-color:var(--brand-accent,#fff);
+  box-shadow:0 4px 14px #00000019;
+}
+.client-app.is-camera .client-camera-drawer-bottom{
+  border-top:1px solid color-mix(in srgb,var(--brand-on-primary,#fff) 28%,transparent);
+}
+.client-app.is-camera .client-camera-drawer-home:hover,
+.client-app.is-camera .client-camera-drawer-category:not(.selected):hover,
+.client-app.is-camera .client-camera-drawer-bottom button:hover,
+.client-app.is-camera .client-camera-drawer-close:hover{
+  background:color-mix(in srgb,var(--brand-primary,#001893) 79%,var(--brand-on-primary,#fff));
+}
+.client-app.is-camera .client-camera-drawer-category.selected:hover{
+  filter:brightness(.96);
+}
+.client-app.is-camera .client-camera-drawer :is(button,a):focus-visible{
+  outline:2px solid var(--brand-on-primary,#fff);
+  outline-offset:3px;
+}
+
+/* Apenas o nome da empresa no cabeçalho; logo PNG segue centralizada
+   na apresentação inicial e não se repete no canto superior esquerdo. */
+.client-app.is-home .client-brand-without-icon{
+  min-width:0;
+}
+.client-app.is-home .client-brand-without-icon .client-brand-copy{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:0;
+}
+.client-app.is-home .client-brand-without-icon .client-brand-copy strong{
+  font-size:15px;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+
+/* Créditos imediatamente abaixo dos controles da câmera, sem mensagem
+   de resolução e sem aumentar a altura do visor. */
+.client-app.is-camera .studio-credits.client-camera-credits{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  max-width:100%;
+  margin:4px auto 0;
+  padding:3px 6px 5px;
+  color:#677892;
+  background:transparent;
+  font-size:10px;
+  line-height:1.3;
+  letter-spacing:0;
+  text-align:center;
+}
+.client-app.is-camera .studio-credits.client-camera-credits strong{
+  color:#001893;
+  font-weight:800;
+}
+@media(max-width:375px){
+  .client-app.is-camera .studio-credits.client-camera-credits{
+    font-size:9px;
+    padding-inline:2px;
+  }
+}
