@@ -26,6 +26,14 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 7. Controle manual de cobranças. **Não** emite boletos nem consulta bancos.
 8. Configuração do nome da plataforma e WhatsApp de suporte.
 
+## Ordem das categorias por arrastar e soltar
+
+Em **Filtros PNG → Categorias**, o administrador escolhe a **empresa** e pode **segurar o ícone ⠿ de uma categoria e arrastá-la para cima ou para baixo**. A funcionalidade aceita mouse em computadores e toque em celulares; como alternativa acessível, cada categoria tem os botões **↑ Subir** e **↓ Descer**.
+
+A nova sequência é salva automaticamente no Supabase pela função `public.reorder_company_categories`, em **uma operação atômica** que exige administrador, valida a lista completa e proíbe misturar categorias de empresas diferentes. O aplicativo carrega as categorias com `order('sort_order').order('created_at')`: assim a ordenação é refletida na **tela inicial do cliente**, no **menu lateral da câmera** e em **Testar filtros**. Alterações aparecem nas sessões dos clientes ao atualizar/abrir novamente o app.
+
+A migração `supabase/migrations/20261103_008_category_drag_order.sql` inicializa a ordem de categorias existentes usando o cadastro original e faz **novas categorias entrarem ao fim** da lista. A reordenação não altera PNGs, nomes ou outros dados dos clientes.
+
 ## Administração de filtros e categorias
 
 No painel do administrador, a navegação possui **uma única área "Filtros PNG"** para:
