@@ -133,7 +133,7 @@ Crie um projeto apontando para a raiz do repositório; **Framework: Other**, sem
 
 ## Pendências para produção
 
-- **GitHub vinculado:** https://github.com/henriquedomarketing/camera-marketing-studio.
+- **GitHub vinculado:** https://github.com/henriquedomarketing/filtros-studio.
 - **Site HTTPS publicado:** https://filtros.studio.
 - Configurar **Site URL** de autenticação no Supabase e cadastrar/autorizar a primeira conta administrativa.
 - Validar a experiência no Safari iPhone e Chrome Android.
@@ -167,4 +167,4 @@ Comece por **README.md** e **docs/ARCHITECTURE.md**, examine a migração SQL e 
 
 ## Domínio e identidade da marca
 
-**Marca oficial:** Filtros Studio. **Domínio principal:** https://filtros.studio. O DNS precisa apontar o registro A do domínio para a Vercel; `www.filtros.studio` redireciona ao domínio principal. Para o login por e-mail, adicionar o domínio às URLs autorizadas no Supabase Auth. **GitHub:** o repositório ainda utiliza o endereço antigo até ser renomeado em Settings → General; a conexão Git é mantida pela Vercel durante a mudança. **Supabase:** manter o project ID e a região atuais; o nome de exibição do projeto pode ser renomeado em Settings sem migrar banco.
+**Marca oficial:** Filtros Studio. **Domínio principal:** https://filtros.studio. O DNS precisa apontar o registro A do domínio para a Vercel; `www.filtros.studio` redireciona ao domínio principal. Para o login por e-mail, adicionar o domínio às URLs autorizadas no Supabase Auth. **GitHub:** https://github.com/henriquedomarketing/filtros-studio (repositório já renomeado). **Vercel:** projeto `filtros-studio`, com domínio principal `filtros.studio`. **Supabase:** projeto renomeado `filtros-studio`, preservando o Project ID e a região. Em Auth → URL Configuration, configurar `https://filtros.studio` como Site URL e adicionar nas Redirect URLs.
