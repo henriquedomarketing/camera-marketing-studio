@@ -70,7 +70,7 @@ function studioCredits(extraClass=''){
     <span>Desde 2025 · Todos os direitos reservados.</span>
   </footer>`;
 }
-function authMarkup(){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div><h1>Bem-vindo de volta</h1><p class="muted">Entre para acessar seu painel ou os filtros da sua empresa.</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,0)}<button class="btn btn-primary btn-full" type="submit">Entrar</button><div id="authError" class="auth-error"></div></form><a class="auth-support-link" href="https://wa.me/5544997497915?text=${encodeURIComponent('Olá! Preciso de suporte com o Filtros Studio.')}" target="_blank" rel="noopener noreferrer" aria-label="SUPORT: falar com o suporte pelo WhatsApp">SUPORT</a></div>${studioCredits('studio-credits-auth')}</div>`}
+function authMarkup(){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div><h1>Bem-vindo de volta</h1><p class="muted">Entre para acessar seu painel ou os filtros da sua empresa.</p><form class="form" id="authForm">${field('login','Nome de usuário','','text')}${field('password','Senha','','password',true,0)}<p class="auth-login-help">Administrador: entre com seu e-mail habitual.</p><button class="btn btn-primary btn-full" type="submit">Entrar</button><div id="authError" class="auth-error"></div></form><a class="auth-support-link" href="https://wa.me/5544997497915?text=${encodeURIComponent('Olá! Preciso de suporte com o Filtros Studio.')}" target="_blank" rel="noopener noreferrer" aria-label="SUPORT: falar com o suporte pelo WhatsApp">SUPORT</a></div>${studioCredits('studio-credits-auth')}</div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   const testing=admin&&app.adminTest.active&&['camera','preview'].includes(app.page);
   if(!admin||testing){
@@ -152,7 +152,7 @@ function layout(content){const admin=app.profile?.role==='admin';
 }
 function table(headings,rows){return `<div class="table-wrap"><table class="table"><thead><tr>${headings.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td class="empty" colspan="${headings.length}">Nenhum registro encontrado</td></tr>`}</tbody></table></div>`}
 function dashboard(){const overdue=app.invoices.filter(i=>dueStatus(i)==='overdue'),unpaid=app.invoices.filter(i=>i.status==='pending');return header('DASHBOARD','Visão geral','Os indicadores abaixo são calculados a partir dos seus dados reais.',button('Cadastrar cliente','add-client'))+`<div class="stats">${stat('Clientes',app.companies.length,'Máximo permitido: 100')}${stat('Clientes ativos',app.companies.filter(x=>x.active).length,'Contas habilitadas')}${stat('Filtros PNG',app.filters.length,'Arquivos cadastrados')}${stat('A receber',brl(unpaid.reduce((sum,i)=>sum+Number(i.amount),0)),unpaid.length+' cobranças abertas • '+overdue.length+' vencidas')}</div>`+`<div class="card"><h2>Próximos vencimentos</h2>${table(['CLIENTE','VENCIMENTO','VALOR','STATUS'],app.invoices.slice().filter(i=>i.status==='pending').sort((a,b)=>a.due_date.localeCompare(b.due_date)).slice(0,8).map(i=>`<tr><td><b>${escapeHtml(companyName(i.company_id))}</b></td><td>${dateBR(i.due_date)}</td><td>${brl(i.amount)}</td><td>${badge(dueStatus(i))}</td></tr>`).join(''))}</div>`}
-function clients(){return header('GERENCIAMENTO','Clientes','Cada empresa terá seu próprio login e seus próprios filtros.',button('Novo cliente','add-client'))+`<div class="card">${table(['CLIENTE','SITUAÇÃO','MENSALIDADE','VENCIMENTO','AÇÕES'],app.companies.map(c=>`<tr><td><div class="company-admin-name"><span class="company-admin-logo">${brandImg(c,'company-admin-logo-img')||'<span>▣</span>'}</span><span><b>${escapeHtml(c.name)}</b><small>${escapeHtml(c.contact_email)}</small></span></div></td><td>${badge(c.access_paused?'paused':c.active?'active':'inactive')}</td><td>${brl(c.monthly_fee)}</td><td>${dateBR(c.next_due_date)}</td><td><div class="actions">${action('edit-client',c.id,'Editar')}${action('toggle-client-access',c.id,c.access_paused?'Reativar acesso':'Pausar acesso',c.access_paused?'client-access-resume':'client-access-pause')}${action('reset-password',c.id,'Nova senha')}${action('remove-client',c.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
+function clients(){return header('GERENCIAMENTO','Clientes','Cada empresa terá seu próprio login e seus próprios filtros.',button('Novo cliente','add-client'))+`<div class="card">${table(['CLIENTE','SITUAÇÃO','MENSALIDADE','VENCIMENTO','AÇÕES'],app.companies.map(c=>`<tr><td><div class="company-admin-name"><span class="company-admin-logo">${brandImg(c,'company-admin-logo-img')||'<span>▣</span>'}</span><span><b>${escapeHtml(c.name)}</b><small>Usuário: ${escapeHtml(c.login_username||'Não configurado')}</small></span></div></td><td>${badge(c.access_paused?'paused':c.active?'active':'inactive')}</td><td>${brl(c.monthly_fee)}</td><td>${dateBR(c.next_due_date)}</td><td><div class="actions">${action('edit-client',c.id,'Editar')}${action('toggle-client-access',c.id,c.access_paused?'Reativar acesso':'Pausar acesso',c.access_paused?'client-access-resume':'client-access-pause')}${action('reset-password',c.id,'Nova senha')}${action('remove-client',c.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
 
 function categoriesSection(){
   const rows=app.categories.map(c=>{
@@ -368,7 +368,21 @@ async function loadData(){
 }
 async function refresh(){await loadData();toast('Dados atualizados.');}
 async function init(){const {data:{session}}=await api.auth.getSession();app.user=session?.user||null;if(app.user){try{await loadData()}catch(error){toast(errorMessage(error));$('root').innerHTML=waiting()}}else render();}
-async function authSubmit(form){const data=Object.fromEntries(new FormData(form));$('authError').textContent='';const submit=form.querySelector('button[type=submit]');submit.disabled=true;try{const {data:auth,error}=await api.auth.signInWithPassword({email:data.email,password:data.password});if(error)throw error;app.user=auth.user;await loadData();}catch(error){const node=$('authError');if(node)node.textContent=errorMessage(error)}finally{if(submit.isConnected)submit.disabled=false;}}
+const clientUsernamePattern=/^[a-z][a-z0-9_-]{2,31}$/;
+function normalizeClientUsername(value){
+  const username=String(value||'').trim().toLowerCase();
+  if(!clientUsernamePattern.test(username))throw new Error('Use um nome de usuário de 3 a 32 caracteres, começando com uma letra e contendo apenas letras, números, _ ou -.');
+  return username;
+}
+function loginAuthEmail(identifier){
+  const value=String(identifier||'').trim().toLowerCase();
+  if(value.includes('@')){
+    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))throw new Error('Informe seu e-mail de administrador corretamente.');
+    return value;
+  }
+  return normalizeClientUsername(value)+'@usuarios.filtros.studio';
+}
+async function authSubmit(form){const data=Object.fromEntries(new FormData(form));$('authError').textContent='';const submit=form.querySelector('button[type=submit]');submit.disabled=true;try{const {data:auth,error}=await api.auth.signInWithPassword({email:loginAuthEmail(data.login),password:data.password});if(error)throw error;app.user=auth.user;await loadData();}catch(error){const node=$('authError');if(node)node.textContent=errorMessage(error)}finally{if(submit.isConnected)submit.disabled=false;}}
 async function manager(body){
   const {data,error}=await api.functions.invoke('manage-client',{body});
   if(error){
@@ -397,7 +411,7 @@ function companyModal(cid){
   const logoInfo=c?.logo_path?`<span class="brand-form-current-logo">${brandImg(c,'brand-form-logo-img')}<small>Logo atual da empresa</small></span>`:'';
   const frm=`<form class="form" id="clientForm">
     ${field('name','Nome da empresa',c?.name)}
-    ${field('email','E-mail do login',c?.contact_email,'email',!c)}
+    ${field('username','Nome de usuário (sem e-mail)',c?.login_username||'','text',true,3)}<p class="username-hint">Use 3 a 32 caracteres, começando com uma letra. Aceita números, _ e -. Ex.: p4veiculos</p>
     ${!c?field('password','Senha inicial (8 caracteres ou mais)','','password',true,8):''}
     <div class="branding-form-section">
       <strong>Identidade visual da empresa</strong>
@@ -574,15 +588,17 @@ async function handleForm(event){event.preventDefault();const form=event.target;
   await validateCompanyLogo(logo);
   const c=app.companies.find(x=>x.id===app.modal?.recordId);
   if(c){
-    const payload={name:values.name,contact_email:values.email,phone:values.phone,
+    const username=normalizeClientUsername(values.username);
+    const payload={name:values.name,phone:values.phone,
       monthly_fee:Number(values.monthly_fee),due_day:Number(values.due_day),
       next_due_date:values.next_due_date||null,active:values.active==='true'};
     const {error}=await api.from('companies').update(payload).eq('id',c.id);
     if(error)throw error;
     await saveCompanyBrand(c.id,values,logo,c.logo_path);
+    if(c.login_username!==username)await manager({action:'update_username',company_id:c.id,username});
   }else{
     if(!logo)throw Error('Envie a logo PNG 500 × 500 da empresa.');
-    const created=await manager({action:'create',name:values.name,email:values.email,password:values.password,
+    const created=await manager({action:'create',name:values.name,username:normalizeClientUsername(values.username),password:values.password,
       phone:values.phone,monthly_fee:Number(values.monthly_fee),due_day:Number(values.due_day),
       next_due_date:values.next_due_date||null});
     try{await saveCompanyBrand(created.company_id,values,logo,null);}
