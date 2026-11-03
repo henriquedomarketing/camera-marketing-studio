@@ -44,6 +44,14 @@ A aba **Testar filtros** aparece no menu administrativo, ao lado de **Filtros PN
 - O menu lateral da câmera mostra apenas as categorias da empresa selecionada e substitui **Sair da conta** por **Encerrar teste e voltar ao painel**. Na tela final, **Voltar** reinicia a câmera normalmente.
 - A seleção é limitada a uma empresa e categoria válidas; navegar ou fotografar não modifica empresas, categorias nem filtros salvos no banco.
 
+## Clientes gratuitos e campos opcionais
+
+No cadastro e na edição de **Clientes**, os campos **Telefone/WhatsApp**, **Mensalidade em reais**, **Dia do vencimento** e **Próximo vencimento** são opcionais. Se a mensalidade não for informada ou for **R$ 0,00**, a conta é tratada como **gratuita/isenta**, independentemente de dados de contato e datas. A listagem apresenta **Gratuito / isento** e **—** como vencimento; o banco mantém `monthly_fee=0` e `next_due_date=null`.
+
+**Não se cria cobrança mensal automática** para contas gratuitas; ao transformar uma conta pagante em gratuita, a sincronização financeira cancela cobranças automáticas ainda pendentes e preserva o histórico de cobranças já pagas. Cobranças manuais eventualmente lançadas pelo administrador permanecem independentes.
+
+Para clientes pagantes, basta informar **mensalidade maior que zero** e **dia do vencimento ou próximo vencimento**. Quando houver somente o dia, a próxima data é calculada pelo banco. Telefone/WhatsApp nunca é obrigatório.
+
 ## Mensalidades e Financeiro sincronizados
 
 Uma nova migração (`20261102_004_auto_monthly_finance.sql`) sincroniza **mensalidade, ativação e próximo vencimento** com o Financeiro. Empresa ativa com mensalidade acima de zero recebe uma cobrança automática pendente, sem duplicar o lançamento do mesmo ciclo. Alterações de valor ou vencimento atualizam a mensalidade pendente. A inativação cancela as mensalidades automáticas pendentes; os pagamentos já feitos são preservados. Ao marcar uma mensalidade automática como paga, o próximo vencimento é calculado para o mês seguinte. **Cobranças manuais** permanecem independentes.
