@@ -1,0 +1,8 @@
+/* Nova identidade visual Filtros Studio: símbolo oficial em vez de letras FS. */
+.fs-logo-mark{display:inline-flex !important;align-items:center !important;justify-content:center !important;overflow:hidden;background:#fff !important;border-radius:22% !important;flex-shrink:0}
+.fs-logo-mark img{display:block;width:88%;height:88%;object-fit:contain}
+.brand{display:flex;align-items:center;gap:12px}
+.brand>span:last-child{color:#111827;font-weight:850;letter-spacing:-.04em}
+.brand>span:last-child small{display:block;font-weight:400;letter-spacing:.17em}
+.client-platform-brand .client-brand-copy strong{color:#111827}
+.client-platform-brand .client-brand-copy small{letter-spacing:.16em}
