@@ -4,7 +4,7 @@
 
 ```
 Safari/Chrome (HTML/CSS/JS)
-      ├── Supabase Auth (e-mail + senha)
+      ├── Supabase Auth (admin: e-mail/senha; clientes: usuário/senha na interface)
       ├── Postgres + Data API (RLS obrigatória)
       ├── Storage privado company-filters/COMPANY_UUID/FILTER_UUID.png
       └── Edge Function manage-client (admin API, senhas, exclusão)
@@ -12,7 +12,7 @@ Safari/Chrome (HTML/CSS/JS)
 
 ## Entidades
 
-- `companies`: empresas, status ativo, mensalidade e vencimento.
+- `companies`: empresas, status ativo, mensalidade e vencimento; `login_username` exclusivo para o login sem e-mail do cliente.
 - `profiles`: login Auth ↔ empresa; `role` restrito a `admin` ou `client`. Uma empresa possui no MVP um login cliente.
 - `categories`: nome e ordem, sempre pertencentes a uma empresa.
 - `filters`: PNGs privados vinculados a categorias, armazenados em `storage_path`.
@@ -29,7 +29,8 @@ Safari/Chrome (HTML/CSS/JS)
 
 ## Operações
 
-- Criar cliente: inserir empresa, criar usuário Supabase Auth, vincular perfil. Reversão de ambos em falhas conhecidas.
+- Criar cliente: validar usuário único (3–32 caracteres), inserir empresa, criar usuário Supabase Auth com endereço interno técnico `usuario@usuarios.filtros.studio` e senha definida pelo administrador, confirmar internamente e vincular perfil. O cliente não precisa criar e-mail. Reversão de ambos em falhas conhecidas.
+- Alterar usuário: Edge Function autenticada `update_username` atualiza o endereço interno e a coluna `login_username`, preservando permissões e senhas. Administrador segue usando seu e-mail original.
 - Excluir cliente: remover PNGs, login e empresa. Operação destrutiva; monitorar falhas parciais e manter backup.
 - Redefinir senha: via Admin API da Edge Function; nenhuma senha fica no banco do frontend.
 - Enviar PNG: cliente JS valida o tipo/transparência, grava Storage e então o registro no Postgres; reverte upload se registro falhar.
