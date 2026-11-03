@@ -415,10 +415,10 @@ function companyModal(cid){
     ${!c?field('password','Senha inicial (8 caracteres ou mais)','','password',true,8):''}
     <div class="branding-form-section">
       <strong>Identidade visual da empresa</strong>
-      <p>Cadastre a logo original em PNG 500 × 500 e escolha as cores que aparecerão após o login do cliente.</p>
+      <p>Envie a logo original em PNG, no formato que tiver (quadrado, horizontal ou vertical). A imagem manterá a proporção original, sem corte nem distorção. Escolha também as cores exibidas após o login.</p>
       ${logoInfo}
       <div class="field">
-        <label for="companyLogo">Logo PNG 500 × 500 (máximo 2 MB)${c?' — opcional para substituir':''}</label>
+        <label for="companyLogo">Logo PNG — qualquer tamanho e proporção (máximo 2 MB)${c?' — opcional para substituir':''}</label>
         <input id="companyLogo" type="file" name="logo" accept=".png,image/png" ${c?'':'required'}>
       </div>
       <div class="brand-color-grid">
@@ -537,8 +537,8 @@ async function validateCompanyLogo(file){
   try{
     const img=new Image();
     await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('A logo selecionada não é um PNG válido.'));img.src=uri;});
-    if(img.naturalWidth!==500||img.naturalHeight!==500)
-      throw Error('A logo precisa ter exatamente 500 × 500 pixels.');
+    if(!img.naturalWidth||!img.naturalHeight)
+      throw Error('A logo PNG selecionada está vazia ou inválida.');
   }finally{URL.revokeObjectURL(uri);}
 }
 async function uploadCompanyLogo(companyId,file){
@@ -597,7 +597,7 @@ async function handleForm(event){event.preventDefault();const form=event.target;
     await saveCompanyBrand(c.id,values,logo,c.logo_path);
     if(c.login_username!==username)await manager({action:'update_username',company_id:c.id,username});
   }else{
-    if(!logo)throw Error('Envie a logo PNG 500 × 500 da empresa.');
+    if(!logo)throw Error('Envie a logo da empresa em PNG (até 2 MB).');
     const created=await manager({action:'create',name:values.name,username:normalizeClientUsername(values.username),password:values.password,
       phone:values.phone,monthly_fee:Number(values.monthly_fee),due_day:Number(values.due_day),
       next_due_date:values.next_due_date||null});
