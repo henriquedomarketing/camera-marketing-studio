@@ -1,0 +1,347 @@
+/*
+ * Filtros Studio · Aurora / Glass blue (design refresh)
+ * Inspired by the supplied icy-blue login reference, not a pixel-for-pixel copy.
+ * Presentation only: buttons retain existing data-act handlers.
+ * Loaded after studio-redesign.css; remove this link to revert the new look.
+ */
+:root{
+  --fs-aurora-blue:#001893;
+  --fs-aurora-royal:#2e64fc;
+  --fs-aurora-light:#edf3ff;
+  --fs-aurora-white:#fff;
+  --fs-aurora-ink:#15254b;
+  --fs-aurora-edge:rgba(255,255,255,.92);
+  --fs-aurora-glow:0 10px 25px rgba(21,59,202,.22),0 3px 8px rgba(9,29,110,.11);
+}
+body{
+  background:radial-gradient(ellipse at 0% 0%,#d9e6ff 0%,transparent 43%),
+    radial-gradient(ellipse at 100% 100%,#e4ecff 0%,transparent 49%),
+    #f5f8ff;
+}
+
+/* Frosted-white / ice blue background on sign-in and admin pages. */
+.auth-layout,
+.admin-layout{
+  background:
+    radial-gradient(ellipse 75% 55% at -13% -12%,rgba(143,182,255,.43),transparent 80%),
+    radial-gradient(ellipse 70% 52% at 115% 108%,rgba(158,190,255,.30),transparent 80%),
+    linear-gradient(155deg,#f8fbff 0%,#eaf1ff 51%,#f7faff 100%) !important;
+}
+.auth-layout{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+}
+.auth-layout::before,
+.auth-layout::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  z-index:0;
+  border-radius:50%;
+  box-shadow:0 0 0 1px rgba(255,255,255,.95),
+    9px 15px 38px rgba(75,122,232,.10),
+    inset -13px -15px 26px rgba(118,162,255,.20),
+    inset 11px 12px 23px rgba(255,255,255,.96);
+  border:1px solid rgba(255,255,255,.84);
+  background:linear-gradient(140deg,rgba(255,255,255,.38),rgba(126,167,246,.085));
+}
+.auth-layout::before{width:280px;height:280px;left:-170px;top:-157px;}
+.auth-layout::after{width:235px;height:235px;right:-155px;bottom:-126px;}
+.auth-layout>.auth-card,
+.auth-layout>.studio-credits,
+.auth-layout .studio-credits-auth{position:relative;z-index:1;}
+.auth-card{
+  border:1px solid rgba(255,255,255,.95);
+  background:linear-gradient(153deg,rgba(255,255,255,.98),rgba(246,250,255,.93));
+  box-shadow:0 26px 66px rgba(26,53,131,.13),
+    0 4px 15px rgba(19,52,136,.06),
+    inset 0 2px rgba(255,255,255,.97);
+}
+.auth-card .field input{
+  background:linear-gradient(155deg,#ffffff,#f2f6ff);
+  border:1px solid #d9e5fa;
+  box-shadow:inset 1px 2px 5px rgba(34,76,159,.045),0 2px 7px #fff;
+}
+.auth-card .btn-primary,
+.admin-layout .btn-primary{
+  background:linear-gradient(114deg,#5a9cff 0%,#3478fa 21%,#2054ec 54%,#071caa 100%) !important;
+  color:#fff !important;
+  border:1px solid rgba(100,160,255,.82) !important;
+  border-radius:18px;
+  text-shadow:0 1px 1px rgba(4,20,100,.16);
+  box-shadow:0 9px 22px rgba(35,75,216,.25),0 2px 5px rgba(27,54,149,.08),
+    inset 0 2px rgba(255,255,255,.48),inset 0 -2px 3px rgba(0,14,130,.17);
+}
+.auth-card .btn-primary:hover:not(:disabled),
+.admin-layout .btn-primary:hover:not(:disabled){
+  transform:translateY(-1px);
+  filter:brightness(1.045);
+  box-shadow:0 12px 28px rgba(21,61,194,.30),inset 0 2px rgba(255,255,255,.50);
+}
+
+/* Unified ice-blue backdrop on the client home. Photo overlays are untouched. */
+.client-app.is-home{
+  position:relative;
+  isolation:isolate;
+  background:
+    radial-gradient(ellipse 340px 360px at -120px -115px,rgba(166,195,254,.46),transparent 88%),
+    radial-gradient(ellipse 350px 400px at calc(100% + 115px) calc(100% + 90px),rgba(168,197,255,.35),transparent 90%),
+    linear-gradient(157deg,#f9fbff 4%,#ecf3ff 48%,#f7faff 100%) !important;
+}
+.client-app.is-home::before,
+.client-app.is-home::after{
+  content:"";
+  position:fixed;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.83);
+  background:linear-gradient(138deg,rgba(255,255,255,.44),rgba(147,183,255,.09));
+  box-shadow:inset -12px -15px 24px rgba(120,161,247,.15),
+    inset 9px 10px 21px rgba(255,255,255,.83),
+    9px 15px 36px rgba(49,91,193,.07);
+  pointer-events:none;
+  z-index:0;
+}
+.client-app.is-home::before{width:260px;height:260px;left:-175px;top:-145px;}
+.client-app.is-home::after{width:245px;height:245px;right:-173px;bottom:-125px;}
+.client-app.is-home .client-content,
+.client-app.is-home .client-header,
+.client-app.is-home .client-footer{
+  position:relative;
+  z-index:1;
+}
+.client-app.is-home .client-content{
+  background:transparent !important;
+}
+.client-app.is-home .client-header{
+  background:rgba(255,255,255,.78) !important;
+  border-bottom:1px solid rgba(255,255,255,.95);
+  box-shadow:0 4px 18px rgba(24,54,125,.035);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.client-app.is-home .client-home-heading{
+  background:linear-gradient(145deg,rgba(255,255,255,.99),rgba(239,246,255,.94)) !important;
+  border:1px solid rgba(255,255,255,.97) !important;
+  box-shadow:0 18px 45px rgba(18,62,156,.11),
+    inset 0 2px rgba(255,255,255,.99),
+    0 0 0 1px rgba(126,161,229,.11);
+}
+.client-app.is-home .client-company-logo-wrap{
+  background:linear-gradient(146deg,#fff 0%,#f3f7ff 100%) !important;
+  border:1px solid rgba(255,255,255,.97) !important;
+  border-radius:26px !important;
+  box-shadow:0 10px 23px rgba(20,55,146,.14),
+    0 0 0 1px rgba(123,167,247,.13),
+    inset 0 2px rgba(255,255,255,.99);
+}
+
+/* Main feature: category cards styled as the reference's bright blue Login button.
+   No icon boxes are brought back; only name, count and arrow stay visible.
+   All labels retain enough contrast against both ends of the gradient. */
+.client-app.is-home .client-category-grid{gap:14px;}
+.client-app.is-home .client-category-item{
+  display:flex;
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  align-items:center;
+  min-height:68px;
+  padding:15px 17px 15px 20px;
+  gap:9px;
+  border-radius:25px !important;
+  border:1px solid rgba(113,169,255,.95) !important;
+  background:linear-gradient(113deg,#5b9fff 0%,#367efb 22%,#285de9 57%,#081b9c 100%) !important;
+  box-shadow:
+    0 11px 23px rgba(19,66,200,.23),
+    0 3px 7px rgba(11,38,135,.10),
+    inset 0 2px rgba(255,255,255,.60),
+    inset 0 -2px 3px rgba(3,16,128,.19) !important;
+  color:#fff !important;
+  text-shadow:0 1px 1px rgba(9,26,110,.12);
+  filter:none !important;
+  transform:translateZ(0);
+  transition:transform .17s ease,box-shadow .17s ease,filter .17s ease;
+}
+.client-app.is-home .client-category-item::before{
+  content:"";
+  position:absolute;
+  inset:1px 2px auto;
+  height:43%;
+  border-radius:24px 24px 55% 55%;
+  background:linear-gradient(180deg,rgba(255,255,255,.20),rgba(255,255,255,0));
+  pointer-events:none;
+  z-index:-1;
+}
+.client-app.is-home .client-category-item:hover,
+.client-app.is-home .client-category-item:focus-visible{
+  background:linear-gradient(113deg,#66aaff 0%,#4388ff 22%,#306aff 57%,#0b22b2 100%) !important;
+  border-color:rgba(185,215,255,.99) !important;
+  box-shadow:0 15px 28px rgba(19,66,200,.30),
+    0 4px 9px rgba(11,38,135,.09),
+    inset 0 2px rgba(255,255,255,.67) !important;
+  transform:translateY(-2px);
+}
+.client-app.is-home .client-category-item:active{
+  transform:translateY(0) scale(.992);
+  filter:brightness(.965) !important;
+}
+.client-app.is-home .client-category-name{
+  color:#fff !important;
+  font-weight:840;
+  letter-spacing:.06px;
+  font-size:14px;
+  text-transform:none;
+}
+.client-app.is-home .client-category-item .client-category-count{
+  max-width:48%;
+  flex:0 1 auto;
+  min-width:0;
+  padding:6px 9px;
+  border-radius:12px;
+  background:rgba(255,255,255,.20) !important;
+  border:1px solid rgba(255,255,255,.22);
+  color:#fff !important;
+  opacity:1 !important;
+  font-weight:720;
+  font-size:10px;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.client-app.is-home .client-category-item .client-category-arrow{
+  flex:0 0 auto;
+  color:#fff !important;
+  font-size:27px;
+  font-weight:500;
+  text-shadow:0 1px 4px rgba(0,20,120,.28);
+}
+
+/* Smaller glass-blue secondary buttons, including the mobile camera menu toggle. */
+.client-app.is-camera .client-camera-header .client-camera-menu-toggle{
+  background:linear-gradient(136deg,#69b0ff 0%,#3375fa 29%,#1746e7 60%,#001893 100%) !important;
+  color:#fff !important;
+  border:1px solid rgba(130,180,255,.90) !important;
+  border-radius:18px !important;
+  box-shadow:0 8px 21px rgba(19,63,199,.24),
+    inset 0 2px rgba(255,255,255,.59),
+    inset 0 -2px rgba(3,16,128,.13) !important;
+}
+.client-app.is-camera .client-camera-header .client-camera-menu-toggle:hover{
+  filter:brightness(1.06);
+  box-shadow:0 10px 24px rgba(12,59,195,.32),inset 0 2px rgba(255,255,255,.64) !important;
+}
+.client-app.is-camera .client-camera-header .client-camera-menu-toggle:active{
+  transform:scale(.96);
+}
+/* Drawer remains platform-branded. Its tappable choices use the same button language. */
+.client-app.is-camera .client-camera-drawer{
+  background:linear-gradient(164deg,#f8fbff 0%,#eaf2ff 70%,#e2edff 100%) !important;
+  border-right:1px solid rgba(255,255,255,.95) !important;
+  color:#142951 !important;
+  box-shadow:12px 0 38px rgba(11,41,142,.18),
+    inset -1px 0 rgba(142,177,250,.11);
+}
+.client-app.is-camera .client-camera-drawer-heading strong{
+  color:#172a56 !important;
+}
+.client-app.is-camera .client-camera-drawer-label{
+  color:#5e75a7 !important;
+  opacity:1;
+}
+.client-app.is-camera .client-camera-drawer-home,
+.client-app.is-camera .client-camera-drawer-category,
+.client-app.is-camera .client-camera-drawer-bottom button{
+  background:linear-gradient(115deg,#5d9eff 0%,#377cf5 25%,#2559e7 60%,#081d9c 100%) !important;
+  border:1px solid rgba(129,177,255,.93) !important;
+  border-radius:18px !important;
+  color:#fff !important;
+  box-shadow:0 7px 15px rgba(20,69,203,.18),
+    inset 0 2px rgba(255,255,255,.45),
+    inset 0 -1px rgba(0,18,136,.20) !important;
+  font-weight:780;
+  min-height:51px;
+}
+.client-app.is-camera .client-camera-drawer-home:hover,
+.client-app.is-camera .client-camera-drawer-category:not(.selected):hover,
+.client-app.is-camera .client-camera-drawer-bottom button:hover{
+  background:linear-gradient(115deg,#70aaff 0%,#4489fd 24%,#2c64f2 60%,#1129b4 100%) !important;
+  transform:translateY(-1px);
+}
+.client-app.is-camera .client-camera-drawer-category.selected{
+  background:linear-gradient(115deg,#4a86fb 0%,#2c61e8 38%,#001893 100%) !important;
+  border:1px solid #668fff !important;
+  color:#fff !important;
+  box-shadow:0 8px 19px rgba(21,56,166,.31),
+    inset 0 2px rgba(255,255,255,.40),
+    0 0 0 2px rgba(34,88,231,.12) !important;
+}
+.client-app.is-camera .client-camera-drawer-category span,
+.client-app.is-camera .client-camera-drawer-home strong,
+.client-app.is-camera .client-camera-drawer-bottom button span{
+  color:#fff !important;
+}
+.client-app.is-camera .client-camera-drawer-close{
+  background:rgba(255,255,255,.90) !important;
+  color:#001893 !important;
+  border:1px solid rgba(152,180,243,.75) !important;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(32,70,165,.08);
+}
+.client-app.is-camera .client-camera-drawer-bottom{
+  border-top:1px solid rgba(127,160,226,.26) !important;
+}
+.client-app.is-camera .client-camera-drawer :is(button,a):focus-visible{
+  outline:3px solid #285af3;
+  outline-offset:2px;
+}
+
+/* Continue the frosted language outside the camera image, not on the video itself. */
+.client-app.is-camera,
+.client-app.is-preview{
+  background:linear-gradient(155deg,#f9fbff 0%,#edf4ff 58%,#f9fbff 100%) !important;
+}
+.client-app.is-camera .client-content,
+.client-app.is-preview .client-content{
+  background:transparent !important;
+}
+.client-app.is-camera .client-camera-header{
+  background:rgba(255,255,255,.93) !important;
+  backdrop-filter:blur(9px);
+  -webkit-backdrop-filter:blur(9px);
+}
+.client-app.is-camera .client-photo-controls{
+  background:linear-gradient(150deg,#fff,#eaf1ff) !important;
+  border:1px solid #fff !important;
+  box-shadow:0 9px 25px rgba(15,48,147,.11),inset 0 2px #fff !important;
+}
+.client-app.is-camera .client-control-secondary{
+  border-radius:15px;
+  box-shadow:0 4px 12px rgba(25,56,131,.09),inset 0 1px #fff !important;
+}
+
+/* Mobile constraints: minimum touch sizes, no hidden categories or horizontal scroll. */
+@media(max-width:430px){
+  .client-app.is-home .client-category-grid{gap:11px;}
+  .client-app.is-home .client-category-item{
+    min-height:62px;
+    padding:12px 13px 12px 15px;
+    gap:7px;
+    border-radius:21px !important;
+  }
+  .client-app.is-home .client-category-name{font-size:13px;}
+  .client-app.is-home .client-category-count{max-width:48%;padding:5px 7px;font-size:10px;}
+  .client-app.is-home .client-category-arrow{font-size:24px;}
+  .client-app.is-home::before{width:200px;height:200px;left:-136px;top:-110px;}
+  .client-app.is-home::after{width:210px;height:210px;right:-139px;bottom:-130px;}
+}
+@media(max-width:360px){
+  .client-app.is-home .client-category-count{max-width:40%;font-size:9px;}
+  .client-app.is-home .client-category-name{font-size:12px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .client-app.is-home .client-category-item,
+  .client-app.is-camera .client-camera-header .client-camera-menu-toggle,
+  .client-app.is-camera .client-camera-drawer :is(button,a){
+    transition:none !important;
+  }
+}
