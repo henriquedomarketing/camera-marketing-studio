@@ -72,6 +72,14 @@ A tela de login é exclusiva para contas já criadas e apresenta **nome de usuá
 
 O Supabase Auth exige um endereço de autenticação nos bastidores; por isso o sistema cria automaticamente um identificador técnico `usuario@usuarios.filtros.studio`, que **não é um e-mail que o cliente precisa criar ou possuir**. A Edge Function é a única responsável por criar e modificar esses logins, sempre verificando a sessão administrativa. Alterar o nome de usuário de uma empresa também atualiza seu identificador interno. Não há recuperação de senha por e-mail para clientes; o administrador pode redefinir as senhas no painel.
 
+## Biblioteca de filtros PNG: visualizar e gerenciar
+
+Em **Painel administrativo → Filtros PNG → Filtros cadastrados**, clique na miniatura ou em **Visualizar e editar** para abrir a imagem PNG inteira, em uma prévia grande. É possível alternar entre fundo quadriculado e fundo escuro para conferir detalhes transparentes ou brancos.
+
+Na mesma janela, o administrador pode **renomear**, **mover o filtro para outra categoria da mesma empresa**, **substituir o arquivo PNG** (com prévia antes de salvar) ou **excluir** mediante confirmação. Para encontrar os arquivos mais rápido, a biblioteca permite filtrar por **empresa** e **categoria**.
+
+Substituir o PNG mantém o ID do filtro e o vínculo com a empresa, cria o novo arquivo em caminho exclusivo e só elimina o antigo **depois** de atualizar o banco com sucesso; em falha na atualização, o novo upload é removido e o cadastro anterior continua válido. A biblioteca mantém a exigência de PNG transparente com até 12 MB.
+
 ## Pausar e reativar o acesso dos clientes
 
 Em **Painel administrativo → Clientes**, cada empresa dispõe de **Pausar acesso** e, quando pausada, **Reativar acesso**. Essa função usa `companies.access_paused`, separada do cadastro financeiro: **não cancela mensalidades, não apaga pagamentos, não exclui logins e não altera os filtros cadastrados**.
