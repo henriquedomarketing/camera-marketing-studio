@@ -606,6 +606,110 @@ function filterModal(){
   openModal('Cadastrar filtro PNG',content,'filterForm');
   updateCategoryOptions();
 }
+function editFilterModal(filterId){
+  if(app.profile?.role!=='admin')return;
+  const filter=app.filters.find(f=>f.id===filterId);
+  if(!filter)return toast('O filtro não foi encontrado. Atualize o painel.');
+  clearFilterDraftUrl();
+  const categories=app.categories.filter(c=>c.company_id===filter.company_id)
+    .sort((a,b)=>Number(a.sort_order)-Number(b.sort_order));
+  const currentCategory=categories.some(c=>c.id===filter.category_id)?filter.category_id:'';
+  const content=`<form class="form filter-editor-form" id="editFilterForm">
+    <div class="filter-editor-layout">
+      <div class="filter-editor-visual">
+        <div class="filter-editor-large-preview" id="filterEditorPreview">
+          <img data-img="${escapeHtml(filter.id)}" alt="Prévia completa do filtro PNG ${escapeHtml(filter.name)}">
+        </div>
+        <p class="filter-editor-preview-caption" id="filterEditorPreviewCaption">PNG atual · proporção original preservada</p>
+      </div>
+      <div class="filter-editor-fields">
+        <p class="filter-editor-kicker">GERENCIAR FILTRO</p>
+        <div class="filter-editor-company"><span>Empresa</span><strong>${escapeHtml(companyName(filter.company_id))}</strong></div>
+        ${field('name','Nome do filtro',filter.name)}
+        <div class="field"><label for="editFilterCategory">Categoria</label>
+          <select id="editFilterCategory" name="category_id" required>
+            ${categories.map(c=>option(c.id,c.name,c.id===currentCategory)).join('')}
+          </select>
+        </div>
+        <div class="field"><label for="editFilterFile">Substituir imagem PNG <small>(opcional)</small></label>
+          <input id="editFilterFile" name="file" type="file" accept="image/png,.png">
+          <small class="filter-editor-file-note">Selecione outro PNG transparente (até 12 MB). Você verá a prévia antes de salvar. Sem arquivo novo, o PNG atual permanece.</small>
+        </div>
+        <div class="filter-editor-actions">
+          <button class="btn btn-primary filter-editor-save" type="submit">Salvar alterações</button>
+          <button class="btn" type="button" data-act="close-modal">Cancelar</button>
+        </div>
+        <button class="small-action danger filter-editor-delete" type="button" data-act="remove-filter" data-id="${escapeHtml(filter.id)}">Excluir este filtro definitivamente</button>
+      </div>
+    </div>
+  </form>`;
+  openModal(`Filtro: ${filter.name}`,content,'editFilterForm');
+  app.modal.recordId=filter.id;
+}
+
+function previewReplacementFilter(file){
+  if(app.modal?.formId!=='editFilterForm')return;
+  const img=document.querySelector('#filterEditorPreview img');
+  const caption=$('filterEditorPreviewCaption');
+  if(!img)return;
+  clearFilterDraftUrl();
+  if(file){
+    if(file.type!=='image/png'||file.size>12582912){
+      toast('Selecione um PNG de até 12 MB.');
+      document.querySelector('#editFilterFile').value='';
+    }else{
+      app.filterDraftUrl=URL.createObjectURL(file);
+      img.src=app.filterDraftUrl;
+      if(caption)caption.textContent='Prévia do novo PNG · ainda não foi salvo';
+      return;
+    }
+  }
+  const current=app.filters.find(f=>f.id===app.modal.recordId);
+  if(current)mediaUrl(current).then(url=>{if(img.isConnected)img.src=url;}).catch(()=>{});
+  if(caption)caption.textContent='PNG atual · proporção original preservada';
+}
+
+async function saveFilterChanges(form){
+  if(app.profile?.role!=='admin')throw Error('Apenas o administrador pode editar filtros.');
+  const filter=app.filters.find(f=>f.id===app.modal?.recordId);
+  if(!filter)throw Error('Filtro não encontrado. Atualize a página.');
+  const name=form.elements.name.value.trim();
+  if(!name||name.length>120)throw Error('O nome do filtro deve ter entre 1 e 120 caracteres.');
+  const categoryId=form.elements.category_id.value;
+  if(!app.categories.some(c=>c.id===categoryId&&c.company_id===filter.company_id))
+    throw Error('Escolha uma categoria pertencente à mesma empresa.');
+  const file=form.elements.file.files?.[0]||null;
+  if(file)await validatePNG(file);
+  const replacementPath=file?`${filter.company_id}/${id()}.png`:null;
+  let uploaded=false;
+  try{
+    if(file){
+      const {error}=await api.storage.from('company-filters')
+        .upload(replacementPath,file,{contentType:'image/png',upsert:false});
+      if(error)throw error;
+      uploaded=true;
+    }
+    const payload={name,category_id:categoryId};
+    if(replacementPath)payload.storage_path=replacementPath;
+    const {data,error}=await api.from('filters').update(payload)
+      .eq('id',filter.id).eq('company_id',filter.company_id)
+      .eq('storage_path',filter.storage_path).select('id').single();
+    if(error)throw error;
+    if(!data)throw Error('O filtro foi alterado por outra sessão. Atualize e tente novamente.');
+  }catch(error){
+    if(uploaded)await api.storage.from('company-filters').remove([replacementPath]);
+    throw error;
+  }
+  if(replacementPath){
+    if(app.images.has(filter.id)){
+      URL.revokeObjectURL(app.images.get(filter.id));
+      app.images.delete(filter.id);
+    }
+    const {error}=await api.storage.from('company-filters').remove([filter.storage_path]);
+    if(error)console.warn('O PNG antigo precisará de limpeza no armazenamento:',error.message);
+  }
+  clearFilterDraftUrl();
+}
 function updateCategoryOptions(){
   const form=$('filterForm');if(!form)return;
   const companyId=form.elements.company_id.value;
@@ -762,7 +866,7 @@ async function handleForm(event){event.preventDefault();const form=event.target;
       throw new Error('Cliente cadastrado, mas a personalização ficou pendente: '+errorMessage(error)+'. Abra Editar para reenviar a logo.');
     }
   }
-}if(form.id==='categoryForm'){const p={company_id:values.company_id,name:values.name.trim()};const q=app.modal.recordId?api.from('categories').update(p).eq('id',app.modal.recordId):api.from('categories').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='invoiceForm'){const p={company_id:values.company_id,amount:Number(values.amount),due_date:values.due_date,status:values.status,paid_at:values.status==='paid'?new Date().toISOString():null,notes:values.notes||null};const q=app.modal.recordId?api.from('invoices').update(p).eq('id',app.modal.recordId):api.from('invoices').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='filterForm')await filterUpload(form);if(form.id==='passwordForm')await manager({action:'reset_password',company_id:app.modal.recordId,password:values.password});if(form.id==='settingsForm'){const support=String(values.supportWhatsapp||'').trim();const digits=support.replace(/\D/g,'');if(support&&!(digits.length===10||digits.length===11||digits.length===12&&digits.startsWith('55')||digits.length===13&&digits.startsWith('55')))throw new Error('Informe um WhatsApp com DDD válido, como (44) 99999-9999.');const branding={...app.settings.branding,appName:values.appName,supportWhatsapp:support};const {error}=await api.from('app_settings').upsert({key:'branding',value:branding});if(error)throw error;}app.modal=null;await loadData();toast('Alterações salvas com sucesso.');}catch(error){toast(errorMessage(error))}finally{if(button?.isConnected)button.disabled=false;}}
+}if(form.id==='categoryForm'){const p={company_id:values.company_id,name:values.name.trim()};const q=app.modal.recordId?api.from('categories').update(p).eq('id',app.modal.recordId):api.from('categories').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='invoiceForm'){const p={company_id:values.company_id,amount:Number(values.amount),due_date:values.due_date,status:values.status,paid_at:values.status==='paid'?new Date().toISOString():null,notes:values.notes||null};const q=app.modal.recordId?api.from('invoices').update(p).eq('id',app.modal.recordId):api.from('invoices').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='filterForm')await filterUpload(form);if(form.id==='editFilterForm')await saveFilterChanges(form);if(form.id==='passwordForm')await manager({action:'reset_password',company_id:app.modal.recordId,password:values.password});if(form.id==='settingsForm'){const support=String(values.supportWhatsapp||'').trim();const digits=support.replace(/\D/g,'');if(support&&!(digits.length===10||digits.length===11||digits.length===12&&digits.startsWith('55')||digits.length===13&&digits.startsWith('55')))throw new Error('Informe um WhatsApp com DDD válido, como (44) 99999-9999.');const branding={...app.settings.branding,appName:values.appName,supportWhatsapp:support};const {error}=await api.from('app_settings').upsert({key:'branding',value:branding});if(error)throw error;}clearFilterDraftUrl();app.modal=null;await loadData();toast('Alterações salvas com sucesso.');}catch(error){toast(errorMessage(error))}finally{if(button?.isConnected)button.disabled=false;}}
 async function mediaUrl(filter){if(app.images.has(filter.id))return app.images.get(filter.id);const {data,error}=await api.storage.from('company-filters').download(filter.storage_path);if(error)throw error;const uri=URL.createObjectURL(data);app.images.set(filter.id,uri);return uri;}
 async function hydrateImages(){const imgs=document.querySelectorAll('[data-img]');for(const element of imgs){const filter=app.filters.find(f=>f.id===element.dataset.img);if(!filter)continue;mediaUrl(filter).then(url=>{if(element.isConnected)element.src=url}).catch(()=>{if(element.isConnected)element.alt='PNG indisponível';});}}
 async function startCamera(facing='environment'){
@@ -963,7 +1067,7 @@ if(act==='open-client-menu'){setClientCameraMenu(true);return;}if(act==='close-c
   return;
 }if(act==='category-move-up'||act==='category-move-down'){
   await moveCategoryByButton(uid,act==='category-move-up'?-1:1);return;
-}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
+}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='view-filter'){editFilterModal(uid);return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
   const paths=app.filters.filter(f=>f.category_id===uid).map(f=>f.storage_path).filter(Boolean);
   const {error}=await api.from('categories').delete().eq('id',uid);
   if(error)throw error;
@@ -971,7 +1075,19 @@ if(act==='open-client-menu'){setClientCameraMenu(true);return;}if(act==='close-c
     if(storageError)toast('Categoria removida, mas alguns PNGs precisam de limpeza no armazenamento.');
   }
   await refresh();
-}return;}if(act==='remove-filter'){if(confirm('Excluir este filtro permanentemente?')){const filter=app.filters.find(f=>f.id===uid);if(!filter)return;const {error}=await api.from('filters').delete().eq('id',uid);if(error)throw error;const removed=await api.storage.from('company-filters').remove([filter.storage_path]);if(removed.error)toast('Cadastro removido, mas o PNG precisa de limpeza no Storage.');await refresh();}return;}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){if(app.categories.some(c=>c.id===uid))resetCameraSession(uid);return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){
+}return;}if(act==='remove-filter'){
+  if(!confirm('Excluir este filtro permanentemente? O arquivo PNG também será removido.'))return;
+  const filter=app.filters.find(f=>f.id===uid);
+  if(!filter)return;
+  const {error}=await api.from('filters').delete().eq('id',uid);
+  if(error)throw error;
+  if(app.images.has(uid)){URL.revokeObjectURL(app.images.get(uid));app.images.delete(uid);}
+  if(app.modal?.formId==='editFilterForm')closeModal();
+  const removed=await api.storage.from('company-filters').remove([filter.storage_path]);
+  if(removed.error)toast('Filtro excluído, mas o PNG antigo precisa de limpeza no Storage.');
+  await loadData();
+  return;
+}if(act==='remove-invoice'){if(confirm('Excluir esta cobrança?')){const {error}=await api.from('invoices').delete().eq('id',uid);if(error)throw error;await refresh();}return;}if(act==='toggle-paid'){const invoice=app.invoices.find(i=>i.id===uid);const paid=invoice.status!=='paid';const {error}=await api.from('invoices').update({status:paid?'paid':'pending',paid_at:paid?new Date().toISOString():null}).eq('id',uid);if(error)throw error;await refresh();return;}if(act==='open-category'){if(app.categories.some(c=>c.id===uid))resetCameraSession(uid);return;}if(act==='back-categories'){navigate('categories');return;}if(act==='choose-filter'){
   const f=app.filters.find(x=>x.id===uid);
   if(!f||f.category_id!==app.selectedCategory||
      (app.adminTest.active&&f.company_id!==app.adminTest.companyId))return;
@@ -1001,6 +1117,7 @@ function setAdminMobileMenu(open){
 }
 document.addEventListener('keydown',event=>{
   if(event.key==='Escape'&&$('adminLayout')?.classList.contains('admin-menu-open'))setAdminMobileMenu(false);
+  if(event.key==='Escape'&&app.modal?.formId==='editFilterForm')closeModal();
   if(event.key==='Escape'&&document.querySelector('.client-camera-menu-open'))setClientCameraMenu(false);
 });
 window.addEventListener('resize',()=>{
@@ -1031,5 +1148,8 @@ $('root').addEventListener('change',event=>{
       render();return;
     }
   }
-if(app.modal?.formId==='filterForm'){if(event.target.id==='f_company_id')updateCategoryOptions();if(event.target.id==='filterCategory')updateNewCategoryField();}if(event.target.id==='galleryPhotoInput'){const file=event.target.files?.[0];event.target.value='';if(file)loadGalleryPhoto(file);}});
+if(app.modal?.formId==='filterForm'){if(event.target.id==='f_company_id')updateCategoryOptions();if(event.target.id==='filterCategory')updateNewCategoryField();}if(event.target.id==='editFilterFile'){
+  previewReplacementFilter(event.target.files?.[0]||null);return;
+}
+if(event.target.id==='galleryPhotoInput'){const file=event.target.files?.[0];event.target.value='';if(file)loadGalleryPhoto(file);}});
 init();
