@@ -39,13 +39,21 @@ Deno.serve(async (req: Request) => {
     if (!name || name.length < 2 || !usernamePattern.test(username) || password.length < 8 || password.length > 128) {
       return json({ error: "Informe empresa, usuário de 3 a 32 caracteres (letras, números, _ ou -) e senha de 8 a 128 caracteres." }, 400);
     }
-    const monthlyFee = Number(body.monthly_fee ?? 0);
-    const dueDay = Number(body.due_day ?? 10);
-    if (!Number.isFinite(monthlyFee) || monthlyFee < 0 || monthlyFee > 100000 || !Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)
-      return json({ error: "Valor ou dia do vencimento inválido." }, 400);
+    const rawFee = body.monthly_fee;
+    const monthlyFee = rawFee === "" || rawFee == null ? 0 : Number(rawFee);
+    const nextDueDate = typeof body.next_due_date === "string" ? body.next_due_date.trim() : "";
+    const rawDueDay = body.due_day;
+    const dueDay = monthlyFee === 0 ? 10
+      : rawDueDay === "" || rawDueDay == null
+        ? (nextDueDate ? Number(nextDueDate.slice(8, 10)) : NaN)
+        : Number(rawDueDay);
+    if (!Number.isFinite(monthlyFee) || monthlyFee < 0 || monthlyFee > 100000)
+      return json({ error: "Mensalidade inválida. Deixe em branco para cadastrar um usuário gratuito." }, 400);
+    if (!Number.isInteger(dueDay) || dueDay < 1 || dueDay > 31)
+      return json({ error: "Para um cliente pagante, informe o dia do vencimento ou a data do próximo vencimento." }, 400);
     const { data: createdCompany, error: companyError } = await adminApi.from("companies").insert({
       name, login_username: username, contact_email: null, phone: safeText(body.phone, 50),
-      monthly_fee: monthlyFee, due_day: dueDay, next_due_date: body.next_due_date || null
+      monthly_fee: monthlyFee, due_day: dueDay, next_due_date: monthlyFee > 0 ? nextDueDate || null : null
     }).select("id").single();
     if (companyError?.code === "23505") return json({ error: "Esse nome de usuário já está em uso. Escolha outro." }, 409);
     if (companyError || !createdCompany) return json({ error: companyError?.message || "Não foi possível criar a empresa." }, 400);
