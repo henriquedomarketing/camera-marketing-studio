@@ -1441,3 +1441,19 @@ img[data-brand-logo].brand-image-ready {visibility:visible;}
     padding-inline:2px;
   }
 }
+
+/* Botão das três barrinhas com a cor da empresa selecionada.
+   Mantém tamanho e alinhamento dos filtros e contraste automático. */
+.client-app.is-camera .client-camera-header .client-camera-menu-toggle{
+  background:var(--brand-primary,#001893);
+  color:var(--brand-on-primary,#fff);
+  border-color:var(--brand-primary,#001893);
+  box-shadow:0 2px 9px #00189317;
+}
+.client-app.is-camera .client-camera-header .client-camera-menu-toggle:active{
+  filter:brightness(.91);
+}
+.client-app.is-camera .client-camera-header .client-camera-menu-toggle:focus-visible{
+  outline:3px solid var(--brand-primary,#001893);
+  outline-offset:3px;
+}
