@@ -50,6 +50,10 @@ Uma nova migração (`20261102_004_auto_monthly_finance.sql`) sincroniza **mensa
 
 No painel, a **Visão geral** informa o valor a receber; em **Financeiro**, o tipo *Mensalidade* ou *Manual* fica identificado e o botão **Editar mensalidade** leva ao cadastro da empresa. Não há geração ou envio automático de boletos bancários, apenas controle financeiro dos lançamentos.
 
+## Login com atendimento SUPORT
+
+A tela de login é exclusiva para contas já criadas e apresenta apenas e-mail, senha, **Entrar** e o link **SUPORT** (https://wa.me/5544997497915). As opções de **Primeiro acesso** e **Criar conta** foram removidas, assim como a inscrição pública pelo cliente web. Novas empresas continuam sendo cadastradas pelo administrador na aba **Clientes**; o WhatsApp principal já consta nas Configurações de suporte.
+
 ## Pausar e reativar o acesso dos clientes
 
 Em **Painel administrativo → Clientes**, cada empresa dispõe de **Pausar acesso** e, quando pausada, **Reativar acesso**. Essa função usa `companies.access_paused`, separada do cadastro financeiro: **não cancela mensalidades, não apaga pagamentos, não exclui logins e não altera os filtros cadastrados**.
