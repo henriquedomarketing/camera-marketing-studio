@@ -17,7 +17,8 @@ const errorMessage=error=>error?.message||'Não foi possível concluir esta oper
 
 const brandColor=(v,fallback)=>typeof v==='string'&&/^#[0-9a-fA-F]{6}$/.test(v)?v:fallback;
 function brandInk(hex){const h=brandColor(hex,'#DB2032').slice(1);const c=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return c[0]*.2126+c[1]*.7152+c[2]*.0722>.38?'#131D34':'#FFFFFF';}
-function brandStyle(company){const main=brandColor(company?.primary_color,'#071C70'),accent=brandColor(company?.accent_color,'#DB2032');return `--brand-primary:${main};--brand-accent:${accent};--brand-on-accent:${brandInk(accent)};--brand-on-primary:${brandInk(main)};`;}
+// A identidade visual da plataforma é fixa; só a logo da empresa personaliza a área do cliente.
+function brandStyle(_company){return '--brand-primary:#001893;--brand-accent:#eaf0ff;--brand-on-accent:#001893;--brand-on-primary:#ffffff;';}
 const companyInitials=company=>String(company?.name||'FS').trim().split(/\s+/).slice(0,2).map(word=>word.charAt(0)).join('').toUpperCase()||'FS';
 const brandImg=(company,cls)=>company?.logo_path?`<img data-brand-logo="${escapeHtml(company.id)}" class="${cls}" alt="" aria-hidden="true" decoding="async">`:'';
 
@@ -550,15 +551,11 @@ function companyModal(cid){
     ${!c?field('password','Senha inicial (8 caracteres ou mais)','','password',true,8):''}
     <div class="branding-form-section">
       <strong>Identidade visual da empresa</strong>
-      <p>Envie a logo original em PNG, no formato que tiver (quadrado, horizontal ou vertical). A imagem manterá a proporção original, sem corte nem distorção. Escolha também as cores exibidas após o login.</p>
+      <p>Envie a logo original em PNG, no formato que tiver (quadrado, horizontal ou vertical). A imagem manterá a proporção original, sem corte nem distorção. O visual do aplicativo seguirá sempre a identidade oficial do Filtros Studio.</p>
       ${logoInfo}
       <div class="field">
         <label for="companyLogo">Logo PNG — qualquer tamanho e proporção (máximo 2 MB)${c?' — opcional para substituir':''}</label>
         <input id="companyLogo" type="file" name="logo" accept=".png,image/png" ${c?'':'required'}>
-      </div>
-      <div class="brand-color-grid">
-        ${field('primary_color','Cor principal',brandColor(c?.primary_color,'#071C70'),'color')}
-        ${field('accent_color','Cor dos botões',brandColor(c?.accent_color,'#DB2032'),'color')}
       </div>
     </div>
     <div class="optional-billing-section">
@@ -793,7 +790,8 @@ async function uploadCompanyLogo(companyId,file){
   return path;
 }
 async function saveCompanyBrand(companyId,values,logo,oldLogo){
-  const payload={primary_color:brandColor(values.primary_color,'#071C70'),accent_color:brandColor(values.accent_color,'#DB2032')};
+  if(!logo)return;
+  const payload={};
   let uploaded=null;
   try{
     if(logo){uploaded=await uploadCompanyLogo(companyId,logo);payload.logo_path=uploaded;}
