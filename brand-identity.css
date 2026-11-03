@@ -140,3 +140,15 @@
   text-align:center !important;
   box-sizing:border-box !important;
 }
+
+/* Contraste da marca no menu lateral azul-escuro do administrador. */
+#adminSidebar .admin-sidebar-head .brand > span:last-child{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  text-shadow:none !important;
+}
+#adminSidebar .admin-sidebar-head .brand > span:last-child small{
+  color:#dce6ff !important;
+  -webkit-text-fill-color:#dce6ff !important;
+  opacity:1 !important;
+}
