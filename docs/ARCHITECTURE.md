@@ -1,4 +1,4 @@
-# Arquitetura — Camera Marketing Studio
+# Arquitetura — Filtros Studio
 
 ## Visão geral
 

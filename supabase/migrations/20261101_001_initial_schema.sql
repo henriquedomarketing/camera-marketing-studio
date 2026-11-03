@@ -62,7 +62,7 @@ create table public.app_settings (
   key text primary key,value jsonb not null,updated_at timestamptz not null default now()
 );
 insert into public.app_settings(key,value) values
-  ('branding','{"appName":"Camera Marketing Studio","supportWhatsapp":"","maxClients":100}'::jsonb);
+  ('branding','{"appName":"Filtros Studio","supportWhatsapp":"","maxClients":100}'::jsonb);
 
 create function private.is_admin() returns boolean language sql stable security definer set search_path='' as $$
   select exists(select 1 from public.profiles p where p.id=(select auth.uid()) and p.role='admin')

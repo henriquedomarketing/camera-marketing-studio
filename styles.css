@@ -165,7 +165,7 @@ body.mobile-menu-lock{overflow:hidden}
 }
 
 /* Azul oficial aprovado: #001893.
-   Aplicar somente à identidade Camera Marketing Studio, não às cores das empresas. */
+   Aplicar somente à identidade Filtros Studio, não às cores das empresas. */
 .btn-primary,.nav-btn.active,.sidebar .nav-btn.active,
 .brand-mark,.mobile-menu-toggle{
   background-color:var(--cms-indigo);

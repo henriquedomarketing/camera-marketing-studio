@@ -1,4 +1,4 @@
-# Camera Marketing Studio
+# Filtros Studio
 
 Plataforma web independente do projeto antigo `filtros-personalizados`, projetada para até **100 empresas**. Interface brasileira responsiva, pensada para computadores (painel) e iPhone/Android (câmera e filtros).
 
@@ -9,7 +9,7 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 - **Storage privado**: bucket `company-filters`, PNGs com máximo de 12 MB.
 - **Servidor para contas**: Supabase Edge Function `manage-client`.
 - **Frontend**: `index.html`, `styles.css`, `app.js` (HTML/CSS/JavaScript ES modules).
-- **Site de produção**: https://camera-marketing-studio.vercel.app (Vercel conectado à branch `main` do GitHub; deploy `READY` confirmado em 01/11/2026).
+- **Site de produção**: https://filtros.studio (Vercel conectado à branch `main` do GitHub; deploy `READY` confirmado em 01/11/2026).
 - **Migração SQL**: `supabase/migrations/20261101_001_initial_schema.sql` (documentação da estrutura que já foi aplicada ao projeto real).
 - **Função do servidor**: `supabase/functions/manage-client/index.ts`.
 
@@ -67,7 +67,7 @@ O sistema apresenta, com visual discreto e responsivo, os créditos **“Desenvo
 ## Aparência e fluxo mobile (novembro de 2026)
 
 - **Apenas a tela inicial do cliente** usa a logo PNG original e as cores da empresa. A logo fica em moldura quadrada compacta, sem sobrepor os títulos; o PNG não é alterado. PNG com fundo branco não é necessariamente transparente, portanto prefira a logo com canal alfa para não exibir quadrado branco.
-- Ao entrar numa categoria, **a câmera tem fundo branco e a identidade padrão do Camera Marketing Studio** (azul anil oficial `#001893`), sem reproduzir as cores da loja.
+- Ao entrar numa categoria, **a câmera tem fundo branco e a identidade padrão do Filtros Studio** (azul anil oficial `#001893`), sem reproduzir as cores da loja.
 - **Câmera ampla, com filtros no topo**: ao entrar na categoria, o menu ☰ permanece à esquerda e os filtros aparecem em **cards quadrados de 58 × 58 px (20% menores que os anteriores), do mesmo tamanho do botão do menu**, alinhados horizontalmente e com rolagem lateral. A prévia 9:16 ocupa a largura do celular (até 420px), seguida pelos controles de fotografar e Galeria. O painel duplicado de filtros que ficava embaixo foi removido.
 - **Menu ☰ no topo, onde ficava a logo**: a faixa branca superior reúne o botão ☰ e os filtros em cards quadrados alinhados, sem cobrir a prévia. A gaveta lateral tem fundo **azul #001893**, com **Página inicial em primeiro lugar**, categorias em seguida e **Sair da conta** no rodapé.
 - Ordem na câmera: **menu ☰ + filtros quadrados horizontais → prévia grande da câmera → controles (Alternar / botão vermelho / Galeria) → Salvar ou compartilhar (somente após importar da galeria)**.
@@ -91,8 +91,8 @@ Por segurança, o cadastro da empresa ocorre antes do envio da logo: se o envio 
 
 A instalação já tem banco/schema criados e uma Edge Function ativa, mas **não existe conta administrativa criada automaticamente**.
 
-1. No [Supabase → Authentication → URL Configuration](https://supabase.com/dashboard/project/imfgumnpbxhbrjlkiphf/auth/url-configuration), defina **Site URL** como `https://camera-marketing-studio.vercel.app` e salve. Isso evita redirecionar a confirmação de e-mail para `localhost`.
-2. Abra https://camera-marketing-studio.vercel.app, clique em **Criar conta inicial** e registre seu e-mail com senha forte.
+1. No [Supabase → Authentication → URL Configuration](https://supabase.com/dashboard/project/imfgumnpbxhbrjlkiphf/auth/url-configuration), defina **Site URL** como `https://filtros.studio` e salve. Isso evita redirecionar a confirmação de e-mail para `localhost`.
+2. Abra https://filtros.studio, clique em **Criar conta inicial** e registre seu e-mail com senha forte.
 3. Confirme o e-mail enviado pelo Supabase (conforme configuração de autenticação).
 4. O dono do projeto, com acesso ao Supabase, deve promover **somente aquela conta verificada**. Esse passo pode ser executado no SQL Editor:
 
@@ -134,7 +134,7 @@ Crie um projeto apontando para a raiz do repositório; **Framework: Other**, sem
 ## Pendências para produção
 
 - **GitHub vinculado:** https://github.com/henriquedomarketing/camera-marketing-studio.
-- **Site HTTPS publicado:** https://camera-marketing-studio.vercel.app.
+- **Site HTTPS publicado:** https://filtros.studio.
 - Configurar **Site URL** de autenticação no Supabase e cadastrar/autorizar a primeira conta administrativa.
 - Validar a experiência no Safari iPhone e Chrome Android.
 - Testar o cadastro/exclusão de uma empresa e o envio/download/captura de um PNG real, com as regras RLS habilitadas.
@@ -144,7 +144,7 @@ Crie um projeto apontando para a raiz do repositório; **Framework: Other**, sem
 ## Estrutura
 
 ```text
-camera-marketing-studio/
+filtros-studio/
 ├── index.html
 ├── styles.css
 ├── app.js
@@ -163,3 +163,8 @@ camera-marketing-studio/
 ## Notas para futuras IAs e desenvolvedores
 
 Comece por **README.md** e **docs/ARCHITECTURE.md**, examine a migração SQL e revise as políticas RLS antes de qualquer mudança no banco. Nunca usar chaves secretas no navegador. Não misturar este projeto com o antigo repositório de filtros Flutter/Firebase. Qualquer alteração de schema deve virar uma nova migração; não editar retrospectivamente a migração inicial. Antes de aplicar uma mudança, testar num ambiente separado.
+
+
+## Domínio e identidade da marca
+
+**Marca oficial:** Filtros Studio. **Domínio principal:** https://filtros.studio. O DNS precisa apontar o registro A do domínio para a Vercel; `www.filtros.studio` redireciona ao domínio principal. Para o login por e-mail, adicionar o domínio às URLs autorizadas no Supabase Auth. **GitHub:** o repositório ainda utiliza o endereço antigo até ser renomeado em Settings → General; a conexão Git é mantida pela Vercel durante a mudança. **Supabase:** manter o project ID e a região atuais; o nome de exibição do projeto pode ser renomeado em Settings sem migrar banco.

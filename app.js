@@ -70,7 +70,7 @@ function studioCredits(extraClass=''){
     <span>Desde 2025 · Todos os direitos reservados.</span>
   </footer>`;
 }
-function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div>${studioCredits('studio-credits-auth')}</div>`}
+function authMarkup(register=false){return `<div class="auth-layout"><div class="auth-card"><div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div><h1>${register?'Criar conta inicial':'Bem-vindo de volta'}</h1><p class="muted">${register?'Cadastre seu acesso. Ele só se tornará administrador após ativação segura no Supabase.':'Entre para acessar seu painel ou os filtros da sua empresa.'}</p><form class="form" id="authForm">${field('email','E-mail','','email')}${field('password','Senha','','password',true,register?8:0)}<button class="btn btn-primary btn-full" type="submit">${register?'Criar conta':'Entrar'}</button><div id="authError" class="auth-error"></div></form><button class="subtle-button auth-switch" type="button" data-act="${register?'login-view':'register-view'}">${register?'Já tenho conta. Entrar':'Primeiro acesso do administrador? Criar conta'}</button></div>${studioCredits('studio-credits-auth')}</div>`}
 function layout(content){const admin=app.profile?.role==='admin';
   const testing=admin&&app.adminTest.active&&['camera','preview'].includes(app.page);
   if(!admin||testing){
@@ -84,8 +84,8 @@ function layout(content){const admin=app.profile?.role==='admin';
           <span class="client-brand-copy"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong><small>FILTROS PERSONALIZADOS</small></span>
         </div>`
       : `<div class="client-brand client-platform-brand">
-          <span class="client-brand-mark client-platform-mark">CM</span>
-          <span class="client-brand-copy"><strong>camera marketing</strong><small>STUDIO</small></span>
+          <span class="client-brand-mark client-platform-mark">FS</span>
+          <span class="client-brand-copy"><strong>Filtros</strong><small>STUDIO</small></span>
         </div>`;
     const cameraMode=type==='is-camera';
     const cameraDrawer=cameraMode?`<div class="client-camera-menu-backdrop" data-act="close-client-menu" aria-hidden="true"></div>
@@ -129,7 +129,7 @@ function layout(content){const admin=app.profile?.role==='admin';
     <button type="button" class="mobile-menu-backdrop" data-act="close-mobile-menu" tabindex="-1" aria-label="Fechar menu"></button>
     <aside class="sidebar" id="adminSidebar" aria-label="Menu administrativo">
       <div class="admin-sidebar-head">
-        <div class="brand"><span class="brand-mark">CM</span><span>camera marketing<small>STUDIO</small></span></div>
+        <div class="brand"><span class="brand-mark">FS</span><span>Filtros<small>STUDIO</small></span></div>
         <button type="button" class="sidebar-close" data-act="close-mobile-menu" aria-label="Fechar menu">✕</button>
       </div>
       <nav aria-label="Navegação do painel">${menu.map(([value,title])=>`<button class="nav-btn ${app.page===value?'active':''}" data-nav="${value}">${title}</button>`).join('')}</nav>
@@ -206,7 +206,7 @@ function testFilters(){
     </div>`;
 }
 function finance(){const pending=app.invoices.filter(x=>x.status==='pending'),paid=app.invoices.filter(x=>x.status==='paid'),late=pending.filter(x=>x.due_date<today());return header('COBRANÇAS','Financeiro','Mensalidades sincronizadas com os clientes e cobranças manuais; sem integração bancária.',button('Nova cobrança','add-invoice'))+`<div class="stats">${stat('A receber',brl(pending.reduce((s,x)=>s+Number(x.amount),0)),pending.length+' cobranças abertas')}${stat('Recebido',brl(paid.reduce((s,x)=>s+Number(x.amount),0)),paid.length+' pagamentos registrados')}${stat('Atrasado',brl(late.reduce((s,x)=>s+Number(x.amount),0)),late.length+' cobranças vencidas')}${stat('Empresas',app.companies.length,'Clientes cadastrados')}</div><div class="card">${table(['CLIENTE','TIPO','VENCIMENTO','VALOR','STATUS','AÇÕES'],app.invoices.map(x=>`<tr><td><b>${escapeHtml(companyName(x.company_id))}</b></td><td>${x.origin==='monthly'?'Mensalidade':'Manual'}</td><td>${dateBR(x.due_date)}</td><td>${brl(x.amount)}</td><td>${badge(dueStatus(x))}</td><td><div class="actions">${action('toggle-paid',x.id,x.status==='paid'?'Reabrir':'Marcar pago')}${x.origin==='monthly'?action('edit-client',x.company_id,'Editar mensalidade'):action('edit-invoice',x.id,'Editar')+action('remove-invoice',x.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
-function settings(){const branding=app.settings.branding||{};return header('PERSONALIZAÇÃO','Configurações','Altere o nome da plataforma e o WhatsApp de suporte.')+`<div class="card"><form id="settingsForm" class="form">${field('appName','Nome da plataforma',branding.appName||'Camera Marketing Studio')}${field('supportWhatsapp','WhatsApp de suporte',branding.supportWhatsapp||'', 'tel',false)}<p class="settings-support-hint">Informe o DDD e o número do suporte. Esse contato aparecerá automaticamente para todos os clientes com acesso pausado. Exemplo: (44) 99999-9999. Não é necessário editar cada cliente.</p><button type="submit" class="btn btn-primary">Salvar configurações</button></form><p class="note">O limite de 100 clientes é aplicado pelo banco. As senhas ficam no Supabase Auth e os PNGs em um armazenamento privado.</p></div>`}
+function settings(){const branding=app.settings.branding||{};return header('PERSONALIZAÇÃO','Configurações','Altere o nome da plataforma e o WhatsApp de suporte.')+`<div class="card"><form id="settingsForm" class="form">${field('appName','Nome da plataforma',branding.appName||'Filtros Studio')}${field('supportWhatsapp','WhatsApp de suporte',branding.supportWhatsapp||'', 'tel',false)}<p class="settings-support-hint">Informe o DDD e o número do suporte. Esse contato aparecerá automaticamente para todos os clientes com acesso pausado. Exemplo: (44) 99999-9999. Não é necessário editar cada cliente.</p><button type="submit" class="btn btn-primary">Salvar configurações</button></form><p class="note">O limite de 100 clientes é aplicado pelo banco. As senhas ficam no Supabase Auth e os PNGs em um armazenamento privado.</p></div>`}
 function clientCategories(){
   return `<section class="client-home">
     <div class="client-home-heading">
@@ -286,12 +286,12 @@ function supportContactMarkup(){
   const valid=(waDigits.length===12||waDigits.length===13)&&waDigits.startsWith('55');
   const contact=phone?'<p class="support-phone"><span>WhatsApp do suporte</span><strong>'+escapeHtml(phone)+'</strong></p>':
     '<p class="muted support-not-configured">O número de suporte ainda não foi informado. Ele aparecerá aqui assim que o administrador o cadastrar.</p>';
-  return contact+(valid?'<a class="btn btn-primary support-whatsapp-button" href="https://wa.me/'+waDigits+'?text='+encodeURIComponent('Olá! Gostaria de verificar a situação do acesso da minha empresa ao Camera Marketing Studio.')+'" target="_blank" rel="noopener noreferrer">Falar com suporte pelo WhatsApp</a>':'');
+  return contact+(valid?'<a class="btn btn-primary support-whatsapp-button" href="https://wa.me/'+waDigits+'?text='+encodeURIComponent('Olá! Gostaria de verificar a situação do acesso da minha empresa ao Filtros Studio.')+'" target="_blank" rel="noopener noreferrer">Falar com suporte pelo WhatsApp</a>':'');
 }
 function pausedClientView(){
   return '<div class="access-paused-layout">'+
     '<section class="card access-paused-card" role="status" aria-live="polite">'+
-      '<div class="access-paused-brand"><span class="brand-mark">CM</span><strong>camera marketing <small>STUDIO</small></strong></div>'+
+      '<div class="access-paused-brand"><span class="brand-mark">FS</span><strong>Filtros <small>STUDIO</small></strong></div>'+
       '<div class="access-paused-icon" aria-hidden="true">🔒</div>'+
       '<h1>Acesso temporariamente pausado</h1>'+
       '<p class="access-paused-description">O acesso aos filtros desta empresa está temporariamente indisponível. Para verificar sua situação e solicitar a regularização, entre em contato com nosso suporte.</p>'+
@@ -301,7 +301,7 @@ function pausedClientView(){
         '<button type="button" class="btn access-paused-logout" data-act="logout">Sair da conta</button>'+
       '</div></section>'+studioCredits('studio-credits-auth')+'</div>';
 }
-function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">CM</span><span>Camera Marketing Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p>${supportContactMarkup()}<button class="btn" data-act="logout">Sair</button></div></div>`}
+function waiting(){return `<div class="auth-layout"><div class="card pending"><div class="brand"><span class="brand-mark">FS</span><span>Filtros Studio</span></div><h2>Conta aguardando ativação</h2><p class="muted">Seu cadastro existe, mas ainda não foi vinculado a uma empresa ou autorizado como administrador. Solicite a ativação ao responsável.</p>${supportContactMarkup()}<button class="btn" data-act="logout">Sair</button></div></div>`}
 function render(){
   document.body.classList.remove('mobile-menu-lock','client-camera-menu-lock');
   if(!app.user){$('root').innerHTML=authMarkup(app.register);return;}
@@ -706,7 +706,7 @@ async function capture(){
     drawSourceCover(ctx,source,1080,1920);
     ctx.drawImage(overlay,0,0,1080,1920);
     const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Não foi possível gerar a foto.')),'image/png'));
-    const name='camera-marketing-'+Date.now()+'.png';
+    const name='filtros-studio-'+Date.now()+'.png';
     clearCapturedPhoto();
     app.captureData={blob,file:new File([blob],name,{type:'image/png'}),url:URL.createObjectURL(blob),name};
     stopCamera();

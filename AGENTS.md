@@ -1,7 +1,7 @@
 # Instruções para agentes de IA e desenvolvedores
 
 ## Contexto
-Este repositório contém o **Camera Marketing Studio**, um sistema web independente para até 100 empresas. **Não** é o antigo aplicativo Flutter/Firebase `filtros-personalizados`. O banco é o novo Supabase `imfgumnpbxhbrjlkiphf` (sa-east-1).
+Este repositório contém o **Filtros Studio**, um sistema web independente para até 100 empresas. **Não** é o antigo aplicativo Flutter/Firebase `filtros-personalizados`. O banco é o novo Supabase `imfgumnpbxhbrjlkiphf` (sa-east-1).
 
 ## Onde começar
 1. Leia `README.md` e `docs/ARCHITECTURE.md`.
@@ -34,4 +34,4 @@ Abra `http://localhost:5173`. Para testar a câmera em um celular, publique em H
 ## Integrações e mudanças
 - GitHub é a fonte do código. Vercel/GitHub Pages podem hospedar o frontend.
 - Banco Supabase `https://supabase.com/dashboard/project/imfgumnpbxhbrjlkiphf`.
-- Não confundir o projeto Supabase `cliquecarros` com o Camera Marketing Studio.
+- Não confundir o projeto Supabase `cliquecarros` com o Filtros Studio.
