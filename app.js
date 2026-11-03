@@ -621,6 +621,7 @@ function editFilterModal(filterId){
           <img data-img="${escapeHtml(filter.id)}" alt="Prévia completa do filtro PNG ${escapeHtml(filter.name)}">
         </div>
         <p class="filter-editor-preview-caption" id="filterEditorPreviewCaption">PNG atual · proporção original preservada</p>
+        <button class="filter-editor-bg-toggle" type="button" data-act="toggle-filter-preview-bg" aria-pressed="false">◐ Ver em fundo escuro</button>
       </div>
       <div class="filter-editor-fields">
         <p class="filter-editor-kicker">GERENCIAR FILTRO</p>
@@ -659,6 +660,7 @@ function previewReplacementFilter(file){
       document.querySelector('#editFilterFile').value='';
     }else{
       app.filterDraftUrl=URL.createObjectURL(file);
+      img.removeAttribute('data-img');
       img.src=app.filterDraftUrl;
       if(caption)caption.textContent='Prévia do novo PNG · ainda não foi salvo';
       return;
@@ -868,7 +870,7 @@ async function handleForm(event){event.preventDefault();const form=event.target;
   }
 }if(form.id==='categoryForm'){const p={company_id:values.company_id,name:values.name.trim()};const q=app.modal.recordId?api.from('categories').update(p).eq('id',app.modal.recordId):api.from('categories').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='invoiceForm'){const p={company_id:values.company_id,amount:Number(values.amount),due_date:values.due_date,status:values.status,paid_at:values.status==='paid'?new Date().toISOString():null,notes:values.notes||null};const q=app.modal.recordId?api.from('invoices').update(p).eq('id',app.modal.recordId):api.from('invoices').insert(p);const {error}=await q;if(error)throw error;}if(form.id==='filterForm')await filterUpload(form);if(form.id==='editFilterForm')await saveFilterChanges(form);if(form.id==='passwordForm')await manager({action:'reset_password',company_id:app.modal.recordId,password:values.password});if(form.id==='settingsForm'){const support=String(values.supportWhatsapp||'').trim();const digits=support.replace(/\D/g,'');if(support&&!(digits.length===10||digits.length===11||digits.length===12&&digits.startsWith('55')||digits.length===13&&digits.startsWith('55')))throw new Error('Informe um WhatsApp com DDD válido, como (44) 99999-9999.');const branding={...app.settings.branding,appName:values.appName,supportWhatsapp:support};const {error}=await api.from('app_settings').upsert({key:'branding',value:branding});if(error)throw error;}clearFilterDraftUrl();app.modal=null;await loadData();toast('Alterações salvas com sucesso.');}catch(error){toast(errorMessage(error))}finally{if(button?.isConnected)button.disabled=false;}}
 async function mediaUrl(filter){if(app.images.has(filter.id))return app.images.get(filter.id);const {data,error}=await api.storage.from('company-filters').download(filter.storage_path);if(error)throw error;const uri=URL.createObjectURL(data);app.images.set(filter.id,uri);return uri;}
-async function hydrateImages(){const imgs=document.querySelectorAll('[data-img]');for(const element of imgs){const filter=app.filters.find(f=>f.id===element.dataset.img);if(!filter)continue;mediaUrl(filter).then(url=>{if(element.isConnected)element.src=url}).catch(()=>{if(element.isConnected)element.alt='PNG indisponível';});}}
+async function hydrateImages(){const imgs=document.querySelectorAll('[data-img]');for(const element of imgs){const filter=app.filters.find(f=>f.id===element.dataset.img);if(!filter)continue;mediaUrl(filter).then(url=>{if(element.isConnected&&element.dataset.img===filter.id)element.src=url}).catch(()=>{if(element.isConnected)element.alt='PNG indisponível';});}}
 async function startCamera(facing='environment'){
   const video=$('cameraVideo');
   if(!video||app.galleryPhoto)return;
@@ -1067,7 +1069,13 @@ if(act==='open-client-menu'){setClientCameraMenu(true);return;}if(act==='close-c
   return;
 }if(act==='category-move-up'||act==='category-move-down'){
   await moveCategoryByButton(uid,act==='category-move-up'?-1:1);return;
-}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='view-filter'){editFilterModal(uid);return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
+}if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='view-filter'){editFilterModal(uid);return;}if(act==='toggle-filter-preview-bg'){
+  const preview=$('filterEditorPreview');if(!preview)return;
+  const dark=preview.classList.toggle('is-dark');
+  target.setAttribute('aria-pressed',String(dark));
+  target.textContent=dark?'◐ Ver em fundo quadriculado':'◐ Ver em fundo escuro';
+  return;
+}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
   const paths=app.filters.filter(f=>f.category_id===uid).map(f=>f.storage_path).filter(Boolean);
   const {error}=await api.from('categories').delete().eq('id',uid);
   if(error)throw error;
@@ -1132,6 +1140,15 @@ document.addEventListener('pointercancel',event=>{void categoryOrderPointerEnd(e
 
 $('root').addEventListener('submit',handleForm);
 $('root').addEventListener('change',event=>{
+  if(event.target.id==='filterLibraryCompany'&&app.profile?.role==='admin'&&app.page==='filters'){
+    app.filterLibraryCompanyId=event.target.value;
+    app.filterLibraryCategoryId='';
+    render();return;
+  }
+  if(event.target.id==='filterLibraryCategory'&&app.profile?.role==='admin'&&app.page==='filters'){
+    app.filterLibraryCategoryId=event.target.value;
+    render();return;
+  }
   if(event.target.id==='categoryOrderCompany'&&app.profile?.role==='admin'&&app.page==='filters'){
     app.categoryOrderCompanyId=event.target.value;
     render();return;
