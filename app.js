@@ -338,12 +338,14 @@ function clientCategories(){
         <p>Selecione o tema para abrir a câmera e criar seu conteúdo.</p>
       </div>
     </div>
-    <div class="client-category-grid">${app.categories.map(c=>`<button type="button" data-act="open-category" data-id="${escapeHtml(c.id)}" class="client-category-item">
-      <span class="client-category-symbol">▦</span>
-      <span class="client-category-name">${escapeHtml(c.name)}</span>
-      <small>${app.filters.filter(f=>f.category_id===c.id&&f.active).length} filtros disponíveis</small>
-      <span class="client-category-arrow">›</span>
-    </button>`).join('')||'<p class="client-empty">Nenhuma categoria disponível por enquanto. Fale com o administrador.</p>'}</div>
+    <div class="client-category-grid">${app.categories.map(c=>{
+      const count=app.filters.filter(f=>f.category_id===c.id&&f.active).length;
+      return `<button type="button" data-act="open-category" data-id="${escapeHtml(c.id)}" class="client-category-item">
+        <span class="client-category-name">${escapeHtml(c.name)}</span>
+        <small class="client-category-count">${count} ${count===1?'filtro disponível':'filtros disponíveis'}</small>
+        <span class="client-category-arrow" aria-hidden="true">›</span>
+      </button>`;
+    }).join('')||'<p class="client-empty">Nenhuma categoria disponível por enquanto. Fale com o administrador.</p>'}</div>
   </section>`;
 }
 function cameraView(){
