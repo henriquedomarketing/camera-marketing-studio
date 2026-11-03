@@ -191,6 +191,79 @@ function categoriesSection(){
   </div>`;
 }
 
+
+async function persistCategoryOrder(companyId,orderedIds){
+  if(app.orderSaving)return;
+  const current=orderedCategoriesForCompany(companyId);
+  if(!companyId||orderedIds.length!==current.length||
+    new Set(orderedIds).size!==orderedIds.length||
+    orderedIds.some(id=>!current.some(c=>c.id===id)))
+    throw new Error('Lista de categorias inválida. Atualize a página para tentar novamente.');
+  if(orderedIds.every((id,i)=>id===current[i].id))return;
+  app.orderSaving=true;
+  try{
+    const {error}=await api.rpc('reorder_company_categories',{
+      p_company_id:companyId,p_category_ids:orderedIds
+    });
+    if(error)throw error;
+    await loadData();
+    toast('Ordem salva! As categorias já aparecem assim para os clientes.');
+  }catch(error){
+    await loadData();
+    throw error;
+  }finally{app.orderSaving=false;}
+}
+async function moveCategoryByButton(categoryId,direction){
+  if(app.profile?.role!=='admin'||app.page!=='filters'||app.orderSaving)return;
+  const cat=app.categories.find(c=>c.id===categoryId);
+  if(!cat||cat.company_id!==app.categoryOrderCompanyId)return;
+  const ids=orderedCategoriesForCompany(cat.company_id).map(c=>c.id);
+  const from=ids.indexOf(categoryId),to=from+direction;
+  if(from<0||to<0||to>=ids.length)return;
+  [ids[from],ids[to]]=[ids[to],ids[from]];
+  await persistCategoryOrder(cat.company_id,ids);
+}
+let categoryPointerDrag=null;
+function categoryOrderPointerDown(event){
+  const handle=event.target.closest?.('[data-category-drag-handle]');
+  if(!handle||app.page!=='filters'||app.profile?.role!=='admin'||
+     app.orderSaving||categoryPointerDrag||handle.disabled)return;
+  if(event.pointerType==='mouse'&&event.button!==0)return;
+  const row=handle.closest('tr[data-category-row]');
+  if(!row||row.dataset.companyId!==app.categoryOrderCompanyId)return;
+  categoryPointerDrag={
+    pointerId:event.pointerId,handle,row,companyId:row.dataset.companyId,
+    startY:event.clientY,moved:false
+  };
+  try{handle.setPointerCapture(event.pointerId);}catch{}
+}
+function categoryOrderPointerMove(event){
+  const drag=categoryPointerDrag;
+  if(!drag||drag.pointerId!==event.pointerId||!drag.row.isConnected)return;
+  if(!drag.moved&&Math.abs(event.clientY-drag.startY)<7)return;
+  event.preventDefault();
+  drag.moved=true;
+  drag.row.classList.add('category-row-dragging');
+  const hovered=document.elementFromPoint(event.clientX,event.clientY)?.closest('tr[data-category-row]');
+  if(!hovered||hovered===drag.row||hovered.parentElement!==drag.row.parentElement)return;
+  const rect=hovered.getBoundingClientRect();
+  if(event.clientY>rect.top+rect.height/2)hovered.after(drag.row);
+  else hovered.before(drag.row);
+}
+async function categoryOrderPointerEnd(event,cancel=false){
+  const drag=categoryPointerDrag;
+  if(!drag||drag.pointerId!==event.pointerId)return;
+  categoryPointerDrag=null;
+  drag.row.classList.remove('category-row-dragging');
+  try{if(drag.handle.hasPointerCapture(event.pointerId))drag.handle.releasePointerCapture(event.pointerId);}catch{}
+  if(!drag.moved)return;
+  if(cancel){render();return;}
+  const ordered=[...drag.row.parentElement.querySelectorAll('tr[data-category-row]')]
+    .map(row=>row.dataset.categoryId);
+  try{await persistCategoryOrder(drag.companyId,ordered);}
+  catch(error){toast(errorMessage(error));}
+}
+
 function filters(){
   return header('BIBLIOTECA','Filtros PNG','Gerencie categorias e envie os filtros de cada empresa em um só lugar.',button('Enviar PNG','add-filter'))+
     categoriesSection()+
@@ -348,7 +421,7 @@ async function loadData(){
   if(admin){
     const [a,b,c,d,settings]=await Promise.all([
       api.from('companies').select('*').order('created_at',{ascending:false}),
-      api.from('categories').select('*').order('sort_order'),
+      api.from('categories').select('*').order('sort_order').order('created_at'),
       api.from('filters').select('*').order('sort_order'),
       api.from('invoices').select('*').order('due_date',{ascending:true}),
       api.from('app_settings').select('*')
@@ -371,7 +444,7 @@ async function loadData(){
     app.company=co.data;
     if(co.data?.active&&!co.data?.access_paused){
       const [cats,filters]=await Promise.all([
-        api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order'),
+        api.from('categories').select('*').eq('company_id',profile.company_id).order('sort_order').order('created_at'),
         api.from('filters').select('*').eq('company_id',profile.company_id).eq('active',true).order('sort_order')
       ]);
       if(cats.error)throw cats.error;
@@ -842,6 +915,8 @@ if(act==='open-client-menu'){setClientCameraMenu(true);return;}if(act==='close-c
   await loadData();
   toast(pause?'Acesso pausado. Os dados e pagamentos foram preservados.':'Acesso reativado com sucesso.');
   return;
+}if(act==='category-move-up'||act==='category-move-down'){
+  await moveCategoryByButton(uid,act==='category-move-up'?-1:1);return;
 }if(act==='close-modal'){closeModal();return;}if(act==='add-client'||act==='edit-client'){companyModal(act==='edit-client'?uid:null);return;}if(act==='add-category'||act==='edit-category'){categoryModal(act==='edit-category'?uid:null);return;}if(act==='add-invoice'||act==='edit-invoice'){invoiceModal(act==='edit-invoice'?uid:null);return;}if(act==='add-filter'){filterModal();return;}if(act==='reset-password'){openModal('Alterar senha do cliente',`<form class="form" id="passwordForm">${field('password','Nova senha (mínimo 8 caracteres)','','password',true,8)}${endForm}</form>`,'passwordForm');app.modal.recordId=uid;render();return;}if(act==='remove-client'){if(confirm('Excluir a empresa, seu login, categorias e PNGs? Esta ação é irreversível.')){await manager({action:'delete',company_id:uid});await refresh();}return;}if(act==='remove-category'){if(confirm('Excluir esta categoria? Os filtros vinculados também serão excluídos.')){
   const paths=app.filters.filter(f=>f.category_id===uid).map(f=>f.storage_path).filter(Boolean);
   const {error}=await api.from('categories').delete().eq('id',uid);
@@ -887,8 +962,18 @@ window.addEventListener('resize',()=>{
 });
 
 $('root').addEventListener('click',click);
+$('root').addEventListener('pointerdown',categoryOrderPointerDown);
+document.addEventListener('pointermove',categoryOrderPointerMove,{passive:false});
+document.addEventListener('pointerup',event=>{void categoryOrderPointerEnd(event);});
+document.addEventListener('pointercancel',event=>{void categoryOrderPointerEnd(event,true);});
+
 $('root').addEventListener('submit',handleForm);
 $('root').addEventListener('change',event=>{
+  if(event.target.id==='categoryOrderCompany'&&app.profile?.role==='admin'&&app.page==='filters'){
+    app.categoryOrderCompanyId=event.target.value;
+    render();return;
+  }
+
   if(app.profile?.role==='admin'&&app.page==='test-filters'){
     if(event.target.id==='testCompanySelect'){
       app.adminTest.companyId=event.target.value;
