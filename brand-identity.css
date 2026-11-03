@@ -6,3 +6,34 @@
 .brand>span:last-child small{display:block;font-weight:400;letter-spacing:.17em}
 .client-platform-brand .client-brand-copy strong{color:#111827}
 .client-platform-brand .client-brand-copy small{letter-spacing:.16em}
+
+/* Símbolo discreto da plataforma no cabeçalho de cada empresa. */
+.client-app.is-home .client-brand-with-studio-logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.client-app.is-home .client-header-studio-logo{
+  display:grid;
+  place-items:center;
+  flex:0 0 clamp(30px,8vw,40px);
+  width:clamp(30px,8vw,40px);
+  height:clamp(30px,8vw,40px);
+  border-radius:12px;
+  background:rgba(255,255,255,.68);
+  border:1px solid rgba(155,184,240,.24);
+}
+.client-app.is-home .client-header-studio-logo img{
+  display:block;
+  width:88%;
+  height:88%;
+  object-fit:contain;
+}
+.client-app.is-home .client-brand-with-studio-logo .client-brand-copy{
+  min-width:0;
+}
+@media(max-width:360px){
+  .client-app.is-home .client-brand-with-studio-logo{gap:7px}
+  .client-app.is-home .client-header-studio-logo{flex-basis:28px;width:28px;height:28px}
+}
