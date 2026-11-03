@@ -42,3 +42,10 @@ test('A visualização da câmera continua com menu, filtros e botões ativos',(
   assert.match(layout,/studioCredits\('client-footer'\)/);
   assert.match(layout,/cameraMode\?'':studioCredits/);
 });
+
+test('Botão de menu usa a cor principal do cliente e muda no modo teste do admin',()=>{
+  assert.match(layout,/<header class="client-camera-header" style="\$\{brandStyle\(testing\?testingCompany:app\.company\)\}">/);
+  assert.match(css,/\.client-app\.is-camera \.client-camera-header \.client-camera-menu-toggle\{\s*background:var\(--brand-primary,#001893\)/);
+  assert.match(css,/color:var\(--brand-on-primary,#fff\)/);
+  assert.match(css,/border-color:var\(--brand-primary,#001893\)/);
+});
