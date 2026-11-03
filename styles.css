@@ -553,3 +553,19 @@ body.mobile-menu-lock{overflow:hidden}
   outline:3px solid #001893;
   outline-offset:3px;
 }
+
+
+/* Acesso simplificado: clientes usam nome de usuário; admin mantém seu e-mail. */
+.auth-login-help{
+  margin:-4px 0 4px;
+  color:#7886a0;
+  font-size:11px;
+  line-height:1.45;
+  text-align:left;
+}
+.username-hint{
+  margin:-7px 0 10px;
+  color:#7786a0;
+  font-size:11px;
+  line-height:1.5;
+}
