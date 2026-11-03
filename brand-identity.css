@@ -97,3 +97,35 @@
     min-height:54px !important;
   }
 }
+
+/* Link de ajuda discreto com ícone do WhatsApp, sem alterar o destino existente. */
+.auth-card .auth-support-link{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  padding:11px 16px !important;
+  border-radius:14px !important;
+  font-size:13px !important;
+  font-weight:600 !important;
+  letter-spacing:0 !important;
+  text-transform:none !important;
+  color:#001993 !important;
+  background:rgba(246,249,255,.75) !important;
+  border:1px solid rgba(0,25,147,.12) !important;
+  box-shadow:0 3px 12px rgba(0,25,147,.04) !important;
+  text-decoration:none !important;
+  transition:background .2s ease,box-shadow .2s ease !important;
+}
+.auth-card .auth-support-link:hover,
+.auth-card .auth-support-link:focus-visible{
+  background:#eef4ff !important;
+  box-shadow:0 4px 14px rgba(0,25,147,.09) !important;
+}
+.auth-card .auth-whatsapp-icon{
+  display:block;
+  flex:0 0 17px;
+  width:17px;
+  height:17px;
+  color:#198754;
+}
