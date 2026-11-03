@@ -377,7 +377,7 @@ function normalizeClientUsername(value){
 function loginAuthEmail(identifier){
   const value=String(identifier||'').trim().toLowerCase();
   if(value.includes('@')){
-    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))throw new Error('Informe seu e-mail de administrador corretamente.');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))throw new Error('Informe seu e-mail de administrador corretamente.');
     return value;
   }
   return normalizeClientUsername(value)+'@usuarios.filtros.studio';
