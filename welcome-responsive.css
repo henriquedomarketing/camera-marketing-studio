@@ -62,3 +62,48 @@
     border-radius:24px !important;
   }
 }
+
+/* Perfil de boas-vindas: avatar circular, como foto de perfil social,
+   e destaque azul coerente com os botões da plataforma. */
+.client-app.is-home .client-home-heading{
+  background:linear-gradient(125deg,#3266e9 0%,#2458d7 55%,#081b9c 100%) !important;
+  border:1px solid rgba(125,179,255,.9) !important;
+  box-shadow:0 14px 30px rgba(19,66,200,.22),inset 0 2px rgba(255,255,255,.42) !important;
+  color:#fff !important;
+}
+.client-app.is-home .client-company-logo-wrap{
+  width:clamp(106px,29vw,146px) !important;
+  height:clamp(106px,29vw,146px) !important;
+  border-radius:50% !important;
+  padding:5px !important;
+  background:#fff !important;
+  border:3px solid rgba(255,255,255,.95) !important;
+  box-shadow:0 0 0 3px rgba(168,203,255,.38),0 9px 20px rgba(3,20,102,.22) !important;
+  overflow:hidden !important;
+}
+.client-app.is-home .client-company-logo{
+  border-radius:50% !important;
+  object-fit:contain !important;
+  background:#fff;
+}
+.client-app.is-home .client-logo-fallback{
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:#fff;
+  color:#153fbb !important;
+}
+.client-app.is-home .client-home-heading .client-eyebrow{
+  color:#dbe8ff !important;
+  opacity:1 !important;
+}
+.client-app.is-home .client-home-heading h1{
+  color:#fff !important;
+  text-shadow:0 1px 2px rgba(0,15,100,.12);
+}
+.client-app.is-home .client-home-heading p{
+  color:#e7efff !important;
+  opacity:1 !important;
+}
