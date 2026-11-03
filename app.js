@@ -446,8 +446,8 @@ function companyModal(cid){
       <strong>Financeiro e contato <span>(opcionais)</span></strong>
       <p class="muted">Sem mensalidade, o usuário é gratuito/isento e não gera cobranças. O telefone também pode ficar vazio. Para cobrar, informe um valor e o dia ou a data de vencimento.</p>
       ${field('phone','Telefone/WhatsApp (opcional)',c?.phone||'','tel',false)}
-      ${field('monthly_fee','Mensalidade em reais (vazio = gratuito)',Number(c?.monthly_fee)>0?c.monthly_fee:'','number',false)}
-      ${field('due_day','Dia do vencimento (somente pagantes)',Number(c?.monthly_fee)>0?c.due_day:'','number',false)}
+      ${field('monthly_fee','Mensalidade em reais (vazio = gratuito)',Number(c?.monthly_fee)>0?c.monthly_fee:'','number',false).replace('type="number"','type="number" min="0" max="100000" step="0.01" inputmode="decimal"')}
+      ${field('due_day','Dia do vencimento (somente pagantes)',Number(c?.monthly_fee)>0?c.due_day:'','number',false).replace('type="number"','type="number" min="1" max="31" step="1"')}
       ${field('next_due_date','Próximo vencimento (opcional)',Number(c?.monthly_fee)>0?c.next_due_date||'':'','date',false)}
     </div>
     ${c?select('active','Situação',option('true','Ativo',c.active)+option('false','Inativo',!c.active)):''}
