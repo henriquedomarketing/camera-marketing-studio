@@ -18,7 +18,8 @@ const errorMessage=error=>error?.message||'Não foi possível concluir esta oper
 const brandColor=(v,fallback)=>typeof v==='string'&&/^#[0-9a-fA-F]{6}$/.test(v)?v:fallback;
 function brandInk(hex){const h=brandColor(hex,'#DB2032').slice(1);const c=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4));return c[0]*.2126+c[1]*.7152+c[2]*.0722>.38?'#131D34':'#FFFFFF';}
 function brandStyle(company){const main=brandColor(company?.primary_color,'#071C70'),accent=brandColor(company?.accent_color,'#DB2032');return `--brand-primary:${main};--brand-accent:${accent};--brand-on-accent:${brandInk(accent)};--brand-on-primary:${brandInk(main)};`;}
-const brandImg=(company,cls)=>company?.logo_path?`<img data-brand-logo="${escapeHtml(company.id)}" class="${cls}" alt="Logo da ${escapeHtml(company.name)}">`:'';
+const companyInitials=company=>String(company?.name||'FS').trim().split(/\s+/).slice(0,2).map(word=>word.charAt(0)).join('').toUpperCase()||'FS';
+const brandImg=(company,cls)=>company?.logo_path?`<img data-brand-logo="${escapeHtml(company.id)}" class="${cls}" alt="" aria-hidden="true" decoding="async">`:'';
 
 const option=(value,text,selected)=>`<option value="${escapeHtml(value)}" ${selected?'selected':''}>${escapeHtml(text)}</option>`;
 const companyName=uid=>app.companies.find(c=>c.id===uid)?.name||'Empresa';
@@ -80,7 +81,7 @@ function layout(content){const admin=app.profile?.role==='admin';
     const type=home?'is-home':app.page==='preview'?'is-preview':'is-camera';
     const clientBrand=home
       ? `<div class="client-brand">
-          <span class="client-brand-mark"><span class="client-brand-fallback">FP</span>${brandImg(app.company,'client-brand-logo')}</span>
+          <span class="client-brand-mark"><span class="client-brand-fallback">${escapeHtml(companyInitials(app.company))}</span>${brandImg(app.company,'client-brand-logo')}</span>
           <span class="client-brand-copy"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong><small>FILTROS PERSONALIZADOS</small></span>
         </div>`
       : `<div class="client-brand client-platform-brand">
@@ -300,7 +301,7 @@ function clientCategories(){
   return `<section class="client-home">
     <div class="client-home-heading">
       <div class="client-company-logo-wrap">
-        ${brandImg(app.company,'client-company-logo')||'<span class="client-logo-fallback">FP</span>'}
+        ${brandImg(app.company,'client-company-logo')||'<span class="client-logo-fallback">'+escapeHtml(companyInitials(app.company))+'</span>'}
       </div>
       <div class="client-home-heading-copy">
         <span class="client-eyebrow">BEM-VINDO À ${escapeHtml(app.company?.name||'SUA EMPRESA')}</span>
@@ -687,8 +688,24 @@ function hydrateBrandLogos(){
     const company=app.companies.find(c=>c.id===element.dataset.brandLogo)||
       (app.company?.id===element.dataset.brandLogo?app.company:null);
     if(!company?.logo_path)return;
+    const fallback=()=>{
+      if(!element.isConnected)return;
+      const parent=element.parentElement;
+      const mainLogo=element.classList.contains('client-company-logo');
+      element.remove();
+      if(mainLogo&&parent&&!parent.querySelector('.client-logo-fallback')){
+        const placeholder=document.createElement('span');
+        placeholder.className='client-logo-fallback';
+        placeholder.textContent=companyInitials(company);
+        parent.append(placeholder);
+      }
+    };
+    element.addEventListener('load',()=>{
+      if(element.isConnected)element.classList.add('brand-image-ready');
+    },{once:true});
+    element.addEventListener('error',fallback,{once:true});
     brandLogoUrl(company).then(uri=>{if(element.isConnected)element.src=uri;})
-      .catch(()=>{if(element.isConnected)element.alt='Logo indisponível';});
+      .catch(fallback);
   });
 }
 
