@@ -96,7 +96,7 @@ O sistema apresenta, com visual discreto e responsivo, os créditos **“Desenvo
 
 ## Aparência e fluxo mobile (novembro de 2026)
 
-- **Apenas a tela inicial do cliente** usa a logo PNG original e as cores da empresa. A logo fica em moldura quadrada compacta, sem sobrepor os títulos; o PNG não é alterado. PNG com fundo branco não é necessariamente transparente, portanto prefira a logo com canal alfa para não exibir quadrado branco.
+- **A tela inicial do cliente** usa a identidade única Filtros Studio e destaca a logo PNG original da empresa numa moldura compacta, sem sobrepor títulos; a imagem não é alterada. PNG com fundo branco não é necessariamente transparente, portanto prefira a logo com canal alfa.
 - Ao entrar numa categoria, **a câmera tem fundo branco e a identidade padrão do Filtros Studio** (azul anil oficial `#001893`), sem reproduzir as cores da loja.
 - **Câmera ampla, com filtros no topo**: ao entrar na categoria, o menu ☰ permanece à esquerda e os filtros aparecem em **cards quadrados de 58 × 58 px (20% menores que os anteriores), do mesmo tamanho do botão do menu**, alinhados horizontalmente e com rolagem lateral. A prévia 9:16 ocupa a largura do celular (até 420px), seguida pelos controles de fotografar e Galeria. O painel duplicado de filtros que ficava embaixo foi removido.
 - **Menu ☰ no topo, onde ficava a logo**: a faixa branca superior reúne o botão ☰ e os filtros em cards quadrados alinhados, sem cobrir a prévia. A gaveta lateral tem fundo **azul #001893**, com **Página inicial em primeiro lugar**, categorias em seguida e **Sair da conta** no rodapé.
@@ -107,15 +107,20 @@ O sistema apresenta, com visual discreto e responsivo, os créditos **“Desenvo
 - A tela de resultado também usa a identidade neutra da plataforma, com prévia final e ações de compartilhamento.
 - O painel administrativo usa azul-marinho escuro; o menu mobile abre por botão ☰, enquanto o desktop mantém a lateral fixa.
 
-## Identidade visual personalizada por empresa
+## Design system oficial do Filtros Studio (novembro de 2026)
 
-O administrador cadastra, na mesma tela de **Novo cliente**, a logo original em **PNG de qualquer dimensão ou proporção** (quadrada, horizontal ou vertical), com até **2 MB**, sem esticar ou cortar a imagem na interface, e escolhe:
-- **Cor principal**, utilizada no cabeçalho e no plano de fundo do cliente;
-- **Cor dos botões**, utilizada nas categorias e no botão de fotografar.
+A interface inteira usa **identidade única do Filtros Studio**, inspirada em padrões visuais leves do iOS e Meta: azul-anil `#001893`, azul de ação `#244CFF`, superfícies brancas, fundo `#F5F7FC`, contraste acessível, cards arredondados e sombras discretas.
 
-A logo é armazenada no bucket privado `company-filters`, no caminho `{company_id}/branding/{uuid}.png`. A coluna `companies.logo_path` aponta para esse arquivo. As regras RLS existentes permitem somente ao administrador carregar novas logos e ao cliente autenticado ler as imagens da própria empresa ativa. A identidade da empresa é exibida automaticamente depois do login, **sem alterar a imagem original**. Também é possível mudar logo e cores em **Clientes → Editar**.
+- **Login**: cartão central claro, campos de usuário e senha e link SUPORT; administrador conserva login por e-mail.
+- **Painel administrativo**: navegação azul, cards claros, tabelas e modais com espaçamentos consistentes.
+- **Área do cliente**: **todas as empresas recebem a mesma interface branca/azul**. As categorias e o menu da câmera não assumem a cor do cliente.
+- **Personalização por empresa**: **somente a logo original em PNG**, exibida em destaque na tela inicial após login, sem mudar proporção nem cores do arquivo. Nenhuma logo ou arte será recriada.
+- **Câmera**: permanece com preview grande 9:16, filtros e menu no topo, foto/galeria e exportação em 1080×1920.
+- **Código seguro para manter**: as alterações visuais estão separadas em `studio-redesign.css`, carregado **depois** dos CSS antigos; a regra de cor fixa fica em `brandStyle()`. Assim, o estilo pode ser refinado ou revertido sem reescrever lógica da aplicação.
 
-Por segurança, o cadastro da empresa ocorre antes do envio da logo: se o envio falhar, a conta poderá existir com personalização pendente. Nesse caso, abra **Editar** e envie novamente, sem duplicar o cadastro. A função `manage-client` também limpa o logo quando exclui a empresa. Empresas antigas sem logo continuam com a identidade padrão até o administrador configurar.
+O administrador cadastra a logo original em **Clientes → Novo cliente**, em PNG de qualquer dimensão ou proporção (quadrada, horizontal ou vertical) com até **2 MB**. O arquivo é armazenado no bucket privado `company-filters`, no caminho `{company_id}/branding/{uuid}.png`; `companies.logo_path` aponta para o arquivo. As permissões RLS permitem que cada empresa autenticada leia somente sua própria logo e filtros. Para trocar a logo, use **Clientes → Editar**.
+
+As colunas antigas de cores da empresa permanecem no banco por compatibilidade, mas **não interferem mais na aparência do aplicativo**. Os antigos seletores de cores foram retirados do formulário. Se o upload da logo falhar, o cliente pode existir com personalização pendente; basta reenviar o PNG na edição, sem duplicar a conta.
 
 ## Configuração e primeiro administrador (sem publicar segredos)
 
