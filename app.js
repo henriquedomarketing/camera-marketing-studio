@@ -152,7 +152,7 @@ function layout(content){const admin=app.profile?.role==='admin';
 }
 function table(headings,rows){return `<div class="table-wrap"><table class="table"><thead><tr>${headings.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td class="empty" colspan="${headings.length}">Nenhum registro encontrado</td></tr>`}</tbody></table></div>`}
 function dashboard(){const overdue=app.invoices.filter(i=>dueStatus(i)==='overdue'),unpaid=app.invoices.filter(i=>i.status==='pending');return header('DASHBOARD','Visão geral','Os indicadores abaixo são calculados a partir dos seus dados reais.',button('Cadastrar cliente','add-client'))+`<div class="stats">${stat('Clientes',app.companies.length,'Máximo permitido: 100')}${stat('Clientes ativos',app.companies.filter(x=>x.active).length,'Contas habilitadas')}${stat('Filtros PNG',app.filters.length,'Arquivos cadastrados')}${stat('A receber',brl(unpaid.reduce((sum,i)=>sum+Number(i.amount),0)),unpaid.length+' cobranças abertas • '+overdue.length+' vencidas')}</div>`+`<div class="card"><h2>Próximos vencimentos</h2>${table(['CLIENTE','VENCIMENTO','VALOR','STATUS'],app.invoices.slice().filter(i=>i.status==='pending').sort((a,b)=>a.due_date.localeCompare(b.due_date)).slice(0,8).map(i=>`<tr><td><b>${escapeHtml(companyName(i.company_id))}</b></td><td>${dateBR(i.due_date)}</td><td>${brl(i.amount)}</td><td>${badge(dueStatus(i))}</td></tr>`).join(''))}</div>`}
-function clients(){return header('GERENCIAMENTO','Clientes','Cada empresa terá seu próprio login e seus próprios filtros.',button('Novo cliente','add-client'))+`<div class="card">${table(['CLIENTE','SITUAÇÃO','MENSALIDADE','VENCIMENTO','AÇÕES'],app.companies.map(c=>`<tr><td><div class="company-admin-name"><span class="company-admin-logo">${brandImg(c,'company-admin-logo-img')||'<span>▣</span>'}</span><span><b>${escapeHtml(c.name)}</b><small>Usuário: ${escapeHtml(c.login_username||'Não configurado')}</small></span></div></td><td>${badge(c.access_paused?'paused':c.active?'active':'inactive')}</td><td>${brl(c.monthly_fee)}</td><td>${dateBR(c.next_due_date)}</td><td><div class="actions">${action('edit-client',c.id,'Editar')}${action('toggle-client-access',c.id,c.access_paused?'Reativar acesso':'Pausar acesso',c.access_paused?'client-access-resume':'client-access-pause')}${action('reset-password',c.id,'Nova senha')}${action('remove-client',c.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
+function clients(){return header('GERENCIAMENTO','Clientes','Cada empresa terá seu próprio login e seus próprios filtros.',button('Novo cliente','add-client'))+`<div class="card">${table(['CLIENTE','SITUAÇÃO','MENSALIDADE','VENCIMENTO','AÇÕES'],app.companies.map(c=>`<tr><td><div class="company-admin-name"><span class="company-admin-logo">${brandImg(c,'company-admin-logo-img')||'<span>▣</span>'}</span><span><b>${escapeHtml(c.name)}</b><small>Usuário: ${escapeHtml(c.login_username||'Não configurado')}</small></span></div></td><td>${badge(c.access_paused?'paused':c.active?'active':'inactive')}</td><td>${Number(c.monthly_fee)>0?brl(c.monthly_fee):'<span class="free-client-label">Gratuito / isento</span>'}</td><td>${Number(c.monthly_fee)>0&&c.next_due_date?dateBR(c.next_due_date):'—'}</td><td><div class="actions">${action('edit-client',c.id,'Editar')}${action('toggle-client-access',c.id,c.access_paused?'Reativar acesso':'Pausar acesso',c.access_paused?'client-access-resume':'client-access-pause')}${action('reset-password',c.id,'Nova senha')}${action('remove-client',c.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
 
 function categoriesSection(){
   const rows=app.categories.map(c=>{
@@ -406,6 +406,22 @@ async function manager(body){
 }
 function openModal(title,body,formId){app.modal={title,content:body,formId};render();}
 function closeModal(){app.modal=null;render();}
+// Sem mensalidade, o cliente é gratuito/isento. Não criar vencimento nem cobrança.
+function clientBillingFromForm(values){
+  const amountText=String(values.monthly_fee??'').trim().replace(',','.');
+  const monthly_fee=amountText===''?0:Number(amountText);
+  if(!Number.isFinite(monthly_fee)||monthly_fee<0||monthly_fee>100000)
+    throw new Error('Informe uma mensalidade válida ou deixe o valor em branco para acesso gratuito.');
+  if(monthly_fee===0)return {monthly_fee:0,due_day:10,next_due_date:null};
+  const date=String(values.next_due_date??'').trim();
+  const rawDay=String(values.due_day??'').trim();
+  if(!rawDay&&!date)
+    throw new Error('Para um cliente pagante, informe o dia do vencimento ou a data do próximo vencimento.');
+  const due_day=rawDay?Number(rawDay):Number(date.slice(8,10));
+  if(!Number.isInteger(due_day)||due_day<1||due_day>31)
+    throw new Error('O dia de vencimento deve estar entre 1 e 31.');
+  return {monthly_fee,due_day,next_due_date:date||null};
+}
 function companyModal(cid){
   const c=app.companies.find(x=>x.id===cid);
   const logoInfo=c?.logo_path?`<span class="brand-form-current-logo">${brandImg(c,'brand-form-logo-img')}<small>Logo atual da empresa</small></span>`:'';
@@ -426,10 +442,14 @@ function companyModal(cid){
         ${field('accent_color','Cor dos botões',brandColor(c?.accent_color,'#DB2032'),'color')}
       </div>
     </div>
-    ${field('phone','Telefone/WhatsApp',c?.phone||'','text',false)}
-    ${field('monthly_fee','Mensalidade em reais',c?.monthly_fee||0,'number')}
-    ${field('due_day','Dia do vencimento',c?.due_day||10,'number')}
-    ${field('next_due_date','Próximo vencimento',c?.next_due_date||'','date',false)}
+    <div class="optional-billing-section">
+      <strong>Financeiro e contato <span>(opcionais)</span></strong>
+      <p class="muted">Sem mensalidade, o usuário é gratuito/isento e não gera cobranças. O telefone também pode ficar vazio. Para cobrar, informe um valor e o dia ou a data de vencimento.</p>
+      ${field('phone','Telefone/WhatsApp (opcional)',c?.phone||'','tel',false)}
+      ${field('monthly_fee','Mensalidade em reais (vazio = gratuito)',Number(c?.monthly_fee)>0?c.monthly_fee:'','number',false)}
+      ${field('due_day','Dia do vencimento (somente pagantes)',Number(c?.monthly_fee)>0?c.due_day:'','number',false)}
+      ${field('next_due_date','Próximo vencimento (opcional)',Number(c?.monthly_fee)>0?c.next_due_date||'':'','date',false)}
+    </div>
     ${c?select('active','Situação',option('true','Ativo',c.active)+option('false','Inativo',!c.active)):''}
     ${endForm}</form>`;
   openModal(c?'Editar cliente':'Cadastrar cliente',frm,'clientForm');
@@ -589,18 +609,18 @@ async function handleForm(event){event.preventDefault();const form=event.target;
   const c=app.companies.find(x=>x.id===app.modal?.recordId);
   if(c){
     const username=normalizeClientUsername(values.username);
-    const payload={name:values.name,phone:values.phone,
-      monthly_fee:Number(values.monthly_fee),due_day:Number(values.due_day),
-      next_due_date:values.next_due_date||null,active:values.active==='true'};
+    const billing=clientBillingFromForm(values);
+    const payload={name:values.name,phone:String(values.phone||'').trim(),
+      ...billing,active:values.active==='true'};
     const {error}=await api.from('companies').update(payload).eq('id',c.id);
     if(error)throw error;
     await saveCompanyBrand(c.id,values,logo,c.logo_path);
     if(c.login_username!==username)await manager({action:'update_username',company_id:c.id,username});
   }else{
     if(!logo)throw Error('Envie a logo da empresa em PNG (até 2 MB).');
+    const billing=clientBillingFromForm(values);
     const created=await manager({action:'create',name:values.name,username:normalizeClientUsername(values.username),password:values.password,
-      phone:values.phone,monthly_fee:Number(values.monthly_fee),due_day:Number(values.due_day),
-      next_due_date:values.next_due_date||null});
+      phone:String(values.phone||'').trim(),...billing});
     try{await saveCompanyBrand(created.company_id,values,logo,null);}
     catch(error){
       await loadData();
