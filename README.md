@@ -16,7 +16,7 @@ Plataforma web independente do projeto antigo `filtros-personalizados`, projetad
 ## Funcionalidades implementadas no código
 
 1. Cadastro e login com **Supabase Auth**.
-2. Primeiro acesso do administrador como conta pendente, com liberação segura pelo proprietário do projeto.
+2. O administrador mantém sua conta de e-mail existente, com liberação de permissões pelo proprietário do projeto; novos cadastros públicos estão desativados no site.
 3. Dashboard com indicadores reais, cadastro/edição/exclusão de empresas, mensalidades e vencimentos.
 4. Cadastro de categorias e PNGs por empresa (arquivos privados).
 5. Câmera do navegador com PNG transparente sobreposto e fotografia 1080×1920. Depois de fotografar, o cliente vê **uma tela de resultado com prévia** em vez de baixar automaticamente: Compartilhar, Instagram Stories, WhatsApp, Salvar no celular, Nova foto e Trocar filtro. A foto permanece **temporariamente no navegador**, sem envio automático ao banco.
@@ -52,7 +52,9 @@ No painel, a **Visão geral** informa o valor a receber; em **Financeiro**, o ti
 
 ## Login com atendimento SUPORT
 
-A tela de login é exclusiva para contas já criadas e apresenta apenas e-mail, senha, **Entrar** e o link **SUPORT** (https://wa.me/5544997497915). As opções de **Primeiro acesso** e **Criar conta** foram removidas, assim como a inscrição pública pelo cliente web. Novas empresas continuam sendo cadastradas pelo administrador na aba **Clientes**; o WhatsApp principal já consta nas Configurações de suporte.
+A tela de login é exclusiva para contas já criadas e apresenta **nome de usuário, senha, Entrar** e o link **SUPORT** (https://wa.me/5544997497915). **Clientes não cadastram nem digitam e-mail:** o administrador escolhe um nome de usuário exclusivo (por exemplo, `p4veiculos`) e uma senha ao adicionar a empresa em **Clientes**. O administrador continua entrando com **seu mesmo e-mail e senha**, no campo de nome de usuário. As opções de **Primeiro acesso** e **Criar conta** foram removidas, sem inscrição pública no aplicativo.
+
+O Supabase Auth exige um endereço de autenticação nos bastidores; por isso o sistema cria automaticamente um identificador técnico `usuario@usuarios.filtros.studio`, que **não é um e-mail que o cliente precisa criar ou possuir**. A Edge Function é a única responsável por criar e modificar esses logins, sempre verificando a sessão administrativa. Alterar o nome de usuário de uma empresa também atualiza seu identificador interno. Não há recuperação de senha por e-mail para clientes; o administrador pode redefinir as senhas no painel.
 
 ## Pausar e reativar o acesso dos clientes
 
@@ -107,7 +109,7 @@ where id = (select id from auth.users where email = 'EMAIL_CONFIRMADO_DO_ADMINIS
 ```
 
 5. Faça logout/login novamente. O dashboard administrativo aparecerá.
-6. No painel, crie empresas com e-mail e senha individual. Empresas inativas não poderão carregar os filtros.
+6. No painel, crie empresas com nome de usuário e senha individual, sem precisar cadastrar e-mail dos clientes. Empresas inativas não poderão carregar os filtros.
 
 **Não compartilhe senhas, tokens ou chaves `service_role` por chat ou em repositórios.** O projeto contém apenas uma chave *publicável* de frontend, que pode ser vista em navegadores e depende de políticas RLS para a segurança real. Qualquer configuração `SUPABASE_SERVICE_ROLE_KEY` deve permanecer apenas nas variáveis protegidas do Supabase Edge Function.
 
