@@ -10,7 +10,7 @@ const brl = n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'B
 const dateBR = d=>d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—';
 const today=()=>new Date().toISOString().slice(0,10);
 const id=()=>crypto.randomUUID();
-const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false,captureData:null,galleryPhoto:null,cameraRequestId:0,adminTest:{active:false,companyId:null,categoryId:null} };
+const app={ user:null,profile:null,company:null,companies:[],categories:[],filters:[],invoices:[],settings:{},page:'dashboard', modal:null, selectedCategory:null,selectedFilter:null,stream:null,images:new Map(),processing:false,captureData:null,galleryPhoto:null,cameraRequestId:0,adminTest:{active:false,companyId:null,categoryId:null},categoryOrderCompanyId:null,orderSaving:false };
 let toastTimer;
 const toast=(message)=>{const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),5000)};
 const errorMessage=error=>error?.message||'Não foi possível concluir esta operação.';
@@ -154,27 +154,43 @@ function table(headings,rows){return `<div class="table-wrap"><table class="tabl
 function dashboard(){const overdue=app.invoices.filter(i=>dueStatus(i)==='overdue'),unpaid=app.invoices.filter(i=>i.status==='pending');return header('DASHBOARD','Visão geral','Os indicadores abaixo são calculados a partir dos seus dados reais.',button('Cadastrar cliente','add-client'))+`<div class="stats">${stat('Clientes',app.companies.length,'Máximo permitido: 100')}${stat('Clientes ativos',app.companies.filter(x=>x.active).length,'Contas habilitadas')}${stat('Filtros PNG',app.filters.length,'Arquivos cadastrados')}${stat('A receber',brl(unpaid.reduce((sum,i)=>sum+Number(i.amount),0)),unpaid.length+' cobranças abertas • '+overdue.length+' vencidas')}</div>`+`<div class="card"><h2>Próximos vencimentos</h2>${table(['CLIENTE','VENCIMENTO','VALOR','STATUS'],app.invoices.slice().filter(i=>i.status==='pending').sort((a,b)=>a.due_date.localeCompare(b.due_date)).slice(0,8).map(i=>`<tr><td><b>${escapeHtml(companyName(i.company_id))}</b></td><td>${dateBR(i.due_date)}</td><td>${brl(i.amount)}</td><td>${badge(dueStatus(i))}</td></tr>`).join(''))}</div>`}
 function clients(){return header('GERENCIAMENTO','Clientes','Cada empresa terá seu próprio login e seus próprios filtros.',button('Novo cliente','add-client'))+`<div class="card">${table(['CLIENTE','SITUAÇÃO','MENSALIDADE','VENCIMENTO','AÇÕES'],app.companies.map(c=>`<tr><td><div class="company-admin-name"><span class="company-admin-logo">${brandImg(c,'company-admin-logo-img')||'<span>▣</span>'}</span><span><b>${escapeHtml(c.name)}</b><small>Usuário: ${escapeHtml(c.login_username||'Não configurado')}</small></span></div></td><td>${badge(c.access_paused?'paused':c.active?'active':'inactive')}</td><td>${Number(c.monthly_fee)>0?brl(c.monthly_fee):'<span class="free-client-label">Gratuito / isento</span>'}</td><td>${Number(c.monthly_fee)>0&&c.next_due_date?dateBR(c.next_due_date):'—'}</td><td><div class="actions">${action('edit-client',c.id,'Editar')}${action('toggle-client-access',c.id,c.access_paused?'Reativar acesso':'Pausar acesso',c.access_paused?'client-access-resume':'client-access-pause')}${action('reset-password',c.id,'Nova senha')}${action('remove-client',c.id,'Excluir','danger')}</div></td></tr>`).join(''))}</div>`}
 
+
+function orderedCategoriesForCompany(companyId){
+  return app.categories.filter(c=>c.company_id===companyId).sort((a,b)=>
+    Number(a.sort_order)-Number(b.sort_order)||
+    String(a.created_at||'').localeCompare(String(b.created_at||''))||
+    a.id.localeCompare(b.id));
+}
 function categoriesSection(){
-  const rows=app.categories.map(c=>{
+  const selected=app.companies.find(c=>c.id===app.categoryOrderCompanyId)||
+    app.companies.find(c=>app.categories.some(cat=>cat.company_id===c.id))||
+    app.companies[0]||null;
+  const companyId=selected?.id||null;
+  app.categoryOrderCompanyId=companyId;
+  const cats=orderedCategoriesForCompany(companyId);
+  const rows=cats.map((c,i)=>{
     const count=app.filters.filter(f=>f.category_id===c.id).length;
-    return `<tr>
+    return `<tr data-category-row data-category-id="${escapeHtml(c.id)}" data-company-id="${escapeHtml(companyId)}">
+      <td class="category-order-grip-cell"><button type="button" class="category-drag-handle" data-category-drag-handle title="Segure e arraste para reordenar" aria-label="Arrastar categoria ${escapeHtml(c.name)}">⠿</button></td>
       <td><b>${escapeHtml(c.name)}</b></td>
       <td>${escapeHtml(companyName(c.company_id))}</td>
       <td><span class="category-count">${count} ${count===1?'filtro':'filtros'}</span></td>
-      <td><div class="actions">
+      <td><div class="actions category-actions">
+        <button type="button" class="small-action category-move-button" data-act="category-move-up" data-id="${escapeHtml(c.id)}" aria-label="Subir ${escapeHtml(c.name)}" title="Subir" ${i===0?'disabled':''}>↑</button>
+        <button type="button" class="small-action category-move-button" data-act="category-move-down" data-id="${escapeHtml(c.id)}" aria-label="Descer ${escapeHtml(c.name)}" title="Descer" ${i===cats.length-1?'disabled':''}>↓</button>
         ${action('edit-category',c.id,'Editar')}
         ${action('remove-category',c.id,'Excluir','danger')}
       </div></td>
     </tr>`;
   }).join('');
+  const selector=app.companies.length?`<label class="category-company-picker" for="categoryOrderCompany"><span>Empresa</span><select id="categoryOrderCompany" aria-label="Empresa para ordenar categorias">${app.companies.map(c=>option(c.id,c.name,c.id===companyId)).join('')}</select></label>`:'';
   return `<div class="card category-management">
-    <div class="toolbar">
-      <div><h2>Categorias</h2><p class="muted">Organize os filtros por assunto. Crie uma categoria aqui ou durante o envio de um PNG.</p></div>
-      <button class="btn" type="button" data-act="add-category">＋ Nova categoria</button>
-    </div>
-    ${table(['CATEGORIA','EMPRESA','FILTROS','AÇÕES'],rows)}
+    <div class="toolbar"><div><h2>Categorias</h2><p class="muted">Segure ⠿ e arraste as categorias para escolher a ordem exibida ao cliente.</p></div><button class="btn" type="button" data-act="add-category">＋ Nova categoria</button></div>
+    <div class="category-order-controls">${selector}<span class="category-order-hint">A ordem é salva automaticamente. Alternativa: use as setas ↑ ↓.</span></div>
+    <div class="table-wrap"><table class="table category-sort-table"><thead><tr><th>ORDEM</th><th>CATEGORIA</th><th>EMPRESA</th><th>FILTROS</th><th>AÇÕES</th></tr></thead><tbody id="categorySortBody" data-company-id="${escapeHtml(companyId||'')}">${rows||'<tr><td class="empty" colspan="5">Nenhuma categoria para esta empresa. Crie uma categoria ou envie um PNG.</td></tr>'}</tbody></table></div>
   </div>`;
 }
+
 function filters(){
   return header('BIBLIOTECA','Filtros PNG','Gerencie categorias e envie os filtros de cada empresa em um só lugar.',button('Enviar PNG','add-filter'))+
     categoriesSection()+
