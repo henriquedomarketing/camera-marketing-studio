@@ -333,8 +333,7 @@ function clientCategories(){
         ${brandImg(app.company,'client-company-logo')||'<span class="client-logo-fallback">'+escapeHtml(companyInitials(app.company))+'</span>'}
       </div>
       <div class="client-home-heading-copy">
-        <span class="client-eyebrow">SEU ESPAÇO DE CRIAÇÃO</span>
-        <h1>Bem-vindo à ${escapeHtml(app.company?.name||'sua empresa')}!</h1>
+        <h1>Bem-vindo!</h1>
         <p>Escolha uma categoria, selecione seu filtro e crie fotos para suas redes sociais.</p>
       </div>
     </div>
