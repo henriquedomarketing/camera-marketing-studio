@@ -523,3 +523,33 @@ body.mobile-menu-lock{overflow:hidden}
   .access-paused-actions .btn{width:100%;}
   .support-phone strong{font-size:17px;}
 }
+
+
+/* Link de atendimento no login: substitui qualquer registro público de conta. */
+.auth-support-link{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:fit-content;
+  min-height:42px;
+  padding:10px 20px;
+  margin:17px auto 0;
+  color:#001893;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:1.35px;
+  border:1px solid #d9e1f3;
+  border-radius:11px;
+  background:#f4f6ff;
+  text-align:center;
+  text-decoration:none;
+  transition:background .18s,border-color .18s;
+}
+.auth-support-link:hover{
+  background:#e8eeff;
+  border-color:#b8c5ec;
+}
+.auth-support-link:focus-visible{
+  outline:3px solid #001893;
+  outline-offset:3px;
+}
