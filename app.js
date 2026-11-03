@@ -80,8 +80,7 @@ function layout(content){const admin=app.profile?.role==='admin';
     const home=app.page==='categories';
     const type=home?'is-home':app.page==='preview'?'is-preview':'is-camera';
     const clientBrand=home
-      ? `<div class="client-brand">
-          <span class="client-brand-mark"><span class="client-brand-fallback">${escapeHtml(companyInitials(app.company))}</span>${brandImg(app.company,'client-brand-logo')}</span>
+      ? `<div class="client-brand client-brand-without-icon">
           <span class="client-brand-copy"><strong>${escapeHtml(app.company?.name||'Minha empresa')}</strong><small>FILTROS PERSONALIZADOS</small></span>
         </div>`
       : `<div class="client-brand client-platform-brand">
@@ -90,7 +89,7 @@ function layout(content){const admin=app.profile?.role==='admin';
         </div>`;
     const cameraMode=type==='is-camera';
     const cameraDrawer=cameraMode?`<div class="client-camera-menu-backdrop" data-act="close-client-menu" aria-hidden="true"></div>
-      <aside class="client-camera-drawer" id="clientCameraDrawer" aria-label="Menu de categorias" aria-hidden="true" inert>
+      <aside class="client-camera-drawer" id="clientCameraDrawer" style="${brandStyle(testing?testingCompany:app.company)}" aria-label="Menu de categorias" aria-hidden="true" inert>
         <div class="client-camera-drawer-heading"><strong>${escapeHtml((testing?testingCompany:app.company)?.name||'Minha empresa')}</strong>
           <button type="button" class="client-camera-drawer-close" data-act="close-client-menu" aria-label="Fechar menu">✕</button>
         </div>
@@ -341,7 +340,7 @@ function cameraView(){
       <span class="client-gallery-finish-copy"><strong>Salvar ou compartilhar</strong><small>Concluir foto com o filtro selecionado</small></span>
       <span class="client-gallery-finish-arrow" aria-hidden="true">›</span>
     </button>`:''}
-    <p class="client-save-note">${fromGallery?'Para descartar a imagem e usar a câmera, toque em Voltar à câmera.':'Fotografe ou escolha uma foto da galeria. Resultado em 1080 × 1920.'}</p>
+    ${studioCredits('client-camera-credits')}
   </section>`;
 }
 
