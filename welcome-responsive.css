@@ -200,3 +200,16 @@
     animation:none !important;
   }
 }
+
+/* Azul-escuro oficial da identidade Filtros Studio: #001993. */
+.client-app.is-home .client-home-heading{
+  background:linear-gradient(125deg,#3374f2 0%,#2459dd 48%,#001993 100%) !important;
+  background-size:240% 240% !important;
+}
+.client-app.is-home .client-category-item{
+  background:linear-gradient(113deg,#3266e9 0%,#2e62d9 22%,#2357d5 57%,#001993 100%) !important;
+}
+.client-app.is-home .client-category-item:hover,
+.client-app.is-home .client-category-item:focus-visible{
+  background:linear-gradient(113deg,#3a6bdd 0%,#3266e9 22%,#285cdb 57%,#001993 100%) !important;
+}
